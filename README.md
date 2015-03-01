@@ -127,24 +127,24 @@ var opts = {
 ###### API
 In addition to the `<ko-component-router>` component, this library adds `router` to the `ko` namespace, and exposes the following api:
 
-`ko.router.show(path)`
+`ko.router.show(path)`  
 Navigates to the specified path
 
-`ko.router.redirect(path)`
+`ko.router.redirect(path)`  
 Redirects to the specified path without adding a new history entry
 
-`ko.router.exit(path, callback)`
+`ko.router.exit(path, callback)`  
 Defines an exit callback for the given path. Generally, you should use a dispose function on the viewModel rather than this.
 
-`ko.router.state`
+`ko.router.state`  
 This is a knockout observable that contains the state object and may be read or written. It depends on the native HTML5 history API, so to use in legacy browsers you should polyfill with [HTML5-History-API](https://github.com/devote/HTML5-History-API).
 
-`ko.router.utils.subscribe([observables], fn, _optional_ subscriptionName)`
+`ko.router.utils.subscribe([observables], fn, _optional_ subscriptionName)`  
 This is a convenience method for subscribing one or more observables to a function. It ensures that any manual subscriptions are properly disposed of when the page is changed. The optional subscriptionName parameter allows you to create named subscriptions that can be undone using `ko.router.unsubscribe` below.
 
 The reasoning behind using this rather than the native `observable.subscribe` is to prevent residual subscriptions from causing the viewModel to be held in memory, causing odd and unforeseen bugs when changing pages. For more on this, I suggest reading [this](http://knockoutjs.com/documentation/component-binding.html#disposal-and-memory-management).
 
-`ko.router.utils.unsubscribe([observables], _optional_ subscriptionName)`
+`ko.router.utils.unsubscribe([observables], _optional_ subscriptionName)`  
 Removes the named subscription for the provided observables. If subscriptionName is not supplied, all subscriptions added using `ko.router.subscribe` are removed.
 
 #### Contributing
