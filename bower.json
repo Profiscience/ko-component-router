@@ -1,0 +1,33 @@
+{
+  "name": "ko-component-router",
+  "version": "0.0.1",
+  "authors": [
+    "Casey Webb <notcaseywebb@gmail.com>"
+  ],
+  "description": "Component-based routing for KnockoutJS",
+  "main": "dist/ko.router.js",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "knockoutjs",
+    "knockout",
+    "routing",
+    "spa",
+    "router"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src",
+    "package.json",
+    "webpack.config.js"
+  ],
+  "dependencies": {
+    "knockout": "~3.3.0"
+  }
+}
