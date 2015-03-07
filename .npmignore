@@ -1,5 +1,16 @@
+.DS_Store
+
+*.log
+
 src/
+test/
+
 node_modules/
+bower_components/
 
 bower.json
-webpack.config.js
+
+webpack.config.*
+
+*.sublime-project
+*.sublime-workspace

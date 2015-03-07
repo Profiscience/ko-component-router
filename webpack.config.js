@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'ko-component-router.js',
-    library: 'ko-component-router',
+    library:  'ko-component-router',
     libraryTarget: 'umd'
   },
 
@@ -18,7 +18,6 @@ module.exports = {
 
       { test: /\.html$/,
         loader: 'html' }
-
     ]
   },
 
@@ -27,6 +26,10 @@ module.exports = {
   },
 
   externals: {
-    'knockout': 'ko'
+    'knockout': 'knockout'
+  },
+
+  node: {
+    fs: 'empty'
   }
 }

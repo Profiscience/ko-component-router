@@ -5,7 +5,7 @@
     "Casey Webb <notcaseywebb@gmail.com>"
   ],
   "description": "Component-based routing for KnockoutJS",
-  "main": "dist/ko.router.js",
+  "main": "dist/ko-component-router.js",
   "moduleType": [
     "amd",
     "globals",
@@ -25,7 +25,13 @@
     "bower_components",
     "src",
     "package.json",
-    "webpack.config.js"
+    "webpack.config.*",
+    "test"
+    "*.sublime-project",
+    "*.sublime-workspace",
+    ".npmignore",
+    ".gitignore",
+    ".DS_Store"
   ],
   "dependencies": {
     "knockout": "~3.3.0"
