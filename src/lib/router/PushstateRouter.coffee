@@ -24,24 +24,11 @@ class PushstateRouter extends require('./lib/AbstractRouter')
     super
 
   ###
-  Handles click events
-
-  @param e {ClickEvent}
-  ###
-  _onClick: (e) =>
-    return if @_ignoreClick(e) || e.metaKey || e.ctrlKey || e.shiftKey
-
-    path = @_getFullPath(e.target)
-
-    e.preventDefault()
-    @show(path)
-
-  ###
   Gets the current path from the URL
 
   @return {String} path
   ###
-  _getCurrentPath: ->
+  _getPathFromUrl: ->
     path = super
     if @_basePath != '' then path.split(@_basePath)[1] ? path else path
 

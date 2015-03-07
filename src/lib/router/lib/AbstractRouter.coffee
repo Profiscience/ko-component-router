@@ -34,7 +34,7 @@ class AbstractRouter
     window.addEventListener('click', @_onClick)
     _stateSubscriptionReference = @state.subscribe(@_onStateChange)
 
-    path = @_getCurrentPath()
+    path = @_getPathFromUrl()
 
     @redirect(path)
 
@@ -77,8 +77,31 @@ class AbstractRouter
   @private
   ###
   _onStateChange: =>
-    path = @_getCurrentPath()
+    path = @_getPathFromUrl()
     @redirect(path)
+
+  ###
+  Handles click events
+
+  @private
+  @note patches shift/ctrl + click to work with base paths
+  @note if route isn't found, the event is passed to the browser
+  @param e {ClickEvent}
+  ###
+  _onClick: (e) =>
+    return if @_ignoreClick(e)
+
+    path = @_getPathFromAnchor(e.target)
+    path.replace(@_basePath, '')
+
+    if e.metaKey || e.ctrlKey || e.shiftKey
+      e.preventDefault()
+      target = if e.metaKey || e.ctrlKey then null else '_blank'
+
+      window.open(@_basePath + path, target)
+      return
+
+    @show(path) && e.preventDefault()
 
   ###
   Finds the most specific matching route and sets the `current` properties
@@ -150,7 +173,7 @@ class AbstractRouter
     !@_isLink(el)                                    ||
     el.getAttribute('download')                      ||
     el.getAttribute('rel') == 'external'             ||
-    el.pathname == @current.path()          ||
+    el.pathname == @current.path()                   ||
     el.getAttribute('href').indexOf('mailto:') > -1  ||
     el.target                                        ||
     !@_sameOrigin(el.href)
@@ -167,32 +190,33 @@ class AbstractRouter
     el && 'A' == el.nodeName
 
   ###
-  Gets the current path
+  Gets the current path from the URL
 
   @private
   @abstract
   @return {String} current path
   ###
-  _getCurrentPath: ->
+  _getPathFromUrl: ->
     location.pathname + location.search + location.hash
 
   ###
-  Get the full (absolute) path for an anchor
+  Get the full (absolute) path for `el`
 
   @private
   @param el {DOMElement}
   @return {String} full path
   ###
-  _getFullPath: (el) ->
+  _getPathFromAnchor: (el) ->
     href = el.getAttribute('href')
 
     path =
-      if href[0] == '/'
-        el.pathname
-      else if href == '..'
-        pathUtil.resolve(@current.path(), href)
-      else
-        pathUtil.resolve(@current.path(), "../#{href}")
+      switch
+        when href[0] == '/'
+          el.pathname
+        when href == '..'
+          pathUtil.resolve(@current.path(), href)
+        else
+          pathUtil.resolve(@current.path(), "../#{href}")
 
     path + el.search + (el.hash || '')
 
