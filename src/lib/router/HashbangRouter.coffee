@@ -16,8 +16,9 @@ class HashbangRouter extends require('./lib/AbstractRouter')
   @param routes {Object} routes in the form { '/path': 'foo' }
   @param basePath {String} basepath to begin routing from
   ###
-  constructor: (routes, @_basePath = '/') ->
-
+  constructor: (routes, @_basePath) ->
+    
+    @_basePath ?= location.pathname
     @_basePath = pathUtil.join('/', @_basePath, '/#!')
 
     path = (location.pathname + location.search + location.hash).replace()
