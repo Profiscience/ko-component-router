@@ -38,8 +38,6 @@ class HashbangRouter extends require('./lib/AbstractRouter')
       else
         history.replaceState(history.state, document.title, redirectUrl)
 
-    # window.addEventListener('contextmenu', @_onContextMenu)
-
     super
 
   ###

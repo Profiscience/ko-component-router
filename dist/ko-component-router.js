@@ -145,7 +145,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var HashbangRouter, history, location, pathUtil, _ref, _ref1,
-	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -155,13 +154,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	history = window.history;
 
+
+	/*
+	HTML4 (hashbang) Router
+
+	@extend AbstractRouter
+	 */
+
 	HashbangRouter = (function(_super) {
 	  __extends(HashbangRouter, _super);
 
-	  function HashbangRouter(_routes, _basePath) {
+
+	  /*
+	  Constructs a new HashbangRouter
+	  
+	  @param routes {Object} routes in the form { '/path': 'foo' }
+	  @param basePath {String} basepath to begin routing from
+	   */
+
+	  function HashbangRouter(routes, _basePath) {
 	    var path, redirectUrl;
-	    this._basePath = _basePath != null ? _basePath : '/';
-	    this._onClick = __bind(this._onClick, this);
+	    this._basePath = _basePath;
+	    if (this._basePath == null) {
+	      this._basePath = location.pathname;
+	    }
 	    this._basePath = pathUtil.join('/', this._basePath, '/#!');
 	    path = (location.pathname + location.search + location.hash).replace();
 	    path = path.replace(new RegExp("^" + this._basePath), '');
@@ -173,12 +189,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        history.replaceState(history.state, document.title, redirectUrl);
 	      }
 	    }
-	    window.addEventListener('contextmenu', this._onContextMenu);
 	    HashbangRouter.__super__.constructor.apply(this, arguments);
 	  }
 
 
-	  /* PRIVATE MEMBERS */
+	  /*
+	  Changes URL, clears state, and add history entry
+	  
+	  @note checks for polyfilled History API (which inserts hash automatically)
+	    otherwise delegates to abstract
+	  
+	  @see https://github.com/devote/HTML5-History-API
+	  
+	  @param path {String}
+	   */
 
 	  HashbangRouter.prototype._pushState = function(path) {
 	    if (history.emulate) {
@@ -187,6 +211,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return HashbangRouter.__super__._pushState.apply(this, arguments);
 	    }
 	  };
+
+
+	  /*
+	  Changes URL, clears state
+	  
+	  @note checks for polyfilled History API (which inserts hash automatically)
+	    otherwise delegates to abstract
+	  
+	  @see https://github.com/devote/HTML5-History-API
+	  
+	  @param path {String}
+	   */
 
 	  HashbangRouter.prototype._replaceState = function(path) {
 	    if (history.emulate) {
@@ -198,83 +234,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	  /*
-	  Handle 'click' events
+	  Gets the current path from the URL
+	  
+	  @return {String}
 	   */
 
-	  HashbangRouter.prototype._onClick = function(e) {
-	    var hashbangURL, path, target;
-	    if (this._ignoreClick(e)) {
-	      return;
-	    }
-	    path = this._getFullPath(e.target);
-	    path.replace(this._basePath, '');
-	    if (e.metaKey || e.ctrlKey || e.shiftKey) {
-	      e.preventDefault();
-	      hashbangURL = pathUtil.join('/', this._basePath, '/#!', path);
-	      target = e.metaKey || e.ctrlKey ? null : '_blank';
-	      window.open(hashbangURL, target);
-	      return;
-	    }
-	    e.preventDefault();
-	    return this.show(path);
-	  };
-
-
-	  /*
-	  Handle 'contextmenu' (right-click menu) events
-	   */
-
-	  HashbangRouter.prototype._onContextMenu = function(e) {
-	    var el;
-	    if (e.defaultPrevented) {
-	      return;
-	    }
-	    el = e.target;
-	    if (this._isLink(el)) {
-	      return this._patchContextMenu(el);
-	    }
-	  };
-
-
-	  /*
-	  Ensure that context menu options like 'open in new tab/window'
-	  work correctly
-	   */
-
-	  HashbangRouter.prototype._patchContextMenu = function(el) {
-	    var hashbangUrl, orig, path, revertPatch;
-	    if (el.hasAttribute('data-orig-href')) {
-	      return;
-	    }
-	    orig = el.getAttribute('href');
-	    path = this._getFullPath(el).replace(this._basePath, '').replace('#!', '');
-	    hashbangUrl = this._basePath + '#!' + path;
-	    el.setAttribute('data-orig-href', orig);
-	    el.setAttribute('href', hashbangUrl);
-	    revertPatch = this._revertContextMenuPatch.bind(this, el);
-	    return window.addEventListener('click', revertPatch);
-	  };
-
-
-	  /*
-	  Undo context menu patch when context menu is closed
-	   */
-
-	  HashbangRouter.prototype._revertContextMenuPatch = function(el) {
-	    var orig;
-	    orig = el.getAttribute('data-orig-href');
-	    el.setAttribute('href', orig);
-	    el.removeAttribute('data-orig-href');
-	    return window.removeEventListener('click', this._revertContextMenuPatch);
-	  };
-
-	  HashbangRouter.prototype._stripBasePath = function(path) {
-	    return path.split('#!')[1];
-	  };
-
-	  HashbangRouter.prototype._getCurrentPath = function() {
+	  HashbangRouter.prototype._getPathFromUrl = function() {
 	    var path;
-	    path = HashbangRouter.__super__._getCurrentPath.apply(this, arguments);
+	    path = HashbangRouter.__super__._getPathFromUrl.apply(this, arguments);
 	    return path.split('#!')[1];
 	  };
 
@@ -290,7 +257,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var PushstateRouter, history, location, pathUtil, _ref, _ref1,
-	  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
 	  __hasProp = {}.hasOwnProperty,
 	  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -300,31 +266,42 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	history = window.history;
 
-	module.exports = PushstateRouter = (function(_super) {
+
+	/*
+	HTML5 (pushstate) Router
+
+	@extend AbstractRouter
+	 */
+
+	PushstateRouter = (function(_super) {
 	  __extends(PushstateRouter, _super);
 
-	  function PushstateRouter(_routes, _basePath) {
+
+	  /*
+	  Constructs a new PushstateRouter
+	  
+	  @param routes {Obj} routes in the form { '/path': 'component' }
+	  @param basePath {String} basepath to route from
+	   */
+
+	  function PushstateRouter(routes, _basePath) {
 	    this._basePath = _basePath != null ? _basePath : '';
-	    this._onClick = __bind(this._onClick, this);
 	    if (this._basePath !== '') {
 	      this._basePath = pathUtil.join('/', this._basePath).replace('\/$', '');
 	    }
 	    PushstateRouter.__super__.constructor.apply(this, arguments);
 	  }
 
-	  PushstateRouter.prototype._onClick = function(e) {
-	    var path;
-	    if (this._ignoreClick(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
-	      return;
-	    }
-	    path = this._getFullPath(e.target);
-	    e.preventDefault();
-	    return this.show(path);
-	  };
 
-	  PushstateRouter.prototype._getCurrentPath = function(path) {
-	    var _ref2;
-	    path = PushstateRouter.__super__._getCurrentPath.apply(this, arguments);
+	  /*
+	  Gets the current path from the URL
+	  
+	  @return {String} path
+	   */
+
+	  PushstateRouter.prototype._getPathFromUrl = function() {
+	    var path, _ref2;
+	    path = PushstateRouter.__super__._getPathFromUrl.apply(this, arguments);
 	    if (this._basePath !== '') {
 	      return (_ref2 = path.split(this._basePath)[1]) != null ? _ref2 : path;
 	    } else {
@@ -335,6 +312,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return PushstateRouter;
 
 	})(__webpack_require__(7));
+
+	module.exports = PushstateRouter;
 
 
 /***/ },
@@ -360,7 +339,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*
 	Base router class
 
-	@private
 	@abstract
 	@param routes {Object} routes in the form { '/path': 'component' }
 	 */
@@ -374,6 +352,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  @return {Router} new router instance
 	   */
 	  function AbstractRouter(routes) {
+	    this._onClick = __bind(this._onClick, this);
 	    this._onStateChange = __bind(this._onStateChange, this);
 	    var component, path, prop, _i, _len, _ref2;
 	    this.state = new State;
@@ -389,8 +368,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.current[prop] = ko.observable();
 	    }
 	    window.addEventListener('click', this._onClick);
+	    window.addEventListener('contextmenu', this._onContextMenu);
 	    _stateSubscriptionReference = this.state.subscribe(this._onStateChange);
-	    path = this._getCurrentPath();
+	    path = this._getPathFromUrl();
 	    this.redirect(path);
 	  }
 
@@ -432,6 +412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  AbstractRouter.prototype._stop = function() {
 	    window.removeEventListener('click', this._onClick);
+	    window.removeEventListener('contextmenu', this._onContextMenu);
 	    return _stateSubscriptionReference.dispose();
 	  };
 
@@ -444,8 +425,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  AbstractRouter.prototype._onStateChange = function() {
 	    var path;
-	    path = this._getCurrentPath();
+	    path = this._getPathFromUrl();
 	    return this.redirect(path);
+	  };
+
+
+	  /*
+	  Handles click events
+	  
+	  @private
+	  @note patches shift/ctrl + click to work with base paths
+	  @note if route isn't found, the event is passed to the browser
+	  @param e {ClickEvent}
+	   */
+
+	  AbstractRouter.prototype._onClick = function(e) {
+	    var path, target;
+	    if (this._ignoreClick(e)) {
+	      return;
+	    }
+	    path = this._getPathFromAnchor(e.target);
+	    if (e.metaKey || e.ctrlKey || e.shiftKey) {
+	      e.preventDefault();
+	      target = e.metaKey || e.ctrlKey ? null : '_blank';
+	      window.open(this._basePath + path, target);
+	      return;
+	    }
+	    return this.show(path) && e.preventDefault();
 	  };
 
 
@@ -552,31 +558,41 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	  /*
-	  Gets the current path
+	  Gets the current path from the URL
 	  
 	  @private
 	  @abstract
 	  @return {String} current path
 	   */
 
-	  AbstractRouter.prototype._getCurrentPath = function() {
+	  AbstractRouter.prototype._getPathFromUrl = function() {
 	    return location.pathname + location.search + location.hash;
 	  };
 
 
 	  /*
-	  Get the full (absolute) path for an anchor
+	  Get the full (absolute) path for `el`
 	  
 	  @private
 	  @param el {DOMElement}
 	  @return {String} full path
 	   */
 
-	  AbstractRouter.prototype._getFullPath = function(el) {
+	  AbstractRouter.prototype._getPathFromAnchor = function(el) {
 	    var href, path;
 	    href = el.getAttribute('href');
-	    path = href[0] === '/' ? el.pathname : href === '..' ? pathUtil.resolve(this.current.path(), href) : pathUtil.resolve(this.current.path(), "../" + href);
-	    return path + el.search + (el.hash || '');
+	    path = (function() {
+	      switch (false) {
+	        case href[0] !== '/':
+	          return el.pathname;
+	        case href !== '..':
+	          return pathUtil.resolve(this.current.path(), href);
+	        default:
+	          return pathUtil.resolve(this.current.path(), "../" + href);
+	      }
+	    }).call(this);
+	    path + el.search + (el.hash || '');
+	    return path.replace(this._basePath, '');
 	  };
 
 
@@ -595,6 +611,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	      origin += ':' + location.port;
 	    }
 	    return href && (0 === href.indexOf(origin));
+	  };
+
+
+	  /*
+	  Handle 'contextmenu' (right-click) events
+	  
+	  @private
+	  @param e {ContextMenuEvent}
+	   */
+
+	  AbstractRouter.prototype._onContextMenu = function(e) {
+	    if (e.defaultPrevented || !this._isLink(el)) {
+	      return;
+	    }
+	    return this._patchContextMenu(e.target);
+	  };
+
+
+	  /*
+	  Ensure that context menu options like 'open in new tab/window'
+	  work correctly
+	  
+	  @private
+	  @param el {DOMElement}
+	   */
+
+	  AbstractRouter.prototype._patchContextMenu = function(el) {
+	    var orig, path, revertPatch, url;
+	    if (el.hasAttribute('data-orig-href')) {
+	      return;
+	    }
+	    orig = el.getAttribute('href');
+	    path = this._getPathFromAnchor(el);
+	    url = this._basePath + path;
+	    el.setAttribute('data-orig-href', orig);
+	    el.setAttribute('href', url);
+	    revertPatch = this._revertContextMenuPatch.bind(this, el);
+	    return window.addEventListener('click', revertPatch);
+	  };
+
+
+	  /*
+	  Reverts context menu patch when context menu is closed
+	  
+	  @private
+	  @param el {DOMElement}
+	   */
+
+	  AbstractRouter.prototype._revertContextMenuPatch = function(el) {
+	    var orig;
+	    orig = el.getAttribute('data-orig-href');
+	    el.setAttribute('href', orig);
+	    el.removeAttribute('data-orig-href');
+	    return window.removeEventListener('click', this._revertContextMenuPatch);
 	  };
 
 	  return AbstractRouter;
@@ -635,7 +705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	var isWindows = process.platform === 'win32';
-	var util = __webpack_require__(15);
+	var util = __webpack_require__(11);
 
 
 	// resolves . and .. elements in a path array with directory names there
@@ -1091,12 +1161,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	exports.exists = util.deprecate(function(path, callback) {
-	  __webpack_require__(14).exists(path, callback);
+	  __webpack_require__(12).exists(path, callback);
 	}, 'path.exists is now called `fs.exists`.');
 
 
 	exports.existsSync = util.deprecate(function(path) {
-	  return __webpack_require__(14).existsSync(path);
+	  return __webpack_require__(12).existsSync(path);
 	}, 'path.existsSync is now called `fs.existsSync`.');
 
 
@@ -1139,7 +1209,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Route, pathToRegExp,
 	  __slice = [].slice;
 
-	pathToRegExp = __webpack_require__(11);
+	pathToRegExp = __webpack_require__(13);
+
+
+	/*
+	Route class
+
+	@private
+	 */
 
 	Route = (function() {
 
@@ -1205,9 +1282,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	ko = __webpack_require__(1);
 
-	isFunction = __webpack_require__(12);
+	isFunction = __webpack_require__(14);
 
-	isPlainObject = __webpack_require__(13);
+	isPlainObject = __webpack_require__(15);
 
 	location = (_ref = (_ref1 = window.history) != null ? _ref1.location : void 0) != null ? _ref : window.location;
 
@@ -1366,338 +1443,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isArray = __webpack_require__(19);
-
-	/**
-	 * Expose `pathToRegexp`.
-	 */
-	module.exports = pathToRegexp;
-
-	/**
-	 * The main path matching regexp utility.
-	 *
-	 * @type {RegExp}
-	 */
-	var PATH_REGEXP = new RegExp([
-	  // Match escaped characters that would otherwise appear in future matches.
-	  // This allows the user to escape special characters that won't transform.
-	  '(\\\\.)',
-	  // Match Express-style parameters and un-named parameters with a prefix
-	  // and optional suffixes. Matches appear as:
-	  //
-	  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?"]
-	  // "/route(\\d+)" => [undefined, undefined, undefined, "\d+", undefined]
-	  '([\\/.])?(?:\\:(\\w+)(?:\\(((?:\\\\.|[^)])*)\\))?|\\(((?:\\\\.|[^)])*)\\))([+*?])?',
-	  // Match regexp special characters that are always escaped.
-	  '([.+*?=^!:${}()[\\]|\\/])'
-	].join('|'), 'g');
-
-	/**
-	 * Escape the capturing group by escaping special characters and meaning.
-	 *
-	 * @param  {String} group
-	 * @return {String}
-	 */
-	function escapeGroup (group) {
-	  return group.replace(/([=!:$\/()])/g, '\\$1');
-	}
-
-	/**
-	 * Attach the keys as a property of the regexp.
-	 *
-	 * @param  {RegExp} re
-	 * @param  {Array}  keys
-	 * @return {RegExp}
-	 */
-	function attachKeys (re, keys) {
-	  re.keys = keys;
-	  return re;
-	}
-
-	/**
-	 * Get the flags for a regexp from the options.
-	 *
-	 * @param  {Object} options
-	 * @return {String}
-	 */
-	function flags (options) {
-	  return options.sensitive ? '' : 'i';
-	}
-
-	/**
-	 * Pull out keys from a regexp.
-	 *
-	 * @param  {RegExp} path
-	 * @param  {Array}  keys
-	 * @return {RegExp}
-	 */
-	function regexpToRegexp (path, keys) {
-	  // Use a negative lookahead to match only capturing groups.
-	  var groups = path.source.match(/\((?!\?)/g);
-
-	  if (groups) {
-	    for (var i = 0; i < groups.length; i++) {
-	      keys.push({
-	        name:      i,
-	        delimiter: null,
-	        optional:  false,
-	        repeat:    false
-	      });
-	    }
-	  }
-
-	  return attachKeys(path, keys);
-	}
-
-	/**
-	 * Transform an array into a regexp.
-	 *
-	 * @param  {Array}  path
-	 * @param  {Array}  keys
-	 * @param  {Object} options
-	 * @return {RegExp}
-	 */
-	function arrayToRegexp (path, keys, options) {
-	  var parts = [];
-
-	  for (var i = 0; i < path.length; i++) {
-	    parts.push(pathToRegexp(path[i], keys, options).source);
-	  }
-
-	  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options));
-	  return attachKeys(regexp, keys);
-	}
-
-	/**
-	 * Replace the specific tags with regexp strings.
-	 *
-	 * @param  {String} path
-	 * @param  {Array}  keys
-	 * @return {String}
-	 */
-	function replacePath (path, keys) {
-	  var index = 0;
-
-	  function replace (_, escaped, prefix, key, capture, group, suffix, escape) {
-	    if (escaped) {
-	      return escaped;
-	    }
-
-	    if (escape) {
-	      return '\\' + escape;
-	    }
-
-	    var repeat   = suffix === '+' || suffix === '*';
-	    var optional = suffix === '?' || suffix === '*';
-
-	    keys.push({
-	      name:      key || index++,
-	      delimiter: prefix || '/',
-	      optional:  optional,
-	      repeat:    repeat
-	    });
-
-	    prefix = prefix ? ('\\' + prefix) : '';
-	    capture = escapeGroup(capture || group || '[^' + (prefix || '\\/') + ']+?');
-
-	    if (repeat) {
-	      capture = capture + '(?:' + prefix + capture + ')*';
-	    }
-
-	    if (optional) {
-	      return '(?:' + prefix + '(' + capture + '))?';
-	    }
-
-	    // Basic parameter support.
-	    return prefix + '(' + capture + ')';
-	  }
-
-	  return path.replace(PATH_REGEXP, replace);
-	}
-
-	/**
-	 * Normalize the given path string, returning a regular expression.
-	 *
-	 * An empty array can be passed in for the keys, which will hold the
-	 * placeholder key descriptions. For example, using `/user/:id`, `keys` will
-	 * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
-	 *
-	 * @param  {(String|RegExp|Array)} path
-	 * @param  {Array}                 [keys]
-	 * @param  {Object}                [options]
-	 * @return {RegExp}
-	 */
-	function pathToRegexp (path, keys, options) {
-	  keys = keys || [];
-
-	  if (!isArray(keys)) {
-	    options = keys;
-	    keys = [];
-	  } else if (!options) {
-	    options = {};
-	  }
-
-	  if (path instanceof RegExp) {
-	    return regexpToRegexp(path, keys, options);
-	  }
-
-	  if (isArray(path)) {
-	    return arrayToRegexp(path, keys, options);
-	  }
-
-	  var strict = options.strict;
-	  var end = options.end !== false;
-	  var route = replacePath(path, keys);
-	  var endsWithSlash = path.charAt(path.length - 1) === '/';
-
-	  // In non-strict mode we allow a slash at the end of match. If the path to
-	  // match already ends with a slash, we remove it for consistency. The slash
-	  // is valid at the end of a path match, not in the middle. This is important
-	  // in non-ending mode, where "/test/" shouldn't match "/test//route".
-	  if (!strict) {
-	    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
-	  }
-
-	  if (end) {
-	    route += '$';
-	  } else {
-	    // In non-ending mode, we need the capturing groups to match as much as
-	    // possible by using a positive lookahead to the end or next path segment.
-	    route += strict && endsWithSlash ? '' : '(?=\\/|$)';
-	  }
-
-	  return attachKeys(new RegExp('^' + route, flags(options)), keys);
-	}
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {var baseIsFunction = __webpack_require__(18),
-	    isNative = __webpack_require__(16);
-
-	/** `Object#toString` result references. */
-	var funcTag = '[object Function]';
-
-	/** Used for native method references. */
-	var objectProto = Object.prototype;
-
-	/**
-	 * Used to resolve the `toStringTag` of values.
-	 * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-	 * for more details.
-	 */
-	var objToString = objectProto.toString;
-
-	/** Native method references. */
-	var Uint8Array = isNative(Uint8Array = global.Uint8Array) && Uint8Array;
-
-	/**
-	 * Checks if `value` is classified as a `Function` object.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
-	 * @example
-	 *
-	 * _.isFunction(_);
-	 * // => true
-	 *
-	 * _.isFunction(/abc/);
-	 * // => false
-	 */
-	var isFunction = !(baseIsFunction(/x/) || (Uint8Array && !baseIsFunction(Uint8Array))) ? baseIsFunction : function(value) {
-	  // The use of `Object#toString` avoids issues with the `typeof` operator
-	  // in older versions of Chrome and Safari which return 'function' for regexes
-	  // and Safari 8 equivalents which return 'object' for typed array constructors.
-	  return objToString.call(value) == funcTag;
-	};
-
-	module.exports = isFunction;
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isNative = __webpack_require__(16),
-	    shimIsPlainObject = __webpack_require__(17);
-
-	/** `Object#toString` result references. */
-	var objectTag = '[object Object]';
-
-	/** Used for native method references. */
-	var objectProto = Object.prototype;
-
-	/**
-	 * Used to resolve the `toStringTag` of values.
-	 * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-	 * for more details.
-	 */
-	var objToString = objectProto.toString;
-
-	/** Native method references. */
-	var getPrototypeOf = isNative(getPrototypeOf = Object.getPrototypeOf) && getPrototypeOf;
-
-	/**
-	 * Checks if `value` is a plain object, that is, an object created by the
-	 * `Object` constructor or one with a `[[Prototype]]` of `null`.
-	 *
-	 * **Note:** This method assumes objects created by the `Object` constructor
-	 * have no inherited enumerable properties.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @category Lang
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
-	 * @example
-	 *
-	 * function Foo() {
-	 *   this.a = 1;
-	 * }
-	 *
-	 * _.isPlainObject(new Foo);
-	 * // => false
-	 *
-	 * _.isPlainObject([1, 2, 3]);
-	 * // => false
-	 *
-	 * _.isPlainObject({ 'x': 0, 'y': 0 });
-	 * // => true
-	 *
-	 * _.isPlainObject(Object.create(null));
-	 * // => true
-	 */
-	var isPlainObject = !getPrototypeOf ? shimIsPlainObject : function(value) {
-	  if (!(value && objToString.call(value) == objectTag)) {
-	    return false;
-	  }
-	  var valueOf = value.valueOf,
-	      objProto = isNative(valueOf) && (objProto = getPrototypeOf(valueOf)) && getPrototypeOf(objProto);
-
-	  return objProto
-	    ? (value == objProto || getPrototypeOf(value) == objProto)
-	    : shimIsPlainObject(value);
-	};
-
-	module.exports = isPlainObject;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-
-/***/ },
-/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -2225,7 +1970,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.isPrimitive = isPrimitive;
 
-	exports.isBuffer = __webpack_require__(20);
+	exports.isBuffer = __webpack_require__(16);
 
 	function objectToString(o) {
 	  return Object.prototype.toString.call(o);
@@ -2269,7 +2014,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     prototype.
 	 * @param {function} superCtor Constructor function to inherit prototype from.
 	 */
-	exports.inherits = __webpack_require__(25);
+	exports.inherits = __webpack_require__(21);
 
 	exports._extend = function(origin, add) {
 	  // Don't do anything if add isn't an object
@@ -2287,26 +2032,234 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Object.prototype.hasOwnProperty.call(obj, prop);
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(21)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(17)))
 
 /***/ },
-/* 16 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var escapeRegExp = __webpack_require__(22),
-	    isObjectLike = __webpack_require__(23);
+	
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isArray = __webpack_require__(22);
+
+	/**
+	 * Expose `pathToRegexp`.
+	 */
+	module.exports = pathToRegexp;
+
+	/**
+	 * The main path matching regexp utility.
+	 *
+	 * @type {RegExp}
+	 */
+	var PATH_REGEXP = new RegExp([
+	  // Match escaped characters that would otherwise appear in future matches.
+	  // This allows the user to escape special characters that won't transform.
+	  '(\\\\.)',
+	  // Match Express-style parameters and un-named parameters with a prefix
+	  // and optional suffixes. Matches appear as:
+	  //
+	  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?"]
+	  // "/route(\\d+)" => [undefined, undefined, undefined, "\d+", undefined]
+	  '([\\/.])?(?:\\:(\\w+)(?:\\(((?:\\\\.|[^)])*)\\))?|\\(((?:\\\\.|[^)])*)\\))([+*?])?',
+	  // Match regexp special characters that are always escaped.
+	  '([.+*?=^!:${}()[\\]|\\/])'
+	].join('|'), 'g');
+
+	/**
+	 * Escape the capturing group by escaping special characters and meaning.
+	 *
+	 * @param  {String} group
+	 * @return {String}
+	 */
+	function escapeGroup (group) {
+	  return group.replace(/([=!:$\/()])/g, '\\$1');
+	}
+
+	/**
+	 * Attach the keys as a property of the regexp.
+	 *
+	 * @param  {RegExp} re
+	 * @param  {Array}  keys
+	 * @return {RegExp}
+	 */
+	function attachKeys (re, keys) {
+	  re.keys = keys;
+	  return re;
+	}
+
+	/**
+	 * Get the flags for a regexp from the options.
+	 *
+	 * @param  {Object} options
+	 * @return {String}
+	 */
+	function flags (options) {
+	  return options.sensitive ? '' : 'i';
+	}
+
+	/**
+	 * Pull out keys from a regexp.
+	 *
+	 * @param  {RegExp} path
+	 * @param  {Array}  keys
+	 * @return {RegExp}
+	 */
+	function regexpToRegexp (path, keys) {
+	  // Use a negative lookahead to match only capturing groups.
+	  var groups = path.source.match(/\((?!\?)/g);
+
+	  if (groups) {
+	    for (var i = 0; i < groups.length; i++) {
+	      keys.push({
+	        name:      i,
+	        delimiter: null,
+	        optional:  false,
+	        repeat:    false
+	      });
+	    }
+	  }
+
+	  return attachKeys(path, keys);
+	}
+
+	/**
+	 * Transform an array into a regexp.
+	 *
+	 * @param  {Array}  path
+	 * @param  {Array}  keys
+	 * @param  {Object} options
+	 * @return {RegExp}
+	 */
+	function arrayToRegexp (path, keys, options) {
+	  var parts = [];
+
+	  for (var i = 0; i < path.length; i++) {
+	    parts.push(pathToRegexp(path[i], keys, options).source);
+	  }
+
+	  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options));
+	  return attachKeys(regexp, keys);
+	}
+
+	/**
+	 * Replace the specific tags with regexp strings.
+	 *
+	 * @param  {String} path
+	 * @param  {Array}  keys
+	 * @return {String}
+	 */
+	function replacePath (path, keys) {
+	  var index = 0;
+
+	  function replace (_, escaped, prefix, key, capture, group, suffix, escape) {
+	    if (escaped) {
+	      return escaped;
+	    }
+
+	    if (escape) {
+	      return '\\' + escape;
+	    }
+
+	    var repeat   = suffix === '+' || suffix === '*';
+	    var optional = suffix === '?' || suffix === '*';
+
+	    keys.push({
+	      name:      key || index++,
+	      delimiter: prefix || '/',
+	      optional:  optional,
+	      repeat:    repeat
+	    });
+
+	    prefix = prefix ? ('\\' + prefix) : '';
+	    capture = escapeGroup(capture || group || '[^' + (prefix || '\\/') + ']+?');
+
+	    if (repeat) {
+	      capture = capture + '(?:' + prefix + capture + ')*';
+	    }
+
+	    if (optional) {
+	      return '(?:' + prefix + '(' + capture + '))?';
+	    }
+
+	    // Basic parameter support.
+	    return prefix + '(' + capture + ')';
+	  }
+
+	  return path.replace(PATH_REGEXP, replace);
+	}
+
+	/**
+	 * Normalize the given path string, returning a regular expression.
+	 *
+	 * An empty array can be passed in for the keys, which will hold the
+	 * placeholder key descriptions. For example, using `/user/:id`, `keys` will
+	 * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
+	 *
+	 * @param  {(String|RegExp|Array)} path
+	 * @param  {Array}                 [keys]
+	 * @param  {Object}                [options]
+	 * @return {RegExp}
+	 */
+	function pathToRegexp (path, keys, options) {
+	  keys = keys || [];
+
+	  if (!isArray(keys)) {
+	    options = keys;
+	    keys = [];
+	  } else if (!options) {
+	    options = {};
+	  }
+
+	  if (path instanceof RegExp) {
+	    return regexpToRegexp(path, keys, options);
+	  }
+
+	  if (isArray(path)) {
+	    return arrayToRegexp(path, keys, options);
+	  }
+
+	  var strict = options.strict;
+	  var end = options.end !== false;
+	  var route = replacePath(path, keys);
+	  var endsWithSlash = path.charAt(path.length - 1) === '/';
+
+	  // In non-strict mode we allow a slash at the end of match. If the path to
+	  // match already ends with a slash, we remove it for consistency. The slash
+	  // is valid at the end of a path match, not in the middle. This is important
+	  // in non-ending mode, where "/test/" shouldn't match "/test//route".
+	  if (!strict) {
+	    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
+	  }
+
+	  if (end) {
+	    route += '$';
+	  } else {
+	    // In non-ending mode, we need the capturing groups to match as much as
+	    // possible by using a positive lookahead to the end or next path segment.
+	    route += strict && endsWithSlash ? '' : '(?=\\/|$)';
+	  }
+
+	  return attachKeys(new RegExp('^' + route, flags(options)), keys);
+	}
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var baseIsFunction = __webpack_require__(18),
+	    isNative = __webpack_require__(19);
 
 	/** `Object#toString` result references. */
 	var funcTag = '[object Function]';
 
-	/** Used to detect host constructors (Safari > 5). */
-	var reHostCtor = /^\[object .+?Constructor\]$/;
-
 	/** Used for native method references. */
 	var objectProto = Object.prototype;
-
-	/** Used to resolve the decompiled source of functions. */
-	var fnToString = Function.prototype.toString;
 
 	/**
 	 * Used to resolve the `toStringTag` of values.
@@ -2315,47 +2268,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var objToString = objectProto.toString;
 
-	/** Used to detect if a method is native. */
-	var reNative = RegExp('^' +
-	  escapeRegExp(objToString)
-	  .replace(/toString|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-	);
+	/** Native method references. */
+	var Uint8Array = isNative(Uint8Array = global.Uint8Array) && Uint8Array;
 
 	/**
-	 * Checks if `value` is a native function.
+	 * Checks if `value` is classified as a `Function` object.
 	 *
 	 * @static
 	 * @memberOf _
 	 * @category Lang
 	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
+	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
 	 * @example
 	 *
-	 * _.isNative(Array.prototype.push);
+	 * _.isFunction(_);
 	 * // => true
 	 *
-	 * _.isNative(_);
+	 * _.isFunction(/abc/);
 	 * // => false
 	 */
-	function isNative(value) {
-	  if (value == null) {
-	    return false;
-	  }
-	  if (objToString.call(value) == funcTag) {
-	    return reNative.test(fnToString.call(value));
-	  }
-	  return (isObjectLike(value) && reHostCtor.test(value)) || false;
-	}
+	var isFunction = !(baseIsFunction(/x/) || (Uint8Array && !baseIsFunction(Uint8Array))) ? baseIsFunction : function(value) {
+	  // The use of `Object#toString` avoids issues with the `typeof` operator
+	  // in older versions of Chrome and Safari which return 'function' for regexes
+	  // and Safari 8 equivalents which return 'object' for typed array constructors.
+	  return objToString.call(value) == funcTag;
+	};
 
-	module.exports = isNative;
+	module.exports = isFunction;
 
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 17 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseForIn = __webpack_require__(24),
-	    isObjectLike = __webpack_require__(23);
+	var isNative = __webpack_require__(19),
+	    shimIsPlainObject = __webpack_require__(20);
 
 	/** `Object#toString` result references. */
 	var objectTag = '[object Object]';
@@ -2363,9 +2311,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/** Used for native method references. */
 	var objectProto = Object.prototype;
 
-	/** Used to check objects for own properties. */
-	var hasOwnProperty = objectProto.hasOwnProperty;
-
 	/**
 	 * Used to resolve the `toStringTag` of values.
 	 * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
@@ -2373,72 +2318,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var objToString = objectProto.toString;
 
+	/** Native method references. */
+	var getPrototypeOf = isNative(getPrototypeOf = Object.getPrototypeOf) && getPrototypeOf;
+
 	/**
-	 * A fallback implementation of `_.isPlainObject` which checks if `value`
-	 * is an object created by the `Object` constructor or has a `[[Prototype]]`
-	 * of `null`.
+	 * Checks if `value` is a plain object, that is, an object created by the
+	 * `Object` constructor or one with a `[[Prototype]]` of `null`.
 	 *
-	 * @private
+	 * **Note:** This method assumes objects created by the `Object` constructor
+	 * have no inherited enumerable properties.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
 	 * @param {*} value The value to check.
 	 * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+	 * @example
+	 *
+	 * function Foo() {
+	 *   this.a = 1;
+	 * }
+	 *
+	 * _.isPlainObject(new Foo);
+	 * // => false
+	 *
+	 * _.isPlainObject([1, 2, 3]);
+	 * // => false
+	 *
+	 * _.isPlainObject({ 'x': 0, 'y': 0 });
+	 * // => true
+	 *
+	 * _.isPlainObject(Object.create(null));
+	 * // => true
 	 */
-	function shimIsPlainObject(value) {
-	  var Ctor;
-
-	  // Exit early for non `Object` objects.
-	  if (!(isObjectLike(value) && objToString.call(value) == objectTag) ||
-	      (!hasOwnProperty.call(value, 'constructor') &&
-	        (Ctor = value.constructor, typeof Ctor == 'function' && !(Ctor instanceof Ctor)))) {
+	var isPlainObject = !getPrototypeOf ? shimIsPlainObject : function(value) {
+	  if (!(value && objToString.call(value) == objectTag)) {
 	    return false;
 	  }
-	  // IE < 9 iterates inherited properties before own properties. If the first
-	  // iterated property is an object's own property then there are no inherited
-	  // enumerable properties.
-	  var result;
-	  // In most environments an object's own properties are iterated before
-	  // its inherited properties. If the last iterated property is an object's
-	  // own property then there are no inherited enumerable properties.
-	  baseForIn(value, function(subValue, key) {
-	    result = key;
-	  });
-	  return typeof result == 'undefined' || hasOwnProperty.call(value, result);
-	}
+	  var valueOf = value.valueOf,
+	      objProto = isNative(valueOf) && (objProto = getPrototypeOf(valueOf)) && getPrototypeOf(objProto);
 
-	module.exports = shimIsPlainObject;
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * The base implementation of `_.isFunction` without support for environments
-	 * with incorrect `typeof` results.
-	 *
-	 * @private
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
-	 */
-	function baseIsFunction(value) {
-	  // Avoid a Chakra JIT bug in compatibility modes of IE 11.
-	  // See https://github.com/jashkenas/underscore/issues/1621 for more details.
-	  return typeof value == 'function' || false;
-	}
-
-	module.exports = baseIsFunction;
-
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = Array.isArray || function (arr) {
-	  return Object.prototype.toString.call(arr) == '[object Array]';
+	  return objProto
+	    ? (value == objProto || getPrototypeOf(value) == objProto)
+	    : shimIsPlainObject(value);
 	};
 
+	module.exports = isPlainObject;
+
 
 /***/ },
-/* 20 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function isBuffer(arg) {
@@ -2449,7 +2378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// shim for using process in browser
@@ -2513,7 +2442,184 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * The base implementation of `_.isFunction` without support for environments
+	 * with incorrect `typeof` results.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	 */
+	function baseIsFunction(value) {
+	  // Avoid a Chakra JIT bug in compatibility modes of IE 11.
+	  // See https://github.com/jashkenas/underscore/issues/1621 for more details.
+	  return typeof value == 'function' || false;
+	}
+
+	module.exports = baseIsFunction;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var escapeRegExp = __webpack_require__(23),
+	    isObjectLike = __webpack_require__(24);
+
+	/** `Object#toString` result references. */
+	var funcTag = '[object Function]';
+
+	/** Used to detect host constructors (Safari > 5). */
+	var reHostCtor = /^\[object .+?Constructor\]$/;
+
+	/** Used for native method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to resolve the decompiled source of functions. */
+	var fnToString = Function.prototype.toString;
+
+	/**
+	 * Used to resolve the `toStringTag` of values.
+	 * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+	 * for more details.
+	 */
+	var objToString = objectProto.toString;
+
+	/** Used to detect if a method is native. */
+	var reNative = RegExp('^' +
+	  escapeRegExp(objToString)
+	  .replace(/toString|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+	);
+
+	/**
+	 * Checks if `value` is a native function.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Lang
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
+	 * @example
+	 *
+	 * _.isNative(Array.prototype.push);
+	 * // => true
+	 *
+	 * _.isNative(_);
+	 * // => false
+	 */
+	function isNative(value) {
+	  if (value == null) {
+	    return false;
+	  }
+	  if (objToString.call(value) == funcTag) {
+	    return reNative.test(fnToString.call(value));
+	  }
+	  return (isObjectLike(value) && reHostCtor.test(value)) || false;
+	}
+
+	module.exports = isNative;
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var baseForIn = __webpack_require__(25),
+	    isObjectLike = __webpack_require__(24);
+
+	/** `Object#toString` result references. */
+	var objectTag = '[object Object]';
+
+	/** Used for native method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/**
+	 * Used to resolve the `toStringTag` of values.
+	 * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+	 * for more details.
+	 */
+	var objToString = objectProto.toString;
+
+	/**
+	 * A fallback implementation of `_.isPlainObject` which checks if `value`
+	 * is an object created by the `Object` constructor or has a `[[Prototype]]`
+	 * of `null`.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+	 */
+	function shimIsPlainObject(value) {
+	  var Ctor;
+
+	  // Exit early for non `Object` objects.
+	  if (!(isObjectLike(value) && objToString.call(value) == objectTag) ||
+	      (!hasOwnProperty.call(value, 'constructor') &&
+	        (Ctor = value.constructor, typeof Ctor == 'function' && !(Ctor instanceof Ctor)))) {
+	    return false;
+	  }
+	  // IE < 9 iterates inherited properties before own properties. If the first
+	  // iterated property is an object's own property then there are no inherited
+	  // enumerable properties.
+	  var result;
+	  // In most environments an object's own properties are iterated before
+	  // its inherited properties. If the last iterated property is an object's
+	  // own property then there are no inherited enumerable properties.
+	  baseForIn(value, function(subValue, key) {
+	    result = key;
+	  });
+	  return typeof result == 'undefined' || hasOwnProperty.call(value, result);
+	}
+
+	module.exports = shimIsPlainObject;
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	if (typeof Object.create === 'function') {
+	  // implementation from standard node.js 'util' module
+	  module.exports = function inherits(ctor, superCtor) {
+	    ctor.super_ = superCtor
+	    ctor.prototype = Object.create(superCtor.prototype, {
+	      constructor: {
+	        value: ctor,
+	        enumerable: false,
+	        writable: true,
+	        configurable: true
+	      }
+	    });
+	  };
+	} else {
+	  // old school shim for old browsers
+	  module.exports = function inherits(ctor, superCtor) {
+	    ctor.super_ = superCtor
+	    var TempCtor = function () {}
+	    TempCtor.prototype = superCtor.prototype
+	    ctor.prototype = new TempCtor()
+	    ctor.prototype.constructor = ctor
+	  }
+	}
+
+
+/***/ },
 /* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = Array.isArray || function (arr) {
+	  return Object.prototype.toString.call(arr) == '[object Array]';
+	};
+
+
+/***/ },
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseToString = __webpack_require__(26);
@@ -2551,7 +2657,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2569,7 +2675,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseFor = __webpack_require__(27),
@@ -2589,35 +2695,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = baseForIn;
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	if (typeof Object.create === 'function') {
-	  // implementation from standard node.js 'util' module
-	  module.exports = function inherits(ctor, superCtor) {
-	    ctor.super_ = superCtor
-	    ctor.prototype = Object.create(superCtor.prototype, {
-	      constructor: {
-	        value: ctor,
-	        enumerable: false,
-	        writable: true,
-	        configurable: true
-	      }
-	    });
-	  };
-	} else {
-	  // old school shim for old browsers
-	  module.exports = function inherits(ctor, superCtor) {
-	    ctor.super_ = superCtor
-	    var TempCtor = function () {}
-	    TempCtor.prototype = superCtor.prototype
-	    ctor.prototype = new TempCtor()
-	    ctor.prototype.constructor = ctor
-	  }
-	}
 
 
 /***/ },
@@ -2774,7 +2851,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var isLength = __webpack_require__(33),
-	    isObjectLike = __webpack_require__(23);
+	    isObjectLike = __webpack_require__(24);
 
 	/** `Object#toString` result references. */
 	var argsTag = '[object Arguments]';
@@ -2818,8 +2895,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var isLength = __webpack_require__(33),
-	    isNative = __webpack_require__(16),
-	    isObjectLike = __webpack_require__(23);
+	    isNative = __webpack_require__(19),
+	    isObjectLike = __webpack_require__(24);
 
 	/** `Object#toString` result references. */
 	var arrayTag = '[object Array]';
@@ -2957,7 +3034,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var isNative = __webpack_require__(16);
+	/* WEBPACK VAR INJECTION */(function(global) {var isNative = __webpack_require__(19);
 
 	/** Used to detect functions containing a `this` reference. */
 	var reThis = /\bthis\b/;

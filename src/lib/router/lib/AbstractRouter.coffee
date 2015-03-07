@@ -32,6 +32,7 @@ class AbstractRouter
     @current[prop] = ko.observable() for prop in ['path', 'component', 'routeParams']
 
     window.addEventListener('click', @_onClick)
+    window.addEventListener('contextmenu', @_onContextMenu)
     _stateSubscriptionReference = @state.subscribe(@_onStateChange)
 
     path = @_getPathFromUrl()
@@ -68,6 +69,7 @@ class AbstractRouter
   ###
   _stop: ->
     window.removeEventListener('click', @_onClick)
+    window.removeEventListener('contextmenu', @_onContextMenu)
     _stateSubscriptionReference.dispose()
 
 
@@ -92,7 +94,6 @@ class AbstractRouter
     return if @_ignoreClick(e)
 
     path = @_getPathFromAnchor(e.target)
-    path.replace(@_basePath, '')
 
     if e.metaKey || e.ctrlKey || e.shiftKey
       e.preventDefault()
@@ -219,6 +220,7 @@ class AbstractRouter
           pathUtil.resolve(@current.path(), "../#{href}")
 
     path + el.search + (el.hash || '')
+    path.replace(@_basePath, '')
 
   ###
   Determines if `href` is on the same origin
@@ -231,5 +233,49 @@ class AbstractRouter
     origin = location.protocol + '//' + location.hostname
     if (location.port) then origin += ':' + location.port
     (href && (0 == href.indexOf(origin)))
+
+  ###
+  Handle 'contextmenu' (right-click) events
+  
+  @private
+  @param e {ContextMenuEvent}
+  ###
+  _onContextMenu: (e) ->
+    return if e.defaultPrevented || !@_isLink(el)
+    @_patchContextMenu(e.target)
+
+  ###
+  Ensure that context menu options like 'open in new tab/window'
+  work correctly
+
+  @private
+  @param el {DOMElement}
+  ###
+  _patchContextMenu: (el) ->
+    return if el.hasAttribute('data-orig-href')
+
+    orig = el.getAttribute('href')
+    path = @_getPathFromAnchor(el)
+    url = @_basePath + path
+
+    el.setAttribute('data-orig-href', orig)
+    el.setAttribute('href', url)
+
+    revertPatch = @_revertContextMenuPatch.bind(this, el)
+    window.addEventListener('click', revertPatch)
+
+  ###
+  Reverts context menu patch when context menu is closed
+
+  @private
+  @param el {DOMElement}
+  ###
+  _revertContextMenuPatch: (el) ->
+    orig = el.getAttribute('data-orig-href')
+
+    el.setAttribute('href', orig)
+    el.removeAttribute('data-orig-href')
+
+    window.removeEventListener('click', @_revertContextMenuPatch)
 
 module.exports = AbstractRouter
