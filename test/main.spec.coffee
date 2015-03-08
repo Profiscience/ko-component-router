@@ -6,7 +6,14 @@ routeSpecs = require './specs/router/route.spec'
 html4Specs = require './specs/router/hashbang.spec'
 html5Specs = require './specs/router/pushstate.spec'
 
-after -> history.pushState(null, null, '/test')
+blockRedirection = (e) -> e.preventDefault()
+
+before ->
+  window.addEventListener('beforeunload', blockRedirection)
+
+after ->
+  window.removeEventListener('beforeunload', blockRedirection)
+  history.pushState(null, null, '/test')
 
 describe 'state', stateSpecs
 describe 'route', routeSpecs

@@ -58,17 +58,18 @@ module.exports = (Router, basePath = '') ->
 
       it 'should react to popstate', (next) ->
         assert = ->
-          sub.dispose()
+          window.removeEventListener('popstate', assert)
           expect(router.current.component()).to.equal('popstate')
           next()
 
+        window.addEventListener('popstate', assert)
+
         history._nativePushState(null, null, basePath + '/popstate')
-        history._nativePushState(null, null, basePath + '/popstate')
+        history._nativePushState(unique: true, null, basePath + '/popstate')
         history.back()
 
-        sub = router.current.component.subscribe(assert)
-
       if basePath.indexOf('#!') > -1
+
         it 'should react to hashchange', ->
           location.hash = '!/hashchange'
           expect(router.current.component()).to.equal('hashchange')
