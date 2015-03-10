@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Component-based routing for KnockoutJS",
   "main": "dist/ko-component-router.js",
   "scripts": {
@@ -13,6 +13,7 @@
     "prepublish": "npm run build"
   },
   "keywords": [
+    "ko",
     "knockout",
     "knockoutjs",
     "router",

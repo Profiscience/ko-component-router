@@ -1,10 +1,11 @@
 {
   "name": "ko-component-router",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "homepage": "https://github.com/caseyWebb/ko-component-router",
   "authors": [
     "Casey Webb <notcaseywebb@gmail.com>"
   ],
-  "description": "Component-based routing for KnockoutJS",
+  "description": "Component-based Routing for KnockoutJS",
   "main": "dist/ko-component-router.js",
   "moduleType": [
     "amd",
@@ -12,26 +13,22 @@
     "node"
   ],
   "keywords": [
-    "knockoutjs",
+    "ko",
     "knockout",
+    "knockoutjs",
+    "router",
     "routing",
-    "spa",
-    "router"
+    "spa"
   ],
   "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
-    "src",
-    "package.json",
-    "webpack.config.*",
-    "test"
-    "*.sublime-project",
+    "test",
     "*.sublime-workspace",
-    ".npmignore",
-    ".gitignore",
-    ".DS_Store"
+    "*.sublime-project",
+    "src"
   ],
   "dependencies": {
     "knockout": "~3.3.0"
