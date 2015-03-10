@@ -1,4 +1,6 @@
-ko         = require 'knockout'
+ko = require 'knockout'
+component = require '../../src/main'
+
 { expect } = require 'chai'
 
 stage    = require '../support/stage'
@@ -18,15 +20,16 @@ module.exports = ->
       params: VMSpy.create()
 
     routes =
-      '/init':             tc.register(spies.init, '<span id="init-comp"></span')
-      '/params/:foo/:bar': tc.register(spies.params)
+      '/init':             tc.register(ko, spies.init, '<span id="init-comp"></span')
+      '/params/:foo/:bar': tc.register(ko, spies.params)
 
-    history.pushState({}, null, '/init')
-    stage.init(routes)
+    history.pushState({}, null, '/#!/init')
+    component.start(ko, routes)
+    stage.init(ko, routes)
 
   after ->
-    tc.unregister()
-    stage.destroy()
+    tc.unregister(ko)
+    stage.destroy(ko)
 
   it 'should load the correct viewmodel', (next) ->
     VMSpy.expectToInitialize spies.init, next

@@ -13,10 +13,11 @@ class PushstateRouter extends require('./lib/AbstractRouter')
   ###
   Constructs a new PushstateRouter
 
+  @param _ko {Knockout} ko context
   @param routes {Obj} routes in the form { '/path': 'component' }
   @param basePath {String} basepath to route from
   ###
-  constructor: (routes, @_basePath = '') ->
+  constructor: (_ko, routes, @_basePath = '') ->
 
     if @_basePath != ''
       @_basePath = pathUtil.join('/', @_basePath).replace('\/$', '')

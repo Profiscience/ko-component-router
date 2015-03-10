@@ -1,8 +1,3 @@
-ko = require 'knockout'
-
-HashbangRouter  = require '../router/HashbangRouter'
-PushstateRouter = require '../router/PushstateRouter'
-
 ###
 Viewmodel class for <ko-component-router>
 
@@ -11,21 +6,21 @@ Viewmodel class for <ko-component-router>
 class KoComponentRouterViewModel
 
   ###
-  Constructs a new viewmodel
+  Constructs a new router viewmodel that sets
+  the component on page change
 
-  @param params {Object} component params
-  @option routes {Object} routes in the format { '/path': 'component-name' }
-  @option options {Object} router options { HTML5: false, basePath: '/' }
+  @param _ko {Knockout} knockout context
   ###
-  constructor: ({ routes, options }) ->
+  constructor: (_ko) ->
+    @_router = _ko.router
 
-    HTML5    = options?.HTML5 ? false
-    basePath = options?.basePath ? ''
+    @component   = _ko.observable(@_router.current().component)
+    @routeParams = _ko.observable(@_router.current().routeParams)
 
-    Router    = if HTML5 then PushstateRouter else HashbangRouter
-    ko.router = new Router(routes, basePath)
-
-    { @component, @routeParams } = ko.router.current
+    @_pageChangeSubscription = @_router.current.subscribe (current) =>
+      return if current.component == @component()
+      @routeParams(current.routeParams)
+      @component(current.component)
 
   ###
   ko `dispose` callback to destroy bindings and subscriptions
@@ -33,6 +28,7 @@ class KoComponentRouterViewModel
   @note called automatically when a component is destroyed
   ###
   dispose: ->
-    ko.router._stop()
+    @_pageChangeSubscription.dispose()
+    @_router._stop()
 
 module.exports = KoComponentRouterViewModel

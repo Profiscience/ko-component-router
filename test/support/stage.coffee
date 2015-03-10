@@ -1,8 +1,4 @@
-ko = require 'knockout'
 $  = require 'jquery'
-
-ko.components.register 'placeholder',
-  template: '<span id="placeholder"></span>'
 
 _createDOM = ->
   $('body').append "
@@ -12,18 +8,23 @@ _createDOM = ->
     </div>
   "
 
-_bindRouterParams = (routes) ->
+_bindRouterParams = (context, routes) ->
   routes['/test'] = 'placeholder'
 
-  ko.applyBindings
+  context.components.register 'placeholder',
+    template: '<span id="placeholder"></span>'
+
+  context.applyBindings
     routes: routes
   , document.getElementById 'test-stage'
 
-_destroyViewModel = ->
+_destroyViewModel = (context) ->
   el = document.getElementById 'test-stage'
 
+  context.components.unregister 'placeholder'
+
   return if !el
-  ko.cleanNode el
+  context.cleanNode el
 
 _destroyDOM = ->
   $('#test-stage').remove()
@@ -32,12 +33,12 @@ module.exports =
 
   class Stage
 
-    @init: (routes) ->
-      @destroy()
+    @init: (_ko, routes) ->
+      @destroy(_ko)
 
       _createDOM()
-      _bindRouterParams(routes)
+      _bindRouterParams(_ko, routes)
 
-    @destroy: ->
-      _destroyViewModel()
+    @destroy: (_ko) ->
+      _destroyViewModel(_ko)
       _destroyDOM()

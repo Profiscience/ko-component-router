@@ -1,4 +1,3 @@
-ko       = require 'knockout'
 pathUtil = require 'path'
 
 location = window.history?.location ? window.location
@@ -19,17 +18,17 @@ class AbstractRouter
   ###
   Initializes a new router
 
+  @param _ko {Knockout} ko context
   @param routes {Object} routes in the for { '/path': 'component' }
   @return {Router} new router instance
   ###
-  constructor: (routes) ->
-    @state = new State
+  constructor: (_ko, routes) ->
+    @state = new State(_ko)
 
     @_routes = []
     @_routes.push(new Route(path, component)) for path, component of routes
 
-    @current = {}
-    @current[prop] = ko.observable() for prop in ['path', 'component', 'routeParams']
+    @current = _ko.observable({})
 
     window.addEventListener('click', @_onClick)
     window.addEventListener('contextmenu', @_onContextMenu)
@@ -44,22 +43,28 @@ class AbstractRouter
 
   @note `path` should not include base path
   @note clears the state
+
   @param path {String} path to navigate to
+  @return {Boolean} route was handled
   ###
   show: (path) ->
-    @_changePage(path)
+    return false unless @_changePage(path)
     @_pushState(path)
+    return true
 
   ###
   Redirects to the given `path`
 
   @note `path` should not include base path
   @note clears the state
+
   @param path {String} path to navigate to
+  @return {Boolean} route was handled
   ###
   redirect: (path) ->
-    @_changePage(path)
+    return false unless @_changePage(path)
     @_replaceState(path)
+    return true
 
   ###
   Disposes of event listeners and subscriptions,
@@ -91,9 +96,11 @@ class AbstractRouter
   @param e {ClickEvent}
   ###
   _onClick: (e) =>
-    return if @_ignoreClick(e)
+    el = @_getParentAnchor(e.target)
 
-    path = @_getPathFromAnchor(e.target)
+    return if @_ignoreClick(e, el)
+
+    path = @_getPathFromAnchor(el)
 
     if e.metaKey || e.ctrlKey || e.shiftKey
       e.preventDefault()
@@ -102,7 +109,7 @@ class AbstractRouter
       window.open(@_basePath + path, target)
       return
 
-    @show(path) && e.preventDefault()
+    e.preventDefault() if @show(path)
 
   ###
   Finds the most specific matching route and sets the `current` properties
@@ -135,9 +142,10 @@ class AbstractRouter
 
         break if numDynamicSegments == 0
 
-    @current.path(path)
-    @current.component(component)
-    @current.routeParams(params)
+    @current
+      path:         path
+      routeParams:  params
+      component:    component
 
     return true
 
@@ -166,18 +174,30 @@ class AbstractRouter
 
   @private
   @param event {ClickEvent}
+  @param el {DOMElement} anchor element clicked
   @return {Boolean} click should be ignored
   ###
-  _ignoreClick: ({ target: el, detail, defaultPrevented}) ->
+  _ignoreClick: ({ detail, defaultPrevented }, el) ->
     detail == 2                                      ||
     defaultPrevented                                 ||
     !@_isLink(el)                                    ||
     el.getAttribute('download')                      ||
     el.getAttribute('rel') == 'external'             ||
-    el.pathname == @current.path()                   ||
+    el.pathname == @current().path                   ||
     el.getAttribute('href').indexOf('mailto:') > -1  ||
     el.target                                        ||
     !@_sameOrigin(el.href)
+
+  ###
+  Gets the parent link of an element
+
+  @private
+  @param el {DOMElement}
+  @return {DOMElement} parent anchor
+  ###
+  _getParentAnchor: (el) ->
+    el = el.parentNode while el && 'A' != el.nodeName
+    return el
 
   ###
   Check to see if `el` is a link
@@ -187,7 +207,7 @@ class AbstractRouter
   @return {Boolean} `el` is link
   ###
   _isLink: (el) ->
-    el = el.parentNode while el && 'A' != el.nodeName
+    el = @_getParentAnchor(el)
     el && 'A' == el.nodeName
 
   ###
@@ -215,9 +235,9 @@ class AbstractRouter
         when href[0] == '/'
           el.pathname
         when href == '..'
-          pathUtil.resolve(@current.path(), href)
+          pathUtil.resolve(@current().path, href)
         else
-          pathUtil.resolve(@current.path(), "../#{href}")
+          pathUtil.resolve(@current().path, "../#{href}")
 
     path + el.search + (el.hash || '')
     path.replace(@_basePath, '')
@@ -236,13 +256,14 @@ class AbstractRouter
 
   ###
   Handle 'contextmenu' (right-click) events
-  
+
   @private
   @param e {ContextMenuEvent}
   ###
-  _onContextMenu: (e) ->
+  _onContextMenu: (e) =>
+    el = @_getParentAnchor(e.target)
     return if e.defaultPrevented || !@_isLink(el)
-    @_patchContextMenu(e.target)
+    @_patchContextMenu(el)
 
   ###
   Ensure that context menu options like 'open in new tab/window'

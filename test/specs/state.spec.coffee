@@ -9,7 +9,7 @@ module.exports = (opts = {}) ->
   state = null
 
   before ->
-    state = new State
+    state = new State(ko)
 
   it 'should be readable', ->
     expect(state()).to.be.ok

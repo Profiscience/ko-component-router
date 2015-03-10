@@ -4,90 +4,51 @@ Component-based router for developing single-page-apps with KnockoutJS
 ## Installation
 This package can be installed via bower or npm under the alias ko-component-router. It is wrapped in a universal module definition and thus may be consumed as a CommonJS/AMD module, or global.
 
+#### CommonJS (Browserify) / AMD (RequireJS) Note
+KnockoutJS relies on the same ko context being used througout the app, so you will have to either create a singleton for ko, or attach it to the window and pass that as the first argument to `start`.
+
 ## Usage
-Using the router is as simple as including it in your index.html or equivalent and passing it routes, as well as any config.
 
-The best way to demonstrate usage is to show a simple example, and then dive into how everything is working and the API, so that is what we shall do.
+#### Getting Started
+Using the router is as simple as defining your routes and starting the router, passing it your knockout context (see above), routes, and -- optionally -- any options. 
 
-__Example__
+_Examples are shown in CommonJS_
+
+Ex.
+__main.js__
+```javascript
+var routes = {
+    '/user':     'UsersComponent',
+    '/user/:id': 'UserComponent'
+}
+
+var router = require('ko-component-router')
+
+// ko.router is undefined
+router.start(window.ko, routes, options)
+// ko.router is defined
+// <ko-component-router> component is now available
+```
+
+__index.html__
 ```html
-<script>
-    ko.components.register('Home', {
-        template: '<h1>I am the home page</h1>'
-    })
-
-    ko.components.register('Users', {
-        viewModel: function() {
-            function UsersViewModel() {
-                this.ready(false)
-                this.init()
-            }
-
-            UsersViewModel.prototype.init = function() {
-                $.get('/api/users', function(users) {
-                    this.users = ko.mapping.fromJS(users)
-                    this.ready(true)
-                }.bind(this))
-            }
-
-            return UsersViewModel
-        }(),
-
-        template: { element: 'users-page' }
-    })
-
-    ko.components.register('User', {
-        viewModel: function() {
-            function UserViewModel(params) {
-                this.ready(false)
-                this.id = params.id // passed in from router
-                this.init()
-            }
-
-            UserViewModel.prototype.init = function() {
-                $.get('/api/user/' + this.id, function(user) {
-                    this.user = ko.mapping.fromJS(user)
-                    this.ready(true)
-                }.bind(this))
-            }
-
-            return UserViewModel
-        },
-
-        template: { element: 'user-page' }
-    })
-
-    ko.applyBindings({
-        routes: {
-            '/home':        'Home',
-            '/user':        'Users',
-            '/user/:id':    'User'
-        }
-    })
-</script>
 <body>
-    <ko-component-router params="routes: routes"></ko-component-router>
-
-    <template id="users-page">
-        <ul data-bind="if: ready, foreach: users">
-            <li>
-                <a data-bind="text: name, attr: { href: '/user/' + id }"></a>
-            </li>
-        </ul>
-    </template>
-
-    <template id="user-page">
-        <span data-bind="if: ready, text: user.name"></span>
-    </template>
+    <!-- Router will display the active page here -->
+    <ko-component-router></ko-component-router>
 </body>
 ```
 
-So, as you can -- hopefully -- see, it all begins with an app view model that contains the routes object in which the keys are the routes, and the values are the name of the component for that page.
-
-A `params` object is passed to the viewModel constructor function that contains any route params.
-
 #### Defining Routes
 Routes are defined such as key == route (in express router syntax) and value == component name
+
+Routes are matched according to specificity, not order, so given the following routes...
+```javascript
+var routes = {
+    '/user/:id/tab?': 'UserComponent',
+    '/user/:id/edit': 'UserEditComponent'
+} 
+```
+...navigating to `/user/1234/edit` will show the `UserEditComponent` rather than passing in `edit` for the tab parameter.
 
 `'/user/:id'` will match routes such as `/user/1` or `/user/caseyWebb`,
 and `params.id` would equal `1` or `caseyWebb`, respectively
@@ -99,8 +60,6 @@ in the case of `/tabbed-page`, `params.tab` will be null, and in `/tabbed-page/t
 
 #### Options
 Options may be supplied to the router component as well as the routes as follows
-
-`<ko-component-router params="routes: routes, options: opts" />`
 
 The following options are available (with their default values shown)
 
@@ -117,13 +76,15 @@ var opts = {
 
     // when your application is in a nested basepath,
     // you must specify the basepath. When hashbang
-    // routing is used, this can be inferred.
+    // routing is used, this will not be used and instead inferred
+    // by window.location.pathname
     basePath: '/'
 }
 ```
 
 #### API
-In addition to the `<ko-component-router>` component, this library adds `router` to the `ko` namespace, and exposes the following api:
+`start`  
+Starts the router and adds `router` to `ko`
 
 `ko.router.show(path)`  
 Navigates to the specified path
@@ -141,6 +102,7 @@ If you wish to target legacy browsers, you must use HTML4 (hashbang) routing -- 
 PRs and bug reports are welcomed. Commits should be single purpose and clearly labeled. In lieu of a formal style guide, style should remain consistent with existing codebase; please limit line lengths to ~80 chars unless it improves clarity and readability.
 
 ## TODO / Roadmap
+- examples
 - support nested routers
 
 ## License

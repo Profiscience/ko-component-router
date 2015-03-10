@@ -1,3 +1,4 @@
+ko = require 'knockout'
 { expect } = require 'chai'
 
 linkClicker = require '../../support/linkClicker'
@@ -29,8 +30,8 @@ module.exports = (Router, basePath = '') ->
     '/params/:foo/:bar?': 'params'
 
   before ->
-    history.pushState({}, null, '/init')
-    router = new Router(routes, basePath.replace('/#!', ''))
+    history.pushState({}, null, basePath + '/init')
+    router = new Router(ko, routes, basePath.replace('/#!', ''))
 
   after ->
     router._stop()
@@ -42,7 +43,7 @@ module.exports = (Router, basePath = '') ->
       expect(location.href.replace(location.origin, '')).to.equal(basePath + '/init')
 
     it 'should set the current component', ->
-      expect(router.current.component()).to.equal('init')
+      expect(router.current().component).to.equal('init')
 
   describe 'navigation', ->
 
@@ -50,16 +51,16 @@ module.exports = (Router, basePath = '') ->
 
       it 'should react to pushstate', ->
         history.pushState(null, null, basePath + '/pushstate')
-        expect(router.current.component()).to.equal('pushstate')
+        expect(router.current().component).to.equal('pushstate')
 
       it 'should react to replacestate', ->
         history.replaceState(null, null, basePath + '/replacestate')
-        expect(router.current.component()).to.equal('replacestate')
+        expect(router.current().component).to.equal('replacestate')
 
       it 'should react to popstate', (next) ->
         assert = ->
           window.removeEventListener('popstate', assert)
-          expect(router.current.component()).to.equal('popstate')
+          expect(router.current().component).to.equal('popstate')
           next()
 
         window.addEventListener('popstate', assert)
@@ -72,21 +73,21 @@ module.exports = (Router, basePath = '') ->
 
         it 'should react to hashchange', ->
           location.hash = '!/hashchange'
-          expect(router.current.component()).to.equal('hashchange')
+          expect(router.current().component).to.equal('hashchange')
 
     describe 'links', ->
 
       it 'should work with absolute paths', ->
         linkClicker('/links/absolute')
-        expect(router.current.component()).to.equal('absolutelink')
+        expect(router.current().component).to.equal('absolutelink')
 
       it 'should work with relative paths', ->
         linkClicker('relative')
-        expect(router.current.component()).to.equal('relativelink')
+        expect(router.current().component).to.equal('relativelink')
 
       it 'should work with relative paths up a directory', ->
         linkClicker('..')
-        expect(router.current.component()).to.equal('links')
+        expect(router.current().component).to.equal('links')
 
       it 'should clear the state', ->
         expect(router.state()).to.deep.equal({})
@@ -95,7 +96,7 @@ module.exports = (Router, basePath = '') ->
 
       it 'should navigate to the correct page', ->
         router.show('/router/show')
-        expect(router.current.component()).to.equal('routershow')
+        expect(router.current().component).to.equal('routershow')
 
       it 'should clear the state', ->
         expect(router.state()).to.deep.equal({})
@@ -104,7 +105,7 @@ module.exports = (Router, basePath = '') ->
 
       it 'should navigate to the correct page', ->
         router.redirect('/router/redirect')
-        expect(router.current.component()).to.equal('routerredirect')
+        expect(router.current().component).to.equal('routerredirect')
 
       it 'should clear the state', ->
         expect(router.state()).to.deep.equal({})
@@ -113,14 +114,14 @@ module.exports = (Router, basePath = '') ->
 
       it 'should use the route with the most specificity when listed before', ->
         router.show('/specificity/specificBefore')
-        expect(router.current.component()).to.equal('specificBefore')
+        expect(router.current().component).to.equal('specificBefore')
 
       it 'should use the route with the most specificity when listed after', ->
         router.show('/specificity/specificAfter')
-        expect(router.current.component()).to.equal('specificAfter')
+        expect(router.current().component).to.equal('specificAfter')
 
   describe 'params', ->
 
     it 'should pass in the correct params', ->
       history.pushState(null, null, basePath + '/params/foo')
-      expect(router.current.routeParams()).to.deep.equal(foo: 'foo')
+      expect(router.current().routeParams).to.deep.equal(foo: 'foo')

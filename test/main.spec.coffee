@@ -1,5 +1,3 @@
-require '../src/main'
-
 componentSpecs = require './specs/component.spec'
 stateSpecs = require './specs/state.spec'
 routeSpecs = require './specs/router/route.spec'
