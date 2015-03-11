@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Component-based routing for KnockoutJS",
   "main": "dist/ko-component-router.js",
   "scripts": {
@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "knockout": "^3.3.0",
-    "lodash": "^3.3.1",
+    "lodash": "^3.5.0",
     "path": "^0.11.14",
     "path-to-regexp": "^1.0.3"
   },
