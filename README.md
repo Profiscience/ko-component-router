@@ -4,6 +4,8 @@ Component-based router for developing single-page-apps with KnockoutJS
 ## Installation
 This package can be installed via bower or npm under the alias ko-component-router. It is wrapped in a universal module definition and thus may be consumed as a CommonJS/AMD module, or global.
 
+_Requires KnockoutJS >= 3.3.0_
+
 #### CommonJS (Browserify) / AMD (RequireJS) Note
 KnockoutJS relies on the same ko context being used througout the app, so you will have to either create a singleton for ko, or attach it to the window and pass that as the first argument to `start`.
 
