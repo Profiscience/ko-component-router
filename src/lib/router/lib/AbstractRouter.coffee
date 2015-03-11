@@ -48,7 +48,8 @@ class AbstractRouter
   @return {Boolean} route was handled
   ###
   show: (path) ->
-    return false unless @_changePage(path)
+    return false if !@_getComponentAndParamsForPath(path)?
+    @_changePage(path)
     @_pushState(path)
     return true
 
@@ -62,7 +63,8 @@ class AbstractRouter
   @return {Boolean} route was handled
   ###
   redirect: (path) ->
-    return false unless @_changePage(path)
+    return false if !@_getComponentAndParamsForPath(path)?
+    @_changePage(path)
     @_replaceState(path)
     return true
 
@@ -119,12 +121,25 @@ class AbstractRouter
   @return {Boolean} whether or not the route was handled
   ###
   _changePage: (path) ->
+    match = @_getComponentAndParamsForPath(path)
+    match.path = path
+
+    @current(match)
+
+  ###
+  Matches a path to a component
+
+  @private
+  @param path {String} path to match
+  @return {Object} route component and params
+  ###
+  _getComponentAndParamsForPath: (path) ->
     params = {}
 
     matchedRoutes = []
     matchedRoutes.push(route) for route in @_routes when route.matches(path)
 
-    return false if matchedRoutes.length == 0
+    return if matchedRoutes.length == 0
 
     fewestDynamicSegments = Infinity
     component = null
@@ -142,12 +157,7 @@ class AbstractRouter
 
         break if numDynamicSegments == 0
 
-    @current
-      path:         path
-      routeParams:  params
-      component:    component
-
-    return true
+    return component: component, routeParams: params
 
   ###
   Writes the URL, clears the state, and adds a history entry
@@ -178,6 +188,9 @@ class AbstractRouter
   @return {Boolean} click should be ignored
   ###
   _ignoreClick: ({ detail, defaultPrevented }, el) ->
+    path = @_getPathFromAnchor(el)
+    return true if !@_getComponentAndParamsForPath(path)?
+
     detail == 2                                      ||
     defaultPrevented                                 ||
     !@_isLink(el)                                    ||
@@ -262,7 +275,7 @@ class AbstractRouter
   ###
   _onContextMenu: (e) =>
     el = @_getParentAnchor(e.target)
-    return if e.defaultPrevented || !@_isLink(el)
+    return if @_ignoreClick(e, el)
     @_patchContextMenu(el)
 
   ###
@@ -277,6 +290,7 @@ class AbstractRouter
 
     orig = el.getAttribute('href')
     path = @_getPathFromAnchor(el)
+
     url = @_basePath + path
 
     el.setAttribute('data-orig-href', orig)
