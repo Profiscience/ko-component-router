@@ -58,6 +58,9 @@ Optional parameters should have `?` suffixed, so that the route will still match
 `'/tabbed-page/:tab?` will match `/tabbed-page`, as well as `/tabbed-page/tab`,
 in the case of `/tabbed-page`, `params.tab` will be null, and in `/tabbed-page/tab`, `params.tab` will be equal to `'tab'`
 
+#### Parameters
+Route params are bound to the component's `params` and are passed to the component viewModel constructor. See the [knockout component binding](http://knockoutjs.com/documentation/component-binding.html) for more.
+
 #### Options
 Options may be supplied to the router component as well as the routes as follows
 
