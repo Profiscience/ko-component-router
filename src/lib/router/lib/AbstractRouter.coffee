@@ -79,7 +79,6 @@ class AbstractRouter
     window.removeEventListener('contextmenu', @_onContextMenu)
     _stateSubscriptionReference.dispose()
 
-
   ###
   Handles statechange (as abstracted by ko.router.state)
 
@@ -98,10 +97,9 @@ class AbstractRouter
   @param e {ClickEvent}
   ###
   _onClick: (e) =>
-    el = @_getParentAnchor(e.target)
+    return if @_ignoreClick(e)
 
-    return if @_ignoreClick(e, el)
-
+    el   = @_getParentAnchor(e.target)
     path = @_getPathFromAnchor(el)
 
     if e.metaKey || e.ctrlKey || e.shiftKey
@@ -184,15 +182,17 @@ class AbstractRouter
 
   @private
   @param event {ClickEvent}
-  @param el {DOMElement} anchor element clicked
   @return {Boolean} click should be ignored
   ###
-  _ignoreClick: ({ detail, defaultPrevented }, el) ->
+  _ignoreClick: (e) ->
+    el = @_getParentAnchor(e.target)
+    return true if !el?
+
     path = @_getPathFromAnchor(el)
     return true if !@_getComponentAndParamsForPath(path)?
 
-    detail == 2                                      ||
-    defaultPrevented                                 ||
+    e.detail == 2                                    ||
+    e.defaultPrevented                               ||
     !@_isLink(el)                                    ||
     el.getAttribute('download')                      ||
     el.getAttribute('rel') == 'external'             ||
@@ -274,8 +274,9 @@ class AbstractRouter
   @param e {ContextMenuEvent}
   ###
   _onContextMenu: (e) =>
+    return if @_ignoreClick(e)
+
     el = @_getParentAnchor(e.target)
-    return if @_ignoreClick(e, el)
     @_patchContextMenu(el)
 
   ###
