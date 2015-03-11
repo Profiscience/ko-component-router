@@ -19,6 +19,7 @@ module.exports = (Router, basePath = '') ->
     '/links':          'links'
     '/links/absolute': 'absolutelink'
     '/links/relative': 'relativelink'
+    '/links/query':    'linkquery'
 
     '/specificity/specificBefore': 'specificBefore'
     '/specificity/:foo':           'foo'
@@ -26,6 +27,7 @@ module.exports = (Router, basePath = '') ->
 
     '/router/show':     'routershow'
     '/router/redirect': 'routerredirect'
+    '/router/query':    'routerquery'
 
     '/params/:foo/:bar?': 'params'
 
@@ -92,6 +94,11 @@ module.exports = (Router, basePath = '') ->
       it 'should clear the state', ->
         expect(router.state()).to.deep.equal({})
 
+      it 'should preserve the querystring', ->
+        linkClicker('/links/query?foo=bar')
+        expect(router.current().component).to.equal('linkquery')
+        expect(window.location.href).to.contain('?foo=bar')
+
     describe 'ko.router.show', ->
 
       it 'should navigate to the correct page', ->
@@ -101,6 +108,11 @@ module.exports = (Router, basePath = '') ->
       it 'should clear the state', ->
         expect(router.state()).to.deep.equal({})
 
+      it 'should work with querystrings', ->
+        router.show('/router/query?foo=bar')
+        expect(router.current().component).to.equal('routerquery')
+        expect(window.location.href).to.contain('?foo=bar')
+
     describe 'ko.router.redirect', ->
 
       it 'should navigate to the correct page', ->
@@ -109,6 +121,11 @@ module.exports = (Router, basePath = '') ->
 
       it 'should clear the state', ->
         expect(router.state()).to.deep.equal({})
+
+      it 'should work with querystrings', ->
+        router.show('/router/query?foo=bar')
+        expect(router.current().component).to.equal('routerquery')
+        expect(window.location.href).to.contain('?foo=bar')
 
     describe 'specificity', ->
 

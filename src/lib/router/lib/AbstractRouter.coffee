@@ -132,6 +132,8 @@ class AbstractRouter
   @return {Object} route component and params
   ###
   _getComponentAndParamsForPath: (path) ->
+    path = path.split('?')[0]
+
     params = {}
 
     matchedRoutes = []
@@ -243,6 +245,9 @@ class AbstractRouter
   _getPathFromAnchor: (el) ->
     href = el.getAttribute('href')
 
+    query = href.split('?')[1] ? ''
+    query = '?' + query if query
+
     path =
       switch
         when href[0] == '/'
@@ -252,8 +257,7 @@ class AbstractRouter
         else
           pathUtil.resolve(@current().path, "../#{href}")
 
-    path + el.search + (el.hash || '')
-    path.replace(@_basePath, '')
+    (path + query + (el.hash || '')).replace(@_basePath, '')
 
   ###
   Determines if `href` is on the same origin
