@@ -95,6 +95,20 @@ Redirects to the specified path without adding a new history entry
 `ko.router.state`  
 This is a knockout observable that contains the state object and may be read, written, or subscribed to
 
+#### Navigating with a base path
+Paths, including those on anchors, should not contain the base path. So, if you are running your app under the base path `/my/app`, both of the following will navigate to `/my/app/is/awesome`
+
+```html
+<a href="/is/awesome">My app is awesome</a>
+```
+
+```javascript
+ko.router.show('/is/awesome')
+```
+
+#### 404 Behavior
+If a matching route is not found for an anchor click, the browser will navigate away to the path. This allows you to use external links without modifying anything.
+
 ## Legacy Browsers (no History support)
 If you wish to target legacy browsers, you must use HTML4 (hashbang) routing -- on by default -- and polyfill this library with [HTML5-History-API](https://github.com/devote/HTML5-History-API). You needn't bother with redirection, that will be taken care of.
 
