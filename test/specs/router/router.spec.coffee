@@ -83,6 +83,10 @@ module.exports = (Router, basePath = '') ->
         linkClicker('/links/absolute')
         expect(router.current().component).to.equal('absolutelink')
 
+      it 'should not do anything if the path is the same', ->
+        linkClicker('/links/absolute')
+        expect(router.current().component).to.equal('absolutelink')
+
       it 'should work with relative paths', ->
         linkClicker('relative')
         expect(router.current().component).to.equal('relativelink')

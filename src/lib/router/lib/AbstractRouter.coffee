@@ -193,12 +193,15 @@ class AbstractRouter
     path = @_getPathFromAnchor(el)
     return true if !@_getComponentAndParamsForPath(path)?
 
+    if el.pathname == @current().path
+      e.preventDefault()
+      return true
+
     e.detail == 2                                    ||
     e.defaultPrevented                               ||
     !@_isLink(el)                                    ||
     el.getAttribute('download')                      ||
     el.getAttribute('rel') == 'external'             ||
-    el.pathname == @current().path                   ||
     el.getAttribute('href').indexOf('mailto:') > -1  ||
     el.target                                        ||
     !@_sameOrigin(el.href)

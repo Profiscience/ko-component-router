@@ -11,41 +11,41 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-
+/******/
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -541,7 +541,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this._getComponentAndParamsForPath(path) == null) {
 	      return true;
 	    }
-	    return e.detail === 2 || e.defaultPrevented || !this._isLink(el) || el.getAttribute('download') || el.getAttribute('rel') === 'external' || el.pathname === this.current().path || el.getAttribute('href').indexOf('mailto:') > -1 || el.target || !this._sameOrigin(el.href);
+	    if (el.pathname === this.current().path) {
+	      e.preventDefault();
+	      return true;
+	    }
+	    return e.detail === 2 || e.defaultPrevented || !this._isLink(el) || el.getAttribute('download') || el.getAttribute('rel') === 'external' || el.getAttribute('href').indexOf('mailto:') > -1 || el.target || !this._sameOrigin(el.href);
 	  };
 
 
@@ -1283,7 +1287,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = "<div data-bind='component: {\n\n  name:    component,\n  params:  routeParams\n\n}'></div>";
+	module.exports = "<div data-bind='component: {\r\n\r\n  name:    component,\r\n  params:  routeParams\r\n\r\n}'></div>";
 
 /***/ },
 /* 8 */
@@ -2120,14 +2124,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	function hasOwnProperty(obj, prop) {
 	  return Object.prototype.hasOwnProperty.call(obj, prop);
 	}
-
+	
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(17)))
 
 /***/ },
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
+
 
 /***/ },
 /* 12 */
@@ -2384,7 +2388,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = isFunction;
-
+	
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -2512,40 +2516,69 @@ return /******/ (function(modules) { // webpackBootstrap
 	// shim for using process in browser
 
 	var process = module.exports = {};
-	var queue = [];
-	var draining = false;
 
-	function drainQueue() {
-	    if (draining) {
-	        return;
+	process.nextTick = (function () {
+	    var canSetImmediate = typeof window !== 'undefined'
+	    && window.setImmediate;
+	    var canMutationObserver = typeof window !== 'undefined'
+	    && window.MutationObserver;
+	    var canPost = typeof window !== 'undefined'
+	    && window.postMessage && window.addEventListener
+	    ;
+
+	    if (canSetImmediate) {
+	        return function (f) { return window.setImmediate(f) };
 	    }
-	    draining = true;
-	    var currentQueue;
-	    var len = queue.length;
-	    while(len) {
-	        currentQueue = queue;
-	        queue = [];
-	        var i = -1;
-	        while (++i < len) {
-	            currentQueue[i]();
-	        }
-	        len = queue.length;
+
+	    var queue = [];
+
+	    if (canMutationObserver) {
+	        var hiddenDiv = document.createElement("div");
+	        var observer = new MutationObserver(function () {
+	            var queueList = queue.slice();
+	            queue.length = 0;
+	            queueList.forEach(function (fn) {
+	                fn();
+	            });
+	        });
+
+	        observer.observe(hiddenDiv, { attributes: true });
+
+	        return function nextTick(fn) {
+	            if (!queue.length) {
+	                hiddenDiv.setAttribute('yes', 'no');
+	            }
+	            queue.push(fn);
+	        };
 	    }
-	    draining = false;
-	}
-	process.nextTick = function (fun) {
-	    queue.push(fun);
-	    if (!draining) {
-	        setTimeout(drainQueue, 0);
+
+	    if (canPost) {
+	        window.addEventListener('message', function (ev) {
+	            var source = ev.source;
+	            if ((source === window || source === null) && ev.data === 'process-tick') {
+	                ev.stopPropagation();
+	                if (queue.length > 0) {
+	                    var fn = queue.shift();
+	                    fn();
+	                }
+	            }
+	        }, true);
+
+	        return function nextTick(fn) {
+	            queue.push(fn);
+	            window.postMessage('process-tick', '*');
+	        };
 	    }
-	};
+
+	    return function nextTick(fn) {
+	        setTimeout(fn, 0);
+	    };
+	})();
 
 	process.title = 'browser';
 	process.browser = true;
 	process.env = {};
 	process.argv = [];
-	process.version = ''; // empty string to avoid regexp issues
-	process.versions = {};
 
 	function noop() {}
 
@@ -2566,7 +2599,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	process.chdir = function (dir) {
 	    throw new Error('process.chdir is not supported');
 	};
-	process.umask = function() { return 0; };
 
 
 /***/ },
@@ -3372,7 +3404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        length = object.length;
 	  }
 	  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
-	      (typeof object != 'function' && (length && isLength(length)))) {
+	     (typeof object != 'function' && (length && isLength(length)))) {
 	    return shimKeys(object);
 	  }
 	  return isObject(object) ? nativeKeys(object) : [];
@@ -3654,7 +3686,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = bufferClone;
-
+	
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -3945,7 +3977,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(0, 0));
 
 	module.exports = support;
-
+	
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -4266,10 +4298,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        othCtor = other.constructor;
 
 	    // Non `Object` object instances with different constructors are not equal.
-	    if (objCtor != othCtor &&
-	        ('constructor' in object && 'constructor' in other) &&
-	        !(typeof objCtor == 'function' && objCtor instanceof objCtor &&
-	          typeof othCtor == 'function' && othCtor instanceof othCtor)) {
+	    if (objCtor != othCtor && ('constructor' in object && 'constructor' in other) &&
+	        !(typeof objCtor == 'function' && objCtor instanceof objCtor && typeof othCtor == 'function' && othCtor instanceof othCtor)) {
 	      return false;
 	    }
 	  }
@@ -4363,4 +4393,3 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ }
 /******/ ])
 });
-;
