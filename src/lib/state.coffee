@@ -2,8 +2,6 @@ isFunction    = require 'lodash/lang/isFunction'
 isPlainObject = require 'lodash/lang/isPlainObject'
 objectsMatch  = require 'lodash/utility/matches'
 
-location = window.history?.location ? window.location
-
 _initialized = false
 _state       = null
 _currentUrl  = ''
@@ -72,6 +70,8 @@ Update state
 _writeState = (state) ->
   currentUrl = location.pathname + location.search + location.hash
   currentTitle = document.title
+
+  currentUrl = currentUrl.split('#!')[1] if history.emulate
 
   history.replaceState(_removeFuncs(state), currentTitle, currentUrl)
 

@@ -1,8 +1,5 @@
 pathUtil = require 'path'
 
-location = window.history?.location ? window.location
-history  = window.history
-
 ###
 HTML5 (pushstate) Router
 

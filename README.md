@@ -114,11 +114,26 @@ ko.router.show('/is/awesome')
 #### 404 Behavior
 If a matching route is not found for an anchor click, the browser will navigate away to the path. This allows you to use external links without modifying anything.
 
-## Legacy Browsers (no History support)
-If you wish to target legacy browsers, you must use HTML4 (hashbang) routing -- on by default -- and polyfill this library with [HTML5-History-API](https://github.com/devote/HTML5-History-API). You needn't bother with redirection, that will be taken care of.
+## <IE10
+If you need to support browsers without pushstate (I'm sorry...), you must use HTML4 (hashbang) routing -- on by default -- and drop the following line into your HTML.
+
+```html
+<!--[if lte IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5-history-api/4.0.2/history.iegte8.min.js?type=!/"></script><![endif]-->
+```
+
+If you're wondering, that's [this History API polyfill](https://github.com/devote/HTML5-History-API) from [cdnjs](cdnjs.com) with IE conditional comments and an extra argument to get the `#!` instead of just `#` (this is not optional).
+
+__Can I use another History polyfill?__
+Don't.
+
+__But if I'm using hashbang routing, why do I even need to polyfill the History API?__
+The router depends on the state abstraction provided on ko.router.state, and the state abstraction relies on, well, history state.
+
+__Can I gracefully degrade so modern browsers use pushstate?__
+Yes, but this package isn't going to do that for you. It's recommended that you use the same routing strategy for all clients.
 
 ## Contributing
-PRs and bug reports are welcomed. Commits should be single purpose and clearly labeled. In lieu of a formal style guide, style should remain consistent with existing codebase; please limit line lengths to ~80 chars unless it improves clarity and readability.
+PRs and bug reports are welcomed. Commits should be single purpose and clearly labeled. Tests should be added if it makes sense, and you obviously shouldn't break any other tests. In lieu of a formal style guide, style should remain consistent with existing codebase (ahem, some syntactic sugar is just noise); please limit line lengths to ~80 chars unless it improves clarity and readability.
 
 ## TODO / Roadmap
 - examples

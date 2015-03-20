@@ -1,7 +1,5 @@
 pathUtil = require 'path'
 
-location = window.history?.location ? window.location
-
 Route = require './Route'
 State = require '../../state'
 
@@ -254,7 +252,8 @@ class AbstractRouter
     path =
       switch
         when href[0] == '/'
-          el.pathname
+          # IE doesn't include leading slash in pathname
+          pathUtil.resolve('/', el.pathname)
         when href == '..'
           pathUtil.resolve(@current().path, href)
         else

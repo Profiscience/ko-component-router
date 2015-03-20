@@ -92,15 +92,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HashbangRouter, history, location, pathUtil, ref, ref1,
+	var HashbangRouter, pathUtil,
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
 	pathUtil = __webpack_require__(6);
-
-	location = (ref = (ref1 = window.history) != null ? ref1.location : void 0) != null ? ref : window.location;
-
-	history = window.history;
 
 
 	/*
@@ -201,15 +197,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var PushstateRouter, history, location, pathUtil, ref, ref1,
+	var PushstateRouter, pathUtil,
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 
 	pathUtil = __webpack_require__(6);
-
-	location = (ref = (ref1 = window.history) != null ? ref1.location : void 0) != null ? ref : window.location;
-
-	history = window.history;
 
 
 	/*
@@ -246,10 +238,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  PushstateRouter.prototype._getPathFromUrl = function() {
-	    var path, ref2;
+	    var path, ref;
 	    path = PushstateRouter.__super__._getPathFromUrl.apply(this, arguments);
 	    if (this._basePath !== '') {
-	      return (ref2 = path.split(this._basePath)[1]) != null ? ref2 : path;
+	      return (ref = path.split(this._basePath)[1]) != null ? ref : path;
 	    } else {
 	      return path;
 	    }
@@ -290,12 +282,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AbstractRouter, Route, State, _stateSubscriptionReference, location, pathUtil, ref, ref1,
+	var AbstractRouter, Route, State, _stateSubscriptionReference, pathUtil,
 	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 	pathUtil = __webpack_require__(6);
-
-	location = (ref = (ref1 = window.history) != null ? ref1.location : void 0) != null ? ref : window.location;
 
 	Route = __webpack_require__(8);
 
@@ -460,13 +450,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  AbstractRouter.prototype._getComponentAndParamsForPath = function(path) {
-	    var _p, component, fewestDynamicSegments, i, j, k, len, len1, matchedRoutes, numDynamicSegments, params, ref2, route;
+	    var _p, component, fewestDynamicSegments, i, j, k, len, len1, matchedRoutes, numDynamicSegments, params, ref, route;
 	    path = path.split('?')[0];
 	    params = {};
 	    matchedRoutes = [];
-	    ref2 = this._routes;
-	    for (j = 0, len = ref2.length; j < len; j++) {
-	      route = ref2[j];
+	    ref = this._routes;
+	    for (j = 0, len = ref.length; j < len; j++) {
+	      route = ref[j];
 	      if (route.matches(path)) {
 	        matchedRoutes.push(route);
 	      }
@@ -601,16 +591,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  AbstractRouter.prototype._getPathFromAnchor = function(el) {
-	    var href, path, query, ref2;
+	    var href, path, query, ref;
 	    href = el.getAttribute('href');
-	    query = (ref2 = href.split('?')[1]) != null ? ref2 : '';
+	    query = (ref = href.split('?')[1]) != null ? ref : '';
 	    if (query) {
 	      query = '?' + query;
 	    }
 	    path = (function() {
 	      switch (false) {
 	        case href[0] !== '/':
-	          return el.pathname;
+	          return pathUtil.resolve('/', el.pathname);
 	        case href !== '..':
 	          return pathUtil.resolve(this.current().path, href);
 	        default:
@@ -1365,15 +1355,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var KoRouterState, _currentUrl, _getState, _initialized, _listenForExternalChanges, _patchNativeHistoryMethods, _removeFuncs, _state, _writeState, isFunction, isPlainObject, location, objectsMatch, ref, ref1;
+	var KoRouterState, _currentUrl, _getState, _initialized, _listenForExternalChanges, _patchNativeHistoryMethods, _removeFuncs, _state, _writeState, isFunction, isPlainObject, objectsMatch;
 
 	isFunction = __webpack_require__(13);
 
 	isPlainObject = __webpack_require__(14);
 
 	objectsMatch = __webpack_require__(15);
-
-	location = (ref = (ref1 = window.history) != null ? ref1.location : void 0) != null ? ref : window.location;
 
 	_initialized = false;
 
@@ -1392,11 +1380,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	_patchNativeHistoryMethods = function() {
 	  history._nativePushState = history.pushState;
 	  history.pushState = function(state, title, url) {
-	    var pathChanged, ref2, stateChanged;
+	    var pathChanged, ref, stateChanged;
 	    if (state == null) {
 	      state = {};
 	    }
-	    stateChanged = !objectsMatch(state)((ref2 = _state()) != null ? ref2 : {});
+	    stateChanged = !objectsMatch(state)((ref = _state()) != null ? ref : {});
 	    pathChanged = _currentUrl !== url;
 	    history._nativePushState.apply(this, arguments);
 	    if (stateChanged || pathChanged) {
@@ -1406,11 +1394,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	  history._nativeReplaceState = history.replaceState;
 	  return history.replaceState = function(state, title, url) {
-	    var pathChanged, ref2, stateChanged;
+	    var pathChanged, ref, stateChanged;
 	    if (state == null) {
 	      state = {};
 	    }
-	    stateChanged = !objectsMatch(state)((ref2 = _state()) != null ? ref2 : {});
+	    stateChanged = !objectsMatch(state)((ref = _state()) != null ? ref : {});
 	    pathChanged = _currentUrl !== url;
 	    history._nativeReplaceState.apply(this, arguments);
 	    if (stateChanged || pathChanged) {
@@ -1472,6 +1460,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var currentTitle, currentUrl;
 	  currentUrl = location.pathname + location.search + location.hash;
 	  currentTitle = document.title;
+	  if (history.emulate) {
+	    currentUrl = currentUrl.split('#!')[1];
+	  }
 	  return history.replaceState(_removeFuncs(state), currentTitle, currentUrl);
 	};
 
@@ -1483,8 +1474,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	_getState = function() {
-	  var ref2;
-	  return (ref2 = _state()) != null ? ref2 : {};
+	  var ref;
+	  return (ref = _state()) != null ? ref : {};
 	};
 
 
@@ -3404,7 +3395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        length = object.length;
 	  }
 	  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
-	     (typeof object != 'function' && (length && isLength(length)))) {
+	      (typeof object != 'function' && (length && isLength(length)))) {
 	    return shimKeys(object);
 	  }
 	  return isObject(object) ? nativeKeys(object) : [];
@@ -4298,8 +4289,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        othCtor = other.constructor;
 
 	    // Non `Object` object instances with different constructors are not equal.
-	    if (objCtor != othCtor && ('constructor' in object && 'constructor' in other) &&
-	        !(typeof objCtor == 'function' && objCtor instanceof objCtor && typeof othCtor == 'function' && othCtor instanceof othCtor)) {
+	    if (objCtor != othCtor &&
+	        ('constructor' in object && 'constructor' in other) &&
+	        !(typeof objCtor == 'function' && objCtor instanceof objCtor &&
+	          typeof othCtor == 'function' && othCtor instanceof othCtor)) {
 	      return false;
 	    }
 	  }
