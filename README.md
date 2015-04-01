@@ -138,6 +138,7 @@ PRs and bug reports are welcomed. Commits should be single purpose and clearly l
 ## TODO / Roadmap
 - examples
 - support nested routers
+- reduce size (remove external deps)
 
 ## License
 This library is released under the MIT License as follows
