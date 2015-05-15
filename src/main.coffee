@@ -1,3 +1,5 @@
+_ = require('lodash')
+
 HashbangRouter  = require './lib/router/HashbangRouter'
 PushstateRouter = require './lib/router/PushstateRouter'
 
@@ -12,6 +14,8 @@ Initializes the router
 ###
 start = (_ko, routes, options = {}) ->
 
+  stripSuperfluousPathSegments()
+
   HTML5    = options.HTML5 ? false
   basePath = options.basePath ? ''
 
@@ -21,3 +25,21 @@ start = (_ko, routes, options = {}) ->
   _ko.components.register 'ko-component-router', require('./lib/component')(_ko)
 
 module.exports = start: start
+
+
+stripSuperfluousPathSegments = ->
+  landingPath = window.location.pathname.toLowerCase()
+
+  if _(landingPath).contains('default.aspx')
+    cleanPath = landingPath.split('default.aspx')[0]
+    if (history.emulate)
+      return window.location.replace(cleanPath)
+    else
+      history.pushState({}, '', cleanPath)
+
+  if _(landingPath).contains('index.html')
+    cleanPath = landingPath.split('index.html')[0]
+    if (history.emulate)
+      return window.location.replace(cleanPath)
+    else
+      history.pushState({}, '', cleanPath)
