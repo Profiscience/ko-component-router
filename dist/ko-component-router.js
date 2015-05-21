@@ -92,17 +92,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	stripSuperfluousPathSegments = function() {
 	  var cleanPath, landingPath;
-	  landingPath = window.location.pathname.toLowerCase();
-	  if (_(landingPath).contains('default.aspx')) {
-	    cleanPath = landingPath.split('default.aspx')[0];
-	    if (history.emulate) {
-	      return window.location.replace(cleanPath);
-	    } else {
-	      history.pushState({}, '', cleanPath);
-	    }
-	  }
-	  if (_(landingPath).contains('index.html')) {
-	    cleanPath = landingPath.split('index.html')[0];
+	  landingPath = window.location.pathname;
+	  cleanPath = landingPath.replace(/Default.aspx/i, '').replace(/Index.html/i, '');
+	  if (landingPath !== cleanPath) {
 	    if (history.emulate) {
 	      return window.location.replace(cleanPath);
 	    } else {
@@ -14348,7 +14340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var isNative = __webpack_require__(19),
-	    shimIsPlainObject = __webpack_require__(20);
+	    shimIsPlainObject = __webpack_require__(22);
 
 	/** `Object#toString` result references. */
 	var objectTag = '[object Object]';
@@ -14414,8 +14406,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseClone = __webpack_require__(21),
-	    baseMatches = __webpack_require__(22);
+	var baseClone = __webpack_require__(20),
+	    baseMatches = __webpack_require__(21);
 
 	/**
 	 * Creates a function which performs a deep comparison between a given object
@@ -14869,7 +14861,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var escapeRegExp = __webpack_require__(37),
+	var escapeRegExp = __webpack_require__(26),
 	    isObjectLike = __webpack_require__(27);
 
 	/** `Object#toString` result references. */
@@ -14927,62 +14919,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var baseForIn = __webpack_require__(26),
-	    isObjectLike = __webpack_require__(27);
-
-	/** `Object#toString` result references. */
-	var objectTag = '[object Object]';
-
-	/** Used for native method references. */
-	var objectProto = Object.prototype;
-
-	/** Used to check objects for own properties. */
-	var hasOwnProperty = objectProto.hasOwnProperty;
-
-	/**
-	 * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-	 * of values.
-	 */
-	var objToString = objectProto.toString;
-
-	/**
-	 * A fallback implementation of `_.isPlainObject` which checks if `value`
-	 * is an object created by the `Object` constructor or has a `[[Prototype]]`
-	 * of `null`.
-	 *
-	 * @private
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
-	 */
-	function shimIsPlainObject(value) {
-	  var Ctor;
-
-	  // Exit early for non `Object` objects.
-	  if (!(isObjectLike(value) && objToString.call(value) == objectTag) ||
-	      (!hasOwnProperty.call(value, 'constructor') &&
-	        (Ctor = value.constructor, typeof Ctor == 'function' && !(Ctor instanceof Ctor)))) {
-	    return false;
-	  }
-	  // IE < 9 iterates inherited properties before own properties. If the first
-	  // iterated property is an object's own property then there are no inherited
-	  // enumerable properties.
-	  var result;
-	  // In most environments an object's own properties are iterated before
-	  // its inherited properties. If the last iterated property is an object's
-	  // own property then there are no inherited enumerable properties.
-	  baseForIn(value, function(subValue, key) {
-	    result = key;
-	  });
-	  return result === undefined || hasOwnProperty.call(value, result);
-	}
-
-	module.exports = shimIsPlainObject;
-
-
-/***/ },
-/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var arrayCopy = __webpack_require__(28),
@@ -15116,7 +15052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseIsMatch = __webpack_require__(38),
@@ -15166,6 +15102,62 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = baseMatches;
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var baseForIn = __webpack_require__(37),
+	    isObjectLike = __webpack_require__(27);
+
+	/** `Object#toString` result references. */
+	var objectTag = '[object Object]';
+
+	/** Used for native method references. */
+	var objectProto = Object.prototype;
+
+	/** Used to check objects for own properties. */
+	var hasOwnProperty = objectProto.hasOwnProperty;
+
+	/**
+	 * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+	 * of values.
+	 */
+	var objToString = objectProto.toString;
+
+	/**
+	 * A fallback implementation of `_.isPlainObject` which checks if `value`
+	 * is an object created by the `Object` constructor or has a `[[Prototype]]`
+	 * of `null`.
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+	 */
+	function shimIsPlainObject(value) {
+	  var Ctor;
+
+	  // Exit early for non `Object` objects.
+	  if (!(isObjectLike(value) && objToString.call(value) == objectTag) ||
+	      (!hasOwnProperty.call(value, 'constructor') &&
+	        (Ctor = value.constructor, typeof Ctor == 'function' && !(Ctor instanceof Ctor)))) {
+	    return false;
+	  }
+	  // IE < 9 iterates inherited properties before own properties. If the first
+	  // iterated property is an object's own property then there are no inherited
+	  // enumerable properties.
+	  var result;
+	  // In most environments an object's own properties are iterated before
+	  // its inherited properties. If the last iterated property is an object's
+	  // own property then there are no inherited enumerable properties.
+	  baseForIn(value, function(subValue, key) {
+	    result = key;
+	  });
+	  return result === undefined || hasOwnProperty.call(value, result);
+	}
+
+	module.exports = shimIsPlainObject;
 
 
 /***/ },
@@ -15308,23 +15300,38 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseFor = __webpack_require__(44),
-	    keysIn = __webpack_require__(45);
+	var baseToString = __webpack_require__(44);
 
 	/**
-	 * The base implementation of `_.forIn` without support for callback
-	 * shorthands and `this` binding.
-	 *
-	 * @private
-	 * @param {Object} object The object to iterate over.
-	 * @param {Function} iteratee The function invoked per iteration.
-	 * @returns {Object} Returns `object`.
+	 * Used to match `RegExp` [special characters](http://www.regular-expressions.info/characters.html#special).
+	 * In addition to special characters the forward slash is escaped to allow for
+	 * easier `eval` use and `Function` compilation.
 	 */
-	function baseForIn(object, iteratee) {
-	  return baseFor(object, iteratee, keysIn);
+	var reRegExpChars = /[.*+?^${}()|[\]\/\\]/g,
+	    reHasRegExpChars = RegExp(reRegExpChars.source);
+
+	/**
+	 * Escapes the `RegExp` special characters "\", "/", "^", "$", ".", "|", "?",
+	 * "*", "+", "(", ")", "[", "]", "{" and "}" in `string`.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category String
+	 * @param {string} [string=''] The string to escape.
+	 * @returns {string} Returns the escaped string.
+	 * @example
+	 *
+	 * _.escapeRegExp('[lodash](https://lodash.com/)');
+	 * // => '\[lodash\]\(https:\/\/lodash\.com\/\)'
+	 */
+	function escapeRegExp(string) {
+	  string = baseToString(string);
+	  return (string && reHasRegExpChars.test(string))
+	    ? string.replace(reRegExpChars, '\\$&')
+	    : string;
 	}
 
-	module.exports = baseForIn;
+	module.exports = escapeRegExp;
 
 
 /***/ },
@@ -15403,8 +15410,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCopy = __webpack_require__(47),
-	    getSymbols = __webpack_require__(48),
+	var baseCopy = __webpack_require__(45),
+	    getSymbols = __webpack_require__(46),
 	    isNative = __webpack_require__(19),
 	    keys = __webpack_require__(41);
 
@@ -15456,7 +15463,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseFor = __webpack_require__(44),
+	var baseFor = __webpack_require__(47),
 	    keys = __webpack_require__(41);
 
 	/**
@@ -15584,7 +15591,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var bufferClone = __webpack_require__(46);
+	var bufferClone = __webpack_require__(48);
 
 	/** `Object#toString` result references. */
 	var boolTag = '[object Boolean]',
@@ -15755,38 +15762,23 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseToString = __webpack_require__(50);
+	var baseFor = __webpack_require__(47),
+	    keysIn = __webpack_require__(50);
 
 	/**
-	 * Used to match `RegExp` [special characters](http://www.regular-expressions.info/characters.html#special).
-	 * In addition to special characters the forward slash is escaped to allow for
-	 * easier `eval` use and `Function` compilation.
-	 */
-	var reRegExpChars = /[.*+?^${}()|[\]\/\\]/g,
-	    reHasRegExpChars = RegExp(reRegExpChars.source);
-
-	/**
-	 * Escapes the `RegExp` special characters "\", "/", "^", "$", ".", "|", "?",
-	 * "*", "+", "(", ")", "[", "]", "{" and "}" in `string`.
+	 * The base implementation of `_.forIn` without support for callback
+	 * shorthands and `this` binding.
 	 *
-	 * @static
-	 * @memberOf _
-	 * @category String
-	 * @param {string} [string=''] The string to escape.
-	 * @returns {string} Returns the escaped string.
-	 * @example
-	 *
-	 * _.escapeRegExp('[lodash](https://lodash.com/)');
-	 * // => '\[lodash\]\(https:\/\/lodash\.com\/\)'
+	 * @private
+	 * @param {Object} object The object to iterate over.
+	 * @param {Function} iteratee The function invoked per iteration.
+	 * @returns {Object} Returns `object`.
 	 */
-	function escapeRegExp(string) {
-	  string = baseToString(string);
-	  return (string && reHasRegExpChars.test(string))
-	    ? string.replace(reRegExpChars, '\\$&')
-	    : string;
+	function baseForIn(object, iteratee) {
+	  return baseFor(object, iteratee, keysIn);
 	}
 
-	module.exports = escapeRegExp;
+	module.exports = baseForIn;
 
 
 /***/ },
@@ -15978,6 +15970,82 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/**
+	 * Converts `value` to a string if it is not one. An empty string is returned
+	 * for `null` or `undefined` values.
+	 *
+	 * @private
+	 * @param {*} value The value to process.
+	 * @returns {string} Returns the string.
+	 */
+	function baseToString(value) {
+	  if (typeof value == 'string') {
+	    return value;
+	  }
+	  return value == null ? '' : (value + '');
+	}
+
+	module.exports = baseToString;
+
+
+/***/ },
+/* 45 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copies properties of `source` to `object`.
+	 *
+	 * @private
+	 * @param {Object} source The object to copy properties from.
+	 * @param {Array} props The property names to copy.
+	 * @param {Object} [object={}] The object to copy properties to.
+	 * @returns {Object} Returns `object`.
+	 */
+	function baseCopy(source, props, object) {
+	  object || (object = {});
+
+	  var index = -1,
+	      length = props.length;
+
+	  while (++index < length) {
+	    var key = props[index];
+	    object[key] = source[key];
+	  }
+	  return object;
+	}
+
+	module.exports = baseCopy;
+
+
+/***/ },
+/* 46 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var constant = __webpack_require__(39),
+	    isNative = __webpack_require__(19),
+	    toObject = __webpack_require__(42);
+
+	/** Native method references. */
+	var getOwnPropertySymbols = isNative(getOwnPropertySymbols = Object.getOwnPropertySymbols) && getOwnPropertySymbols;
+
+	/**
+	 * Creates an array of the own symbols of `object`.
+	 *
+	 * @private
+	 * @param {Object} object The object to query.
+	 * @returns {Array} Returns the array of symbols.
+	 */
+	var getSymbols = !getOwnPropertySymbols ? constant([]) : function(object) {
+	  return getOwnPropertySymbols(toObject(object));
+	};
+
+	module.exports = getSymbols;
+
+
+/***/ },
+/* 47 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var createBaseFor = __webpack_require__(54);
 
 	/**
@@ -15998,7 +16066,95 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 45 */
+/* 48 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var constant = __webpack_require__(39),
+	    isNative = __webpack_require__(19);
+
+	/** Native method references. */
+	var ArrayBuffer = isNative(ArrayBuffer = global.ArrayBuffer) && ArrayBuffer,
+	    bufferSlice = isNative(bufferSlice = ArrayBuffer && new ArrayBuffer(0).slice) && bufferSlice,
+	    floor = Math.floor,
+	    Uint8Array = isNative(Uint8Array = global.Uint8Array) && Uint8Array;
+
+	/** Used to clone array buffers. */
+	var Float64Array = (function() {
+	  // Safari 5 errors when using an array buffer to initialize a typed array
+	  // where the array buffer's `byteLength` is not a multiple of the typed
+	  // array's `BYTES_PER_ELEMENT`.
+	  try {
+	    var func = isNative(func = global.Float64Array) && func,
+	        result = new func(new ArrayBuffer(10), 0, 1) && func;
+	  } catch(e) {}
+	  return result;
+	}());
+
+	/** Used as the size, in bytes, of each `Float64Array` element. */
+	var FLOAT64_BYTES_PER_ELEMENT = Float64Array ? Float64Array.BYTES_PER_ELEMENT : 0;
+
+	/**
+	 * Creates a clone of the given array buffer.
+	 *
+	 * @private
+	 * @param {ArrayBuffer} buffer The array buffer to clone.
+	 * @returns {ArrayBuffer} Returns the cloned array buffer.
+	 */
+	function bufferClone(buffer) {
+	  return bufferSlice.call(buffer, 0);
+	}
+	if (!bufferSlice) {
+	  // PhantomJS has `ArrayBuffer` and `Uint8Array` but not `Float64Array`.
+	  bufferClone = !(ArrayBuffer && Uint8Array) ? constant(null) : function(buffer) {
+	    var byteLength = buffer.byteLength,
+	        floatLength = Float64Array ? floor(byteLength / FLOAT64_BYTES_PER_ELEMENT) : 0,
+	        offset = floatLength * FLOAT64_BYTES_PER_ELEMENT,
+	        result = new ArrayBuffer(byteLength);
+
+	    if (floatLength) {
+	      var view = new Float64Array(result, 0, floatLength);
+	      view.set(new Float64Array(buffer, 0, floatLength));
+	    }
+	    if (byteLength != offset) {
+	      view = new Uint8Array(result, offset);
+	      view.set(new Uint8Array(buffer, offset));
+	    }
+	    return result;
+	  };
+	}
+
+	module.exports = bufferClone;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 49 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
+	 * of an array-like value.
+	 */
+	var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
+
+	/**
+	 * Checks if `value` is a valid array-like length.
+	 *
+	 * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
+	 *
+	 * @private
+	 * @param {*} value The value to check.
+	 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+	 */
+	function isLength(value) {
+	  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	}
+
+	module.exports = isLength;
+
+
+/***/ },
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isArguments = __webpack_require__(55),
@@ -16069,170 +16225,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 46 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {var constant = __webpack_require__(39),
-	    isNative = __webpack_require__(19);
-
-	/** Native method references. */
-	var ArrayBuffer = isNative(ArrayBuffer = global.ArrayBuffer) && ArrayBuffer,
-	    bufferSlice = isNative(bufferSlice = ArrayBuffer && new ArrayBuffer(0).slice) && bufferSlice,
-	    floor = Math.floor,
-	    Uint8Array = isNative(Uint8Array = global.Uint8Array) && Uint8Array;
-
-	/** Used to clone array buffers. */
-	var Float64Array = (function() {
-	  // Safari 5 errors when using an array buffer to initialize a typed array
-	  // where the array buffer's `byteLength` is not a multiple of the typed
-	  // array's `BYTES_PER_ELEMENT`.
-	  try {
-	    var func = isNative(func = global.Float64Array) && func,
-	        result = new func(new ArrayBuffer(10), 0, 1) && func;
-	  } catch(e) {}
-	  return result;
-	}());
-
-	/** Used as the size, in bytes, of each `Float64Array` element. */
-	var FLOAT64_BYTES_PER_ELEMENT = Float64Array ? Float64Array.BYTES_PER_ELEMENT : 0;
-
-	/**
-	 * Creates a clone of the given array buffer.
-	 *
-	 * @private
-	 * @param {ArrayBuffer} buffer The array buffer to clone.
-	 * @returns {ArrayBuffer} Returns the cloned array buffer.
-	 */
-	function bufferClone(buffer) {
-	  return bufferSlice.call(buffer, 0);
-	}
-	if (!bufferSlice) {
-	  // PhantomJS has `ArrayBuffer` and `Uint8Array` but not `Float64Array`.
-	  bufferClone = !(ArrayBuffer && Uint8Array) ? constant(null) : function(buffer) {
-	    var byteLength = buffer.byteLength,
-	        floatLength = Float64Array ? floor(byteLength / FLOAT64_BYTES_PER_ELEMENT) : 0,
-	        offset = floatLength * FLOAT64_BYTES_PER_ELEMENT,
-	        result = new ArrayBuffer(byteLength);
-
-	    if (floatLength) {
-	      var view = new Float64Array(result, 0, floatLength);
-	      view.set(new Float64Array(buffer, 0, floatLength));
-	    }
-	    if (byteLength != offset) {
-	      view = new Uint8Array(result, offset);
-	      view.set(new Uint8Array(buffer, offset));
-	    }
-	    return result;
-	  };
-	}
-
-	module.exports = bufferClone;
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copies properties of `source` to `object`.
-	 *
-	 * @private
-	 * @param {Object} source The object to copy properties from.
-	 * @param {Array} props The property names to copy.
-	 * @param {Object} [object={}] The object to copy properties to.
-	 * @returns {Object} Returns `object`.
-	 */
-	function baseCopy(source, props, object) {
-	  object || (object = {});
-
-	  var index = -1,
-	      length = props.length;
-
-	  while (++index < length) {
-	    var key = props[index];
-	    object[key] = source[key];
-	  }
-	  return object;
-	}
-
-	module.exports = baseCopy;
-
-
-/***/ },
-/* 48 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var constant = __webpack_require__(39),
-	    isNative = __webpack_require__(19),
-	    toObject = __webpack_require__(42);
-
-	/** Native method references. */
-	var getOwnPropertySymbols = isNative(getOwnPropertySymbols = Object.getOwnPropertySymbols) && getOwnPropertySymbols;
-
-	/**
-	 * Creates an array of the own symbols of `object`.
-	 *
-	 * @private
-	 * @param {Object} object The object to query.
-	 * @returns {Array} Returns the array of symbols.
-	 */
-	var getSymbols = !getOwnPropertySymbols ? constant([]) : function(object) {
-	  return getOwnPropertySymbols(toObject(object));
-	};
-
-	module.exports = getSymbols;
-
-
-/***/ },
-/* 49 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
-	 * of an array-like value.
-	 */
-	var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
-
-	/**
-	 * Checks if `value` is a valid array-like length.
-	 *
-	 * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
-	 *
-	 * @private
-	 * @param {*} value The value to check.
-	 * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
-	 */
-	function isLength(value) {
-	  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-	}
-
-	module.exports = isLength;
-
-
-/***/ },
-/* 50 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Converts `value` to a string if it is not one. An empty string is returned
-	 * for `null` or `undefined` values.
-	 *
-	 * @private
-	 * @param {*} value The value to process.
-	 * @returns {string} Returns the string.
-	 */
-	function baseToString(value) {
-	  if (typeof value == 'string') {
-	    return value;
-	  }
-	  return value == null ? '' : (value + '');
-	}
-
-	module.exports = baseToString;
-
-
-/***/ },
 /* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -16300,7 +16292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    isArray = __webpack_require__(35),
 	    isIndex = __webpack_require__(56),
 	    isLength = __webpack_require__(49),
-	    keysIn = __webpack_require__(45),
+	    keysIn = __webpack_require__(50),
 	    support = __webpack_require__(57);
 
 	/** Used for native method references. */

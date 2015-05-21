@@ -28,18 +28,12 @@ module.exports = start: start
 
 
 stripSuperfluousPathSegments = ->
-  landingPath = window.location.pathname.toLowerCase()
+  landingPath = window.location.pathname
+  cleanPath = landingPath.replace(/Default.aspx/i, '')
+                         .replace(/Index.html/i, '')
 
-  if _(landingPath).contains('default.aspx')
-    cleanPath = landingPath.split('default.aspx')[0]
-    if (history.emulate)
-      return window.location.replace(cleanPath)
-    else
-      history.pushState({}, '', cleanPath)
-
-  if _(landingPath).contains('index.html')
-    cleanPath = landingPath.split('index.html')[0]
-    if (history.emulate)
+  if landingPath != cleanPath
+    if history.emulate
       return window.location.replace(cleanPath)
     else
       history.pushState({}, '', cleanPath)
