@@ -1,10 +1,5 @@
 .DS_Store
+.gitignore
 
-*.log
-
-*.sublime-workspace
-
-test.js
-
+test/
 node_modules/
-bower_components/
