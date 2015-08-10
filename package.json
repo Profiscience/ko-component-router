@@ -15,7 +15,6 @@
     "knockout": "^3.3.0"
   },
   "dependencies": {
-    "lodash": "^3.5.0",
     "page": "^1.6.3"
   },
   "jshintConfig": {
