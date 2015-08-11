@@ -1,5 +1,12 @@
 .DS_Store
+
+.git/
 .gitignore
 
+examples/
 test/
+src/
+README.md
+
 node_modules/
+npm-debug.log
