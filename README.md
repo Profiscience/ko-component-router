@@ -28,6 +28,34 @@ var ko = require('knockout')
 ko.router // the router
 ```
 
+## Basic Usage
+```javascript
+
+// app.js
+ko.router.route('/hello/:name', 'Hello')
+ko.router.start()
+
+// home.js
+function HomeViewModel(routerCtxObs) {
+  this.name = routerCtxObs().params.name
+}
+
+ko.components.register('Home', {
+  template: "<h1>Hello <span data-bind='text: name'></span></h1>",
+  viewModel: HomeViewModel
+})
+```
+
+```html
+<!-- index.html -->
+<ko-component-router></ko-component-router>
+```
+
+So, in a nutshell...
+  - register your routes
+  - register your components (or use a [component loader](http://knockoutjs.com/documentation/component-loaders.html))
+  - place the router in your root html page, this is where the current page will be rendered
+
 ## API
 
 ### ko.router.route(path, [callback ...], componentName, [callback ...])

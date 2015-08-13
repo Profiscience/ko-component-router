@@ -24,7 +24,7 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       transform: [istanbul({
-        ignore: ['**/node_modules/**', '**/test/**', '**/tests/**']
+        ignore: ['**/node_modules/**', '**/test/**']
       })]
     },
 
