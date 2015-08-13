@@ -1,9 +1,13 @@
 # ko-component-router
+
+[![Code Climate](https://codeclimate.com/github/caseyWebb/ko-component-router/badges/gpa.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router)
+[![Test Coverage](https://codeclimate.com/github/caseyWebb/ko-component-router/badges/coverage.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router/coverage)
+[![Build Status](https://travis-ci.org/caseyWebb/ko-component-router.svg?branch=master)](https://travis-ci.org/caseyWebb/ko-component-router)
+
 Component-based router for developing single-page-apps with KnockoutJS,
 built on top of [page.js](https://github.com/visionmedia/page.js). Any gaps in this
 documentations will most likely be quickly answered by a quick look at page.js' docs.
 
-__v2.0.0 is a complete rewrite and is currently in development__
 
 ```javascript
 ko.router.route('/user/:id', loadUser, 'User')
