@@ -3,8 +3,6 @@ engines:
   eslint:
     enabled: true
     checks:
-      indent:
-        enabled: false
       no-underscore-dangle:
         enabled: false
 
