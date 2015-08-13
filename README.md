@@ -101,7 +101,6 @@ Consult [page.js' documentation](https://github.com/visionmedia/page.js), it pro
 has your answer. If not, feel free to email me at [notcaseywebb@gmail.com](mailto:notcaseywebb@gmail.com).
 
 ## TODO / Roadmap
-- tests
 - nested routing
 
 ## License
