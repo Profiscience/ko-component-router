@@ -34,15 +34,16 @@ function runTests(config) {
       page.start.restore()
     })
 
-    it('should set the base path if applicable', function() {
-      if (config.basePath)
-        expect(pageBaseSpy.calledWith(config.basePath)).to.be.true
-      else if (!config.basePath)
-        expect(pageBaseSpy.called).to.be.false
+    it('should call page.base', function() {
+      expect(pageBaseSpy.calledWith(config.basePath)).to.be.true
     })
 
     it('should pass the options to page', function() {
       expect(pageStartSpy.calledWith(config)).to.be.true
+    })
+
+    it('should load the binding', function() {
+      expect(ko.bindingHandlers.route).to.exist
     })
 
     it('should load the component', function() {
@@ -94,8 +95,8 @@ function runTests(config) {
 
       function getAssert(cb) {
         return function (ctx, next) {
-          expect(router.component()).to.equal('component')
-          expect(router.ctx()).to.exist
+          expect(router._component()).to.equal('component')
+          expect(router._ctx()).to.exist
           cb()
           next()
         }
