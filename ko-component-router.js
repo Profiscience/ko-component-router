@@ -929,42 +929,68 @@ var ko = require('knockout')
 
 ko.router = require('./lib/router')
 
-},{"./lib/router":7,"knockout":"knockout"}],6:[function(require,module,exports){
+},{"./lib/router":8,"knockout":"knockout"}],6:[function(require,module,exports){
 'use strict'
 
 var ko = require('knockout')
 
 var router = require('./router')
 
+ko.bindingHandlers.route = {
+  init: function(el, valueAccessor) {
+    ko.applyBindingsToNode(el, {
+      attr: {
+        href: ko.pureComputed(function() {
+          return router._basePath + ko.unwrap(valueAccessor())
+        })
+      }
+    })
+  }
+}
+
+},{"./router":8,"knockout":"knockout"}],7:[function(require,module,exports){
+'use strict'
+
+var ko = require('knockout')
+
+var router = require('./router')
+
+function ViewModel() {
+  this.component = router._component
+  this.ctx = router._ctx
+}
+
 ko.components.register('ko-component-router', {
-  viewModel: function ViewModel() {
-    this.component = router.component
-    this.ctx = router.ctx
-  },
+  viewModel: ViewModel,
   template: "<div data-bind='component: {" +
               "name: component," +
               "params: ctx" +
             "}'></div>"
 })
 
-},{"./router":7,"knockout":"knockout"}],7:[function(require,module,exports){
+module.exports = ViewModel
+
+},{"./router":8,"knockout":"knockout"}],8:[function(require,module,exports){
 'use strict'
 
 var ko = require('knockout')
 var page = require('page')
 
 function Router() {
-  this.component = ko.observable()
-  this.ctx = ko.observable()
+  this._component = ko.observable()
+  this._ctx = ko.observable()
 }
 
 Router.prototype.start = function(config) {
-  if (config.basePath) {
-    page.base(config.basePath)
-  }
+  if (typeof config === 'undefined')
+    config = {}
 
+  this._basePath = config.basePath || ''
+
+  page.base(this._basePath)
   page.start(config)
 
+  require('./binding')
   require('./component')
 }
 
@@ -1004,10 +1030,10 @@ Router.prototype.route = function(route) {
 
   page.apply(page, args)
 
-  function getComponentSetter(_el) {
+  function getComponentSetter(component) {
     return function(ctx, next) {
-      self.component(_el)
-      self.ctx(ctx)
+      self._component(component)
+      self._ctx(ctx)
       ctx.handled = true
       next()
     }
@@ -1016,5 +1042,5 @@ Router.prototype.route = function(route) {
 
 module.exports = new Router()
 
-},{"./component":6,"knockout":"knockout","page":2}]},{},[5])(5)
+},{"./binding":6,"./component":7,"knockout":"knockout","page":2}]},{},[5])(5)
 });
