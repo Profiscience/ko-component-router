@@ -3,25 +3,16 @@
 var ko = require('knockout')
 var page = require('page')
 
-function Router(config) {
-  var self = this
-  var k
-
-  self.component = ko.observable()
-  self.ctx = ko.observable()
-
-  self.config = {
-    hashbang: false,
-    basePath: ''
-  }
+function Router() {
+  this.component = ko.observable()
+  this.ctx = ko.observable()
 }
 
 Router.prototype.start = function(config) {
-  this.config.basePath = config.basePath || ''
-  this.config.hashbang = config.hashbang === true
+  if (config.basePath)
+    page.base(config.basePath)
 
-  page.base(this.config.basePath)
-  page.start(this.config)
+  page.start(config)
 
   require('./component')
 }

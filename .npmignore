@@ -5,6 +5,7 @@
 
 examples/
 test/
+coverage/
 src/
 README.md
 
