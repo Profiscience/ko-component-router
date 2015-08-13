@@ -16,7 +16,7 @@ ko.router.route('/user/:id', loadUser, 'User')
 ## Installation
 ```shell
 npm install ko-component-router
-bower install caseyWebb/ko-component-router
+bower install ko-component-router
 ```
 
 _Note for CommonJS / AMD users: requiring this modules adds it to the `ko` namespace, i.e._
