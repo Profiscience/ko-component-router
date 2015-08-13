@@ -6,7 +6,8 @@
   "scripts": {
     "build": "browserify src/index.js -s ko-component-router -x knockout -o ko-component-router.js && uglifyjs ko-component-router.js -o ko-component-router.min.js",
     "watch": "watchify src/index.js -s ko-component-router -x knockout -o ko-component-router.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
   },
   "keywords": [
     "ko",

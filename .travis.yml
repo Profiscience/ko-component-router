@@ -1,0 +1,7 @@
+language: node_js
+
+node_js:
+  - "stable"
+
+after_script:
+- codeclimate-test-reporter < coverage/lcov.txt
