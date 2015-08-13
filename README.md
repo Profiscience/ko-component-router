@@ -124,6 +124,15 @@ function hideLoader(ctx, next) {
 }
 ```
 
+## Route Binding
+Working with base paths can be tricky, to aid in this, the router exposes a simple
+binding so you can pass only the relevant part of the route, regardless of the
+current base path.
+
+```html
+<a data-bind="route: '/user/1234'">John Doe</a>
+```
+
 ## Parameters / Route Matching, State, Middleware, 404 behavior
 Consult [page.js' documentation](https://github.com/visionmedia/page.js), it probably
 has your answer. If not, feel free to email me at [notcaseywebb@gmail.com](mailto:notcaseywebb@gmail.com).

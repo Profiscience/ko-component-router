@@ -4,16 +4,20 @@ var ko = require('knockout')
 var page = require('page')
 
 function Router() {
-  this.component = ko.observable()
-  this.ctx = ko.observable()
+  this._component = ko.observable()
+  this._ctx = ko.observable()
 }
 
 Router.prototype.start = function(config) {
-  if (config && config.basePath)
-    page.base(config.basePath)
+  if (typeof config === 'undefined')
+    config = {}
 
+  this._basePath = config.basePath || ''
+
+  page.base(this._basePath)
   page.start(config)
 
+  require('./binding')
   require('./component')
 }
 
@@ -55,8 +59,8 @@ Router.prototype.route = function(route) {
 
   function getComponentSetter(component) {
     return function(ctx, next) {
-      self.component(component)
-      self.ctx(ctx)
+      self._component(component)
+      self._ctx(ctx)
       ctx.handled = true
       next()
     }
