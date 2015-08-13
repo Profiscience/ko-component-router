@@ -1,13 +1,8 @@
 # Save as .codeclimate.yml (note leading .) in project root directory
-languages:
-  JavaScript: true
-
 engines:
   eslint:
     enabled: true
     checks:
-      indent:
-        enabled: false
       no-underscore-dangle:
         enabled: false
 
