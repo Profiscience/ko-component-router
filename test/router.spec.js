@@ -6,7 +6,7 @@ var sinon = require('sinon')
 var ko = require('knockout')
 var page = require('page')
 
-var router = require('../src/lib/router.js')
+var router = require('../src/lib/router')
 
 var testCounter = 0
 

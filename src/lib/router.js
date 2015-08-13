@@ -9,9 +9,8 @@ function Router() {
 }
 
 Router.prototype.start = function(config) {
-  if (config.basePath) {
+  if (config && config.basePath)
     page.base(config.basePath)
-  }
 
   page.start(config)
 
@@ -54,9 +53,9 @@ Router.prototype.route = function(route) {
 
   page.apply(page, args)
 
-  function getComponentSetter(_el) {
+  function getComponentSetter(component) {
     return function(ctx, next) {
-      self.component(_el)
+      self.component(component)
       self.ctx(ctx)
       ctx.handled = true
       next()

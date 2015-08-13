@@ -4,13 +4,17 @@ var ko = require('knockout')
 
 var router = require('./router')
 
+function ViewModel() {
+  this.component = router.component
+  this.ctx = router.ctx
+}
+
 ko.components.register('ko-component-router', {
-  viewModel: function ViewModel() {
-    this.component = router.component
-    this.params = router.params
-  },
+  viewModel: ViewModel,
   template: "<div data-bind='component: {" +
               "name: component," +
-              "params: params" +
+              "params: ctx" +
             "}'></div>"
 })
+
+module.exports = ViewModel
