@@ -958,21 +958,11 @@ function Router(config) {
   var k
 
   self.component = ko.observable()
-  self.params = {}
-  self.middleware = [
-    _setParams
-  ]
+  self.ctx = ko.observable()
 
   self.config = {
     hashbang: false,
     basePath: ''
-  }
-
-  function _setParams(ctx, next) {
-    for (k in ctx.params) {
-      self.params[k] = ko.observable(ctx.params[k])
-    }
-    next()
   }
 }
 
@@ -1004,7 +994,6 @@ Router.prototype.route = function(route) {
     stack.push(arguments[i])
 
   args = [route]
-  args.concat(self.middleware)
 
   for (i = 0; i < stack.length; i++) {
     el = stack[i]
@@ -1026,6 +1015,7 @@ Router.prototype.route = function(route) {
   function _getComponentSetter(el) {
     return function(ctx, next) {
       self.component(el)
+      self.ctx(ctx)
       ctx.handled = true
       next()
     }
