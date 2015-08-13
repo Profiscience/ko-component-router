@@ -3,9 +3,12 @@
 .git/
 .gitignore
 
-examples/
 test/
 coverage/
+karma.conf.js
+.codeclimate.yml
+.eslintrc
+
 src/
 README.md
 

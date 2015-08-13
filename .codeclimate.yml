@@ -1,0 +1,16 @@
+# Save as .codeclimate.yml (note leading .) in project root directory
+languages:
+  JavaScript: true
+
+engines:
+  eslint:
+    enabled: true
+
+ratings:
+   paths:
+   - src/**
+
+exclude_paths:
+- "ko-component-router.js"
+- "ko-component-router.min.js"
+- "test/*"
