@@ -953,25 +953,17 @@ ko.components.register('ko-component-router', {
 var ko = require('knockout')
 var page = require('page')
 
-function Router(config) {
-  var self = this
-  var k
-
-  self.component = ko.observable()
-  self.ctx = ko.observable()
-
-  self.config = {
-    hashbang: false,
-    basePath: ''
-  }
+function Router() {
+  this.component = ko.observable()
+  this.ctx = ko.observable()
 }
 
 Router.prototype.start = function(config) {
-  this.config.basePath = config.basePath || ''
-  this.config.hashbang = config.hashbang === true
+  if (config.basePath) {
+    page.base(config.basePath)
+  }
 
-  page.base(this.config.basePath)
-  page.start(this.config)
+  page.start(config)
 
   require('./component')
 }
@@ -1000,7 +992,7 @@ Router.prototype.route = function(route) {
 
     switch (typeof el) {
       case 'string':
-        arg = _getComponentSetter(el)
+        arg = getComponentSetter(el)
         break
 
       default:
@@ -1012,9 +1004,9 @@ Router.prototype.route = function(route) {
 
   page.apply(page, args)
 
-  function _getComponentSetter(el) {
+  function getComponentSetter(_el) {
     return function(ctx, next) {
-      self.component(el)
+      self.component(_el)
       self.ctx(ctx)
       ctx.handled = true
       next()
