@@ -9,8 +9,9 @@ function Router() {
 }
 
 Router.prototype.start = function(config) {
-  if (config.basePath)
+  if (config.basePath) {
     page.base(config.basePath)
+  }
 
   page.start(config)
 
@@ -41,7 +42,7 @@ Router.prototype.route = function(route) {
 
     switch (typeof el) {
       case 'string':
-        arg = _getComponentSetter(el)
+        arg = getComponentSetter(el)
         break
 
       default:
@@ -53,9 +54,9 @@ Router.prototype.route = function(route) {
 
   page.apply(page, args)
 
-  function _getComponentSetter(el) {
+  function getComponentSetter(_el) {
     return function(ctx, next) {
-      self.component(el)
+      self.component(_el)
       self.ctx(ctx)
       ctx.handled = true
       next()

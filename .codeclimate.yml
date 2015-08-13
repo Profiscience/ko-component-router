@@ -5,6 +5,11 @@ languages:
 engines:
   eslint:
     enabled: true
+    checks:
+      indent:
+        enabled: false
+      no-underscore-dangle:
+        enabled: false
 
 ratings:
    paths:
@@ -13,4 +18,5 @@ ratings:
 exclude_paths:
 - "ko-component-router.js"
 - "ko-component-router.min.js"
+- "karma.conf.js"
 - "test/*"
