@@ -2,6 +2,12 @@
   "name": "ko-component-router",
   "version": "2.0.0",
   "description": "Component-based routing for KnockoutJS",
+  "homepage": "https://github.com/caseyWebb/ko-component-router",
+  "bugs": {
+    "url": "https://github.com/casey/ko-component-router/issues",
+    "email": "notcaseywebb@gmail.com"
+  },
+  "repository": "caseyWebb/ko-component-router",
   "main": "ko-component-router.js",
   "scripts": {
     "build": "browserify src/index.js -s ko-component-router -x knockout -o ko-component-router.js && uglifyjs ko-component-router.js -o ko-component-router.min.js",
@@ -13,7 +19,9 @@
     "ko",
     "knockout",
     "component",
-    "router"
+    "router",
+    "routing",
+    "spa"
   ],
   "author": "Casey Webb <notcaseywebb@gmail.com>",
   "license": "MIT",
