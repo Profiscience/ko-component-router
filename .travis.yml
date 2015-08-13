@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-  - "stable"
+  - stable
 
 after_script:
-- codeclimate-test-reporter < coverage/lcov.txt
+- node node_modules/code-climate-test-reporter/bin/codeclimate.js < coverage/lcov.txt
