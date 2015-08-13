@@ -4,4 +4,4 @@ node_js:
   - stable
 
 after_script:
-- node node_modules/code-climate-test-reporter/bin/codeclimate.js < coverage/lcov.txt
+- node node_modules/codeclimate-test-reporter/bin/codeclimate.js < coverage/lcov.txt
