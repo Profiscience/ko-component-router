@@ -15,7 +15,8 @@
     "semi": [
       2,
       "never"
-    ]
+    ],
+    "no-underscore-dangle": false
   },
   "env": {
     "browser": true,

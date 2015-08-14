@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Component-based routing for KnockoutJS",
   "homepage": "https://github.com/caseyWebb/ko-component-router",
   "bugs": {
@@ -8,10 +8,10 @@
     "email": "notcaseywebb@gmail.com"
   },
   "repository": "caseyWebb/ko-component-router",
-  "main": "ko-component-router.js",
+  "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "browserify src/index.js -s ko-component-router -x knockout -o ko-component-router.js && uglifyjs ko-component-router.js -o ko-component-router.min.js",
-    "watch": "watchify src/index.js -s ko-component-router -x knockout -o ko-component-router.js",
+    "build": "webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",
+    "watch": "webpack --watch",
     "prepublish": "npm run build",
     "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
   },
@@ -40,7 +40,6 @@
     "browserify": "^11.0.1",
     "browserify-istanbul": "^0.2.1",
     "chai": "^3.2.0",
-    "codeclimate-test-reporter": "^0.1.0",
     "jquery": "^2.1.4",
     "karma": "^0.13.9",
     "karma-browserify": "^4.3.0",
@@ -53,6 +52,7 @@
     "phantomjs": "^1.9.18",
     "sinon": "^1.15.4",
     "uglify-js": "^2.4.24",
-    "watchify": "^3.3.1"
+    "watchify": "^3.3.1",
+    "webpack": "^1.11.0"
   }
 }

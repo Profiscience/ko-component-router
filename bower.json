@@ -1,7 +1,7 @@
 {
   "name": "ko-component-router",
   "main": "ko-component-router.js",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "homepage": "https://github.com/caseyWebb/ko-component-router",
   "repository": {
     "type": "git",

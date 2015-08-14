@@ -2,9 +2,6 @@
 engines:
   eslint:
     enabled: true
-    checks:
-      no-underscore-dangle:
-        enabled: false
 
 ratings:
    paths:

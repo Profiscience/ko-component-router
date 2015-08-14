@@ -11,10 +11,13 @@ function ViewModel() {
 
 ko.components.register('ko-component-router', {
   viewModel: ViewModel,
-  template: "<div data-bind='component: {" +
-              "name: component," +
-              "params: ctx" +
-            "}'></div>"
+  template: "<div data-bind='if: component'>" +
+              "<div data-bind='component: {" +
+                "name: component," +
+                "params: ctx" +
+              "}'></div>" +
+            "</div>"
+
 })
 
 module.exports = ViewModel
