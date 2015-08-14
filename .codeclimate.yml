@@ -8,7 +8,6 @@ ratings:
    - src/**
 
 exclude_paths:
-- "ko-component-router.js"
-- "ko-component-router.min.js"
+- "dist/*"
 - "karma.conf.js"
 - "test/*"
