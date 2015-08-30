@@ -11,7 +11,6 @@ var ComponentViewModel = require('../src/lib/component')
 describe('component', function() {
 
   before(function() {
-    debugger
     history.pushState({}, null, '/component')
     router.route('/component', 'component')
     router.start()
