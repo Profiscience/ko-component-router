@@ -12,6 +12,7 @@ module.exports = {
     'knockout': {
       root: 'ko',
       commonjs: 'knockout',
+      commonjs2: 'knockout',
       amd: 'knockout'
     }
   }
