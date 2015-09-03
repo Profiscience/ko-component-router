@@ -6,7 +6,7 @@
 	else if(typeof exports === 'object')
 		exports["ko-component-router"] = factory(require("knockout"));
 	else
-		root["ko-component-router"] = factory(root["knockout"]);
+		root["ko-component-router"] = factory(root["ko"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
