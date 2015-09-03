@@ -9,6 +9,10 @@ module.exports = {
   },
 
   externals: {
-    'knockout': 'knockout'
+    'knockout': {
+      root: 'ko',
+      commonjs: 'knockout',
+      amd: 'knockout'
+    }
   }
 }

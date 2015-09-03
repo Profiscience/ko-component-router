@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("knockout"));
+		module.exports = factory(require(undefined));
 	else if(typeof define === 'function' && define.amd)
 		define(["knockout"], factory);
 	else if(typeof exports === 'object')
 		exports["ko-component-router"] = factory(require("knockout"));
 	else
-		root["ko-component-router"] = factory(root["knockout"]);
+		root["ko-component-router"] = factory(root["ko"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
