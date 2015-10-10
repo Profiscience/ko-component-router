@@ -1,8 +1,11 @@
 # ko-component-router
 
-[![Code Climate](https://codeclimate.com/github/caseyWebb/ko-component-router/badges/gpa.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router)
-[![Test Coverage](https://codeclimate.com/github/caseyWebb/ko-component-router/badges/coverage.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router/coverage)
-[![Build Status](https://travis-ci.org/caseyWebb/ko-component-router.svg?branch=master)](https://travis-ci.org/caseyWebb/ko-component-router)
+![NPM](https://img.shields.io/npm/v/ko-component-router.svg)
+![Bower](https://img.shields.io/bower/v/ko-component-router.svg)
+![MIT](https://img.shields.io/npm/l/ko-component-router.svg)
+[![Travis](https://img.shields.io/travis/caseyWebb/ko-component-router.svg)](https://travis-ci.org/caseyWebb/ko-component-router)
+[![CodeClimate](https://img.shields.io/codeclimate/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router)
+[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router/coverage)
 
 Component-based router for developing single-page-apps with KnockoutJS,
 built on top of [page.js](https://github.com/visionmedia/page.js). Any gaps in this
