@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = {
   entry: './src/index.js',
 
@@ -6,6 +8,12 @@ module.exports = {
     filename: 'ko-component-router.js',
     library:  'ko-component-router',
     libraryTarget: 'umd'
+  },
+
+  module: {
+    loaders: [
+      { test: /\.js$/, exclude: /(node_modules|bower_components)/, loader: 'babel' }
+    ]
   },
 
   externals: {

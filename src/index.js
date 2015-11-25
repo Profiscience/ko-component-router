@@ -1,5 +1,15 @@
 'use strict'
 
-var ko = require('knockout')
+const ko = require('knockout')
+const router = require('./router')
 
-ko.router = require('./lib/router')
+ko.components.register('ko-component-router', {
+  viewModel: router,
+  template:
+    `<div data-bind='if: component'>
+      <div data-bind='component: {
+        name: component,
+        params: ctx
+      }'></div>
+    </div>`
+})

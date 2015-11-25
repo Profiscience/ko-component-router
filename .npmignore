@@ -3,15 +3,9 @@
 .git/
 .gitignore
 
-test/
-coverage/
-karma.conf.js
-.codeclimate.yml
-.travis.yml
 .eslintrc
 
 src/
-README.md
 
 node_modules/
 npm-debug.log
