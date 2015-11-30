@@ -6,9 +6,9 @@ const router = require('./router')
 ko.components.register('ko-component-router', {
   viewModel: router,
   template:
-    `<div data-bind='if: component'>
+    `<div data-bind='if: ctx.component'>
       <div data-bind='component: {
-        name: component,
+        name: ctx.component,
         params: ctx
       }'></div>
     </div>`

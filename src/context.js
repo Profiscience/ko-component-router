@@ -9,54 +9,51 @@ class Context {
     this.config = config
 
     this.route = ko.observable('')
+    this.component = ko.observable()
     this.state = ko.observable({})
     this.canonicalPath = ko.observable('')
     this.path = ko.observable('')
-    this.querystring = ko.observable('')
     this.pathname = ko.observable('')
     this.params = {}
     this.query = {}
     this.hash = ko.observable('')
   }
 
-  update(path, state) {
+  update(route, path, state = {}, push = true) {
+    this.route(route)
+
     if ('/' === path[0] && 0 !== path.indexOf(this.config.base)) {
       path = this.config.base + (this.config.hashbang ? '#!' : '') + path
     }
 
-    const i = path.indexOf('?')
-
     this.canonicalPath(path)
-    this.path(path.replace(this.config.base, '') || '/')
+    path = path.replace(this.config.base, '') || '/'
 
     if (this.config.hashbang) {
-      this.path(this.path.replace('#!', '') || '/')
+      path = this.path().replace('#!', '') || '/'
     }
 
-    this.state(state || {})
-    this.querystring(~i ? utils.decodeURLEncodedURIComponent(path.slice(i + 1)) : '')
+    this.state(state)
+
+    const i = path.indexOf('?')
+    // this.querystring(~i ? utils.decodeURLEncodedURIComponent(path.slice(i + 1)) : '')
     this.pathname(utils.decodeURLEncodedURIComponent(~i ? path.slice(0, i) : path))
-    this.hash('')
+    // this.hash('')
 
-    if (!this.config.hashbang) {
-      if (!~this.path().indexOf('#')) {
-        return
-      }
+    const [params, childPath] = route.parse(path)
 
-      const parts = this.path().split('#')
-      this.path(parts[0])
-      this.hash(utils.decodeURLEncodedURIComponent(parts[1]) || '')
-      this.querystring(this.querystring.split('#')[0])
-    }
-  }
+    path = path.replace(childPath, '')
+    utils.merge(this.params, params)
 
-  pushState() {
-    history.pushState(
-      this.state(),
-      document.title,
-      this.config.hashbang && this.path() !== '/'
-        ? '#!' + this.path()
-        : this.canonicalPath())
+    // if (!this.config.hashbang && ~this.path().indexOf('#')) {
+    //   const parts = this.path().split('#')
+    //   this.path(parts[0])
+      // this.hash(utils.decodeURLEncodedURIComponent(parts[1]) || '')
+      // this.querystring(this.querystring().split('#')[0])
+    // }
+
+    this.path(path)
+    route.exec(this, push)
   }
 }
 
