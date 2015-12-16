@@ -74,10 +74,6 @@ class Context {
       sub.dispose()
     }
   }
-
-  dispose() {
-    this.unsubscribeParams()
-  }
 }
 
 module.exports = Context

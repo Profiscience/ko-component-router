@@ -39,7 +39,7 @@ ko.components.register('app', {
         </ul>
       </div>
       <div class="col-sm-8 col-lg-9">
-        <ko-component-router params="routes: routes, base: '/examples', hashbang: true"></ko-component-router>
+        <ko-component-router params="routes: routes, base: '/examples', hashbang: false"></ko-component-router>
       </div>
     </div>
   </div>

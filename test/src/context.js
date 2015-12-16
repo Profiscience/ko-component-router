@@ -52,7 +52,7 @@ function runTests(config) {
     const route = new Route('/:foo', 'foo')
 
     ctx.update(route, '/foo')
-    ctx.dispose()
+    ctx.unsubscribeParams()
     t.pass()
     restorePushState()
   })
