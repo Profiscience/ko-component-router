@@ -36,6 +36,11 @@ class Router {
       this.routes[route] = new Route(route, routes[route])
     }
 
+    if(this.isRoot){
+      this.defaultName = arguments[0].default
+      this.defaultRoute = new Route(this.defaultName, routes[this.defaultName])
+    }
+
     if (dispatch) {
       const url = (this.config.hashbang && ~location.hash.indexOf('#!'))
         ? location.hash.substr(2) + location.search
@@ -59,7 +64,8 @@ class Router {
     }
 
     if (this.isRoot) {
-      location.href = this.ctx.canonicalPath()
+      this.ctx.update(this.defaultRoute, (this.config.base + this.defaultName), state, this.isRoot && push)
+      //location.href = this.ctx.canonicalPath()
     } else {
       this.ctx.component(null)
     }
