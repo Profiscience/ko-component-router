@@ -1,6 +1,7 @@
 'use strict'
 
 const ko = require('knockout')
+const Params = require('./params')
 const utils = require('./utils')
 
 class Context {
@@ -15,10 +16,8 @@ class Context {
     this.path = ko.observable('')
     this.pathname = ko.observable('')
     this.hash = ko.observable('')
-    this.params = {}
+    this.params = new Params(this)
     this.query = {}
-
-    this.subscribeParams()
   }
 
   update(route, url, state = {}, push = true) {
@@ -46,33 +45,9 @@ class Context {
     this.path(path)
     this.pathname(pathname)
     this.hash(hash)
-    utils.merge(this.params, params)
+    this.params.update(params)
 
     route.exec(this, push)
-  }
-
-  subscribeParams() {
-    this._paramSubs = []
-
-    for (const paramName in this.params) {
-      const param = this.params[paramName]
-      this._paramSubs.push(param.subscribe(() => {
-        const url = this.route().compile(ko.toJS(this.params))
-        this.update(this.route(), url, null, false)
-      }))
-    }
-
-    this._paramSubsUpdaterSub = this.component.subscribe(() => {
-      this.unsubscribeParams()
-      this.subscribeParams()
-    })
-  }
-
-  unsubscribeParams() {
-    this._paramSubsUpdaterSub.dispose()
-    for (const sub of this._paramSubs) {
-      sub.dispose()
-    }
   }
 }
 

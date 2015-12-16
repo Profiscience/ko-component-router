@@ -35,7 +35,7 @@ class Route {
         fn(ctx, next)
       } else {
         history[push ? 'pushState' : 'replaceState'](
-          ctx.state(),
+          history.state,
           document.title,
           '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath())
       }

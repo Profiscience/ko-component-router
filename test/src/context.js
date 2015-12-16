@@ -5,7 +5,7 @@ const Context = require('../../src/context')
 const Route = require('../../src/route')
 
 function runTests(config) {
-  test('ctx initialization', (t) => {
+  test('ctx', (t) => {
     t.plan(7)
     t.comment(`using config: ${JSON.stringify(config)}`)
     stubPushState()
@@ -24,36 +24,6 @@ function runTests(config) {
     t.equal(ctx.hash(), 'hash', 'sets hash')
     t.equal(ctx.params.foo(), 'foo', 'sets params')
     // t.equal(ctx.query(), { baz: 'qux', num: 1, arr: [1, 2, 3] }, 'sets query')
-    restorePushState()
-  })
-
-  test('ctx.params should be writable', (t) => {
-    t.plan(1)
-    stubPushState()
-    const _replaceState = history.replaceState
-    const ctx = new Context(config)
-    const route = new Route('/:foo', 'foo')
-
-    history.replaceState = function stub(state, title, url) {
-      t.equal(url, config.base + (config.hashbang ? '/#!' : '') + '/bar', 'updates url')
-    }
-
-    ctx.update(route, '/foo')
-    ctx.params.foo('bar')
-
-    history.replaceState = _replaceState
-    restorePushState()
-  })
-
-  test('ctx.dispose should be ok', (t) => {
-    t.plan(1)
-    stubPushState()
-    const ctx = new Context(config)
-    const route = new Route('/:foo', 'foo')
-
-    ctx.update(route, '/foo')
-    ctx.unsubscribeParams()
-    t.pass()
     restorePushState()
   })
 }
