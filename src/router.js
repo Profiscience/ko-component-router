@@ -15,8 +15,9 @@ class Router {
     const parentRouterCtx = bindingCtx.$parentContext.$router
     let dispatch = true
     if (parentRouterCtx) {
-      base = parentRouterCtx.path()
+      base = parentRouterCtx.config.base + (parentRouterCtx.config.hashbang ? '/#!' : '') + parentRouterCtx.path()
       dispatch = parentRouterCtx.path() !== parentRouterCtx.canonicalPath()
+      this.isRoot = false
     } else {
       this.isRoot = true
     }
@@ -117,14 +118,18 @@ class Router {
 
     // same page
     const orig = path
-
-    if (path.indexOf(this.config.base) === 0) {
-      path = path.substr(this.config.base.length)
+    const base = this.config.base.replace('/#!', '')
+    if (path.indexOf(base) === 0) {
+      path = path.substr(base.length)
     }
 
-    if (this.config.hashbang) path = path.replace('#!', '')
+    if (this.config.hashbang) {
+      path = path.replace('#!', '')
+    }
 
-    if (this.config.base && orig === path) return
+    if (this.config.base && orig === path) {
+      return
+    }
 
     e.preventDefault()
 

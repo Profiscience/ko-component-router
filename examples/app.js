@@ -9,7 +9,7 @@ window.ko = ko
 class App {
   constructor() {
     this.routes = {
-      '/home': 'home',
+      '/': 'home',
       '/nested/!': 'nested',
       '/params/:foo/:bar': 'params'
     }
@@ -33,13 +33,13 @@ ko.components.register('app', {
     <div class="row">
       <div class="col-sm-4 col-lg-3">
         <ul class="nav nav-pills nav-stacked">
-          <li><a href="/home">Home</a></li>
-          <li><a href="/nested">Nested</a></li>
-          <li><a href="/params/lorem/ipsum">Params</a></li>
+          <li><a href="/examples">Home</a></li>
+          <li><a href="/examples/nested">Nested</a></li>
+          <li><a href="/examples/params/lorem/ipsum">Params</a></li>
         </ul>
       </div>
       <div class="col-sm-8 col-lg-9">
-        <ko-component-router params="routes: routes, default: '/home', hashbang: false"></ko-component-router>
+        <ko-component-router params="routes: routes, base: '/examples', hashbang: true"></ko-component-router>
       </div>
     </div>
   </div>

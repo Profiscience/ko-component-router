@@ -35,4 +35,4 @@ const compiler = webpack({
 app.use(webpackDevMiddleware(compiler, { noInfo: true }))
 app.get(/node_modules/, (req, res) => res.sendFile(path.resolve(__dirname, '..', req.path.substring(1))))
 app.get('*',            (req, res) => res.sendFile(path.resolve(__dirname, 'index.html')))
-app.listen(8080, () => { log('Examples running at localhost:8080') })
+app.listen(8080, () => { log('Examples running at localhost:8080/examples') })

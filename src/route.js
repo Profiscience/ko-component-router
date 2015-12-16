@@ -1,6 +1,5 @@
 'use strict'
 
-const ko = require('knockout')
 const pathtoRegexp = require('path-to-regexp')
 const utils = require('./utils')
 
@@ -38,9 +37,7 @@ class Route {
         history[push ? 'pushState' : 'replaceState'](
           ctx.state(),
           document.title,
-          ctx.config.hashbang && ctx.path() !== '/'
-            ? '#!' + ctx.path()
-            : ctx.canonicalPath())
+          '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath())
       }
     }
   }
@@ -51,25 +48,7 @@ class Route {
 
   getComponentSetter(c) {
     return (ctx, next) => {
-      let subs = []
       ctx.component(c)
-
-      for (const paramName in ctx.params) {
-        const param = ctx.params[paramName]
-        subs.push(param.subscribe(() => {
-          const url = ctx.route().compile(ko.toJS(ctx.params))
-          ctx.update(this, url, null, false)
-        }))
-      }
-
-      const killMe = ctx.component.subscribe(() => {
-        killMe.dispose()
-        for (const sub of subs) {
-          sub.dispose()
-        }
-        subs = []
-      })
-
       next()
     }
   }
@@ -80,7 +59,16 @@ class Route {
 
   parse(path) {
     let childPath
+    let hash
     const params = {}
+    const hIndex = path.indexOf('#')
+
+    if (~hIndex) {
+      const parts = path.split('#')
+      path = parts[0]
+      hash = utils.decodeURLEncodedURIComponent(parts[1]) || ''
+    }
+
     const qsIndex = path.indexOf('?')
     const pathname = ~qsIndex ? path.slice(0, qsIndex) : path
     const matches = this._regexp.exec(decodeURIComponent(pathname))
@@ -91,13 +79,14 @@ class Route {
       if (v !== undefined || !(hasOwnProperty.call(params, k.name))) {
         if (k.name === 'child_path') {
           childPath = `/${v}`
+          path = path.replace(childPath, '')
         } else {
           params[k.name] = v
         }
       }
     }
 
-    return [params, childPath]
+    return [path, params, hash, pathname]
   }
 }
 

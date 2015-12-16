@@ -14,46 +14,69 @@ class Context {
     this.canonicalPath = ko.observable('')
     this.path = ko.observable('')
     this.pathname = ko.observable('')
+    this.hash = ko.observable('')
     this.params = {}
     this.query = {}
-    this.hash = ko.observable('')
+
+    this.subscribeParams()
   }
 
-  update(route, path, state = {}, push = true) {
+  update(route, url, state = {}, push = true) {
     this.route(route)
 
-    if ('/' === path[0] && 0 !== path.indexOf(this.config.base)) {
-      path = this.config.base + (this.config.hashbang ? '#!' : '') + path
+    if ('/' === url[0] && (0 !== url.indexOf(this.config.base) || '' === this.config.base)) {
+      url = this.config.base + (this.config.hashbang ? '/#!' : '') + url
+    } else if (0 === url.indexOf(this.config.base) && this.config.hashbang) {
+      url = `${this.config.base}/#!${url.substr(this.config.base.length)}`
     }
 
-    this.canonicalPath(path)
-    path = path.replace(this.config.base, '') || '/'
+    this.canonicalPath(url)
+
+    url = url.replace(this.config.base, '')
 
     if (this.config.hashbang) {
-      path = this.path().replace('#!', '') || '/'
+      url = url.replace('/#!', '')
     }
 
     this.state(state)
-
-    const i = path.indexOf('?')
     // this.querystring(~i ? utils.decodeURLEncodedURIComponent(path.slice(i + 1)) : '')
-    this.pathname(utils.decodeURLEncodedURIComponent(~i ? path.slice(0, i) : path))
-    // this.hash('')
 
-    const [params, childPath] = route.parse(path)
-
-    path = path.replace(childPath, '')
-    utils.merge(this.params, params)
-
-    // if (!this.config.hashbang && ~this.path().indexOf('#')) {
-    //   const parts = this.path().split('#')
-    //   this.path(parts[0])
-      // this.hash(utils.decodeURLEncodedURIComponent(parts[1]) || '')
-      // this.querystring(this.querystring().split('#')[0])
-    // }
+    const [path, params, hash, pathname] = route.parse(url)
 
     this.path(path)
+    this.pathname(pathname)
+    this.hash(hash)
+    utils.merge(this.params, params)
+
     route.exec(this, push)
+  }
+
+  subscribeParams() {
+    this._paramSubs = []
+
+    for (const paramName in this.params) {
+      const param = this.params[paramName]
+      this._paramSubs.push(param.subscribe(() => {
+        const url = this.route().compile(ko.toJS(this.params))
+        this.update(this.route(), url, null, false)
+      }))
+    }
+
+    this._paramSubsUpdaterSub = this.component.subscribe(() => {
+      this.unsubscribeParams()
+      this.subscribeParams()
+    })
+  }
+
+  unsubscribeParams() {
+    this._paramSubsUpdaterSub.dispose()
+    for (const sub of this._paramSubs) {
+      sub.dispose()
+    }
+  }
+
+  dispose() {
+    this.unsubscribeParams()
   }
 }
 

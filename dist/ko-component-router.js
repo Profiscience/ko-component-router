@@ -101,8 +101,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var parentRouterCtx = bindingCtx.$parentContext.$router;
 	    var dispatch = true;
 	    if (parentRouterCtx) {
-	      base = parentRouterCtx.path();
+	      base = parentRouterCtx.config.base + (parentRouterCtx.config.hashbang ? '/#!' : '') + parentRouterCtx.path();
 	      dispatch = parentRouterCtx.path() !== parentRouterCtx.canonicalPath();
+	      this.isRoot = false;
 	    } else {
 	      this.isRoot = true;
 	    }
@@ -205,14 +206,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      // same page
 	      var orig = path;
-
-	      if (path.indexOf(this.config.base) === 0) {
-	        path = path.substr(this.config.base.length);
+	      var base = this.config.base.replace('/#!', '');
+	      if (path.indexOf(base) === 0) {
+	        path = path.substr(base.length);
 	      }
 
-	      if (this.config.hashbang) path = path.replace('#!', '');
+	      if (this.config.hashbang) {
+	        path = path.replace('#!', '');
+	      }
 
-	      if (this.config.base && orig === path) return;
+	      if (this.config.base && orig === path) {
+	        return;
+	      }
 
 	      e.preventDefault();
 
@@ -273,56 +278,107 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.canonicalPath = ko.observable('');
 	    this.path = ko.observable('');
 	    this.pathname = ko.observable('');
+	    this.hash = ko.observable('');
 	    this.params = {};
 	    this.query = {};
-	    this.hash = ko.observable('');
+
+	    this.subscribeParams();
 	  }
 
 	  _createClass(Context, [{
 	    key: 'update',
-	    value: function update(route, path) {
+	    value: function update(route, url) {
 	      var state = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	      var push = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
 
 	      this.route(route);
 
-	      if ('/' === path[0] && 0 !== path.indexOf(this.config.base)) {
-	        path = this.config.base + (this.config.hashbang ? '#!' : '') + path;
+	      if ('/' === url[0] && (0 !== url.indexOf(this.config.base) || '' === this.config.base)) {
+	        url = this.config.base + (this.config.hashbang ? '/#!' : '') + url;
+	      } else if (0 === url.indexOf(this.config.base) && this.config.hashbang) {
+	        url = this.config.base + '/#!' + url.substr(this.config.base.length);
 	      }
 
-	      this.canonicalPath(path);
-	      path = path.replace(this.config.base, '') || '/';
+	      this.canonicalPath(url);
+
+	      url = url.replace(this.config.base, '');
 
 	      if (this.config.hashbang) {
-	        path = this.path().replace('#!', '') || '/';
+	        url = url.replace('/#!', '');
 	      }
 
 	      this.state(state);
-
-	      var i = path.indexOf('?');
 	      // this.querystring(~i ? utils.decodeURLEncodedURIComponent(path.slice(i + 1)) : '')
-	      this.pathname(utils.decodeURLEncodedURIComponent(~i ? path.slice(0, i) : path));
-	      // this.hash('')
 
-	      var _route$parse = route.parse(path);
+	      var _route$parse = route.parse(url);
 
-	      var _route$parse2 = _slicedToArray(_route$parse, 2);
+	      var _route$parse2 = _slicedToArray(_route$parse, 4);
 
-	      var params = _route$parse2[0];
-	      var childPath = _route$parse2[1];
-
-	      path = path.replace(childPath, '');
-	      utils.merge(this.params, params);
-
-	      // if (!this.config.hashbang && ~this.path().indexOf('#')) {
-	      //   const parts = this.path().split('#')
-	      //   this.path(parts[0])
-	      // this.hash(utils.decodeURLEncodedURIComponent(parts[1]) || '')
-	      // this.querystring(this.querystring().split('#')[0])
-	      // }
+	      var path = _route$parse2[0];
+	      var params = _route$parse2[1];
+	      var hash = _route$parse2[2];
+	      var pathname = _route$parse2[3];
 
 	      this.path(path);
+	      this.pathname(pathname);
+	      this.hash(hash);
+	      utils.merge(this.params, params);
+
 	      route.exec(this, push);
+	    }
+	  }, {
+	    key: 'subscribeParams',
+	    value: function subscribeParams() {
+	      var _this = this;
+
+	      this._paramSubs = [];
+
+	      for (var paramName in this.params) {
+	        var param = this.params[paramName];
+	        this._paramSubs.push(param.subscribe(function () {
+	          var url = _this.route().compile(ko.toJS(_this.params));
+	          _this.update(_this.route(), url, null, false);
+	        }));
+	      }
+
+	      this._paramSubsUpdaterSub = this.component.subscribe(function () {
+	        _this.unsubscribeParams();
+	        _this.subscribeParams();
+	      });
+	    }
+	  }, {
+	    key: 'unsubscribeParams',
+	    value: function unsubscribeParams() {
+	      this._paramSubsUpdaterSub.dispose();
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = this._paramSubs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var sub = _step.value;
+
+	          sub.dispose();
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'dispose',
+	    value: function dispose() {
+	      this.unsubscribeParams();
 	    }
 	  }]);
 
@@ -391,7 +447,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var ko = __webpack_require__(1);
 	var pathtoRegexp = __webpack_require__(6);
 	var utils = __webpack_require__(4);
 
@@ -434,7 +489,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (fn) {
 	          fn(ctx, next);
 	        } else {
-	          history[push ? 'pushState' : 'replaceState'](ctx.state(), document.title, ctx.config.hashbang && ctx.path() !== '/' ? '#!' + ctx.path() : ctx.canonicalPath());
+	          history[push ? 'pushState' : 'replaceState'](ctx.state(), document.title, '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath());
 	        }
 	      }
 	    }
@@ -446,50 +501,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getComponentSetter',
 	    value: function getComponentSetter(c) {
-	      var _this2 = this;
-
 	      return function (ctx, next) {
-	        var subs = [];
 	        ctx.component(c);
-
-	        for (var paramName in ctx.params) {
-	          var param = ctx.params[paramName];
-	          subs.push(param.subscribe(function () {
-	            var url = ctx.route().compile(ko.toJS(ctx.params));
-	            ctx.update(_this2, url, null, false);
-	          }));
-	        }
-
-	        var killMe = ctx.component.subscribe(function () {
-	          killMe.dispose();
-	          var _iteratorNormalCompletion = true;
-	          var _didIteratorError = false;
-	          var _iteratorError = undefined;
-
-	          try {
-	            for (var _iterator = subs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	              var sub = _step.value;
-
-	              sub.dispose();
-	            }
-	          } catch (err) {
-	            _didIteratorError = true;
-	            _iteratorError = err;
-	          } finally {
-	            try {
-	              if (!_iteratorNormalCompletion && _iterator.return) {
-	                _iterator.return();
-	              }
-	            } finally {
-	              if (_didIteratorError) {
-	                throw _iteratorError;
-	              }
-	            }
-	          }
-
-	          subs = [];
-	        });
-
 	        next();
 	      };
 	    }
@@ -502,7 +515,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'parse',
 	    value: function parse(path) {
 	      var childPath = undefined;
+	      var hash = undefined;
 	      var params = {};
+	      var hIndex = path.indexOf('#');
+
+	      if (~hIndex) {
+	        var parts = path.split('#');
+	        path = parts[0];
+	        hash = utils.decodeURLEncodedURIComponent(parts[1]) || '';
+	      }
+
 	      var qsIndex = path.indexOf('?');
 	      var pathname = ~qsIndex ? path.slice(0, qsIndex) : path;
 	      var matches = this._regexp.exec(decodeURIComponent(pathname));
@@ -513,13 +535,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (v !== undefined || !hasOwnProperty.call(params, k.name)) {
 	          if (k.name === 'child_path') {
 	            childPath = '/' + v;
+	            path = path.replace(childPath, '');
 	          } else {
 	            params[k.name] = v;
 	          }
 	        }
 	      }
 
-	      return [params, childPath];
+	      return [path, params, hash, pathname];
 	    }
 	  }]);
 

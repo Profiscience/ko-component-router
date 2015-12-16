@@ -13,7 +13,9 @@
     "build": "webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",
     "watch": "webpack --watch",
     "examples": "node examples/server.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "node test/server.js",
+    "coverage": ""
   },
   "keywords": [
     "ko",
@@ -35,7 +37,14 @@
     "bootstrap": "^3.3.6",
     "eslint": "^1.10.1",
     "express": "^4.13.3",
+    "isparta-loader": "^2.0.0",
     "jquery": "^2.1.4",
+    "karma": "^0.13.15",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-coverage": "^0.5.3",
+    "karma-osx-reporter": "^0.2.1",
+    "karma-tap": "^1.0.3",
+    "karma-webpack": "^1.7.0",
     "knockout": "^3.3.0",
     "uglify-js": "^2.4.24",
     "webpack": "^1.11.0",
