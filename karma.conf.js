@@ -39,7 +39,8 @@ module.exports = function(config) {
             loader: 'babel'
           }
         ]
-      }
+      },
+      devtool: 'eval-source-map'
     },
 
     webpackMiddleware: {
