@@ -179,31 +179,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 
-	      // Ignore if tag has
-	      // 1. "download" attribute
-	      // 2. rel="external" attribute
-	      if (el.hasAttribute('download') || el.getAttribute('rel') === 'external') {
-	        return;
-	      }
+	      var isDownload = el.hasAttribute('download');
+	      var hasOtherTarget = el.hasAttribute('target');
+	      var hasExternalRel = el.getAttribute('rel') === 'external';
+	      var isMailto = ~(el.getAttribute('href') || '').indexOf('mailto:');
+	      var isCrossOrigin = !sameOrigin(el.href);
 
-	      // ensure non-hash for the same path
-	      var link = el.getAttribute('href');
-	      if (!this.config.hashbang && el.pathname === location.pathname && (el.hash || '#' === link)) {
-	        return;
-	      }
-
-	      // Check for mailto: in the href
-	      if (link && link.indexOf('mailto:') > -1) {
-	        return;
-	      }
-
-	      // check target
-	      if (el.target) {
-	        return;
-	      }
-
-	      // x-origin
-	      if (!sameOrigin(el.href)) {
+	      if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin) {
 	        return;
 	      }
 

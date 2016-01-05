@@ -89,31 +89,13 @@ class Router {
       return
     }
 
-    // Ignore if tag has
-    // 1. "download" attribute
-    // 2. rel="external" attribute
-    if (el.hasAttribute('download') || el.getAttribute('rel') === 'external') {
-      return
-    }
+    const isDownload = el.hasAttribute('download')
+    const hasOtherTarget = el.hasAttribute('target')
+    const hasExternalRel = el.getAttribute('rel') === 'external'
+    const isMailto = ~(el.getAttribute('href') || '').indexOf('mailto:')
+    const isCrossOrigin = !sameOrigin(el.href)
 
-    // ensure non-hash for the same path
-    const link = el.getAttribute('href')
-    if (!this.config.hashbang && el.pathname === location.pathname && (el.hash || '#' === link)) {
-      return
-    }
-
-    // Check for mailto: in the href
-    if (link && link.indexOf('mailto:') > -1) {
-      return
-    }
-
-    // check target
-    if (el.target) {
-      return
-    }
-
-    // x-origin
-    if (!sameOrigin(el.href)) {
+    if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin) {
       return
     }
 

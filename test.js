@@ -168,9 +168,42 @@ function runTests(t, config) {
     .step(() => {
       const activeLink = $('#should-be-active', dom)
       t.ok(activeLink.hasClass('active-path'), 'path binding sets `active` class')
-
-      resolve()
     })
+
+    // anchors
+    .step(() => {
+      router.update('/anchors')
+    })
+    .step(() => {
+      $('body').append($('#about-link', dom))
+      const aboutLink = $('#about-link').get(0)
+
+      aboutLink.click()
+    })
+    .step(() => {
+      const aboutLink = $('#about-link').get(0)
+      t.equal(ko.contextFor(aboutLink).$router.component(), 'about', 'clicking a link navigates')
+    })
+    .step(() => {
+      router.update('/anchors')
+    })
+    .step(() => {
+      $('body').append($('#ignored-links', dom))
+
+      let count = 0
+      $('body').on('click', (e) => {
+        count++
+        e.preventDefault()
+      })
+
+      $('#ignored-links *').each((i, el) => {
+        el.click()
+      })
+
+      t.equal(count, $('#ignored-links *').length, 'ignores appropriate links')
+    })
+
+    .step(() => resolve())
   })
 }
 
@@ -188,8 +221,9 @@ class RoutingTest {
       // route w/ nested router
       '/nested/!': 'nested',
 
-      // bindings test component
+      // various test components
       '/bindings': 'bindings',
+      '/anchors': 'anchors',
 
       // named wildcard segment
       '/file/:file(*)': 'file',
@@ -227,9 +261,23 @@ ko.components.register('bindings', {
     <a id="query-binding-anchor" data-bind="query: { bar: 'bar' }"></a>
   `
 })
+ko.components.register('anchors', {
+  synchronous: true,
+  template: `
+    <a id="about-link" href="/about"></a>
+    <div id="ignored-links">
+      <button id="not-a-link"></button>
+      <a id="download-link" download="/foo"></a>
+      <a id="blank-target-link" target="_blank"></a>
+      <a id="external-link" rel="external"></a>
+      <a id="mailto-link" href="mailto:foobar@example.com"></a>
+      <a id="cross-origin-link" href="http://example.com/"></a>
+    </div>
+  `
+})
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 26 * 4 + 4
+  const NUM_TESTS = 28 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')
