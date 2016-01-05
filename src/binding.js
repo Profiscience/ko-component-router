@@ -47,5 +47,5 @@ function getRouter(ctx) {
     ctx = ctx.$parent
   }
 
-  throw new Error('ko-component-router bindings must be within a router')
+  throw new Error('ko-component-router bindings must be in the same context as, or nested within, a router')
 }

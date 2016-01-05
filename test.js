@@ -267,11 +267,11 @@ ko.components.register('anchors', {
     <a id="about-link" href="/about"></a>
     <div id="ignored-links">
       <button id="not-a-link"></button>
-      <a id="download-link" download="/foo"></a>
-      <a id="blank-target-link" target="_blank"></a>
-      <a id="external-link" rel="external"></a>
-      <a id="mailto-link" href="mailto:foobar@example.com"></a>
-      <a id="cross-origin-link" href="http://example.com/"></a>
+      <a download="/foo"></a>
+      <a target="_blank"></a>
+      <a rel="external"></a>
+      <a href="mailto:foobar@example.com"></a>
+      <a href="http://example.com/"></a>
     </div>
   `
 })
