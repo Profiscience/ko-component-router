@@ -15,9 +15,16 @@
     "example:build": "webpack -p --config webpack.config.example.js",
     "example:watch": "webpack --watch --config webpack.config.example.js",
     "example:serve": "webpack-dev-server --config webpack.config.example.js",
+    "prepublish": "npm run build && npm run example:build",
+    "stage-dist": "git add dist example/dist",
     "test": "karma start karma.travis.js",
     "test:watch": "karma start"
   },
+  "precommit": [
+    "build",
+    "example:build",
+    "stage-dist"
+  ],
   "keywords": [
     "ko",
     "knockout",
@@ -51,6 +58,7 @@
     "karma-tap": "^1.0.3",
     "karma-webpack": "^1.7.0",
     "knockout": "^3.3.0",
+    "pre-commit": "^1.1.2",
     "prismjs": "^1.3.0",
     "raf": "^3.1.0",
     "style-loader": "^0.13.0",
