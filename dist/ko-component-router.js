@@ -1774,8 +1774,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bindingsToApply.click = function (data, e) {
 	    var router = getRouter(ctx);
 	    var url = bindings.has('path') ? bindings.get('path') : router.canonicalPath();
-	    var state = bindings.has('state') ? bindings.get('state') : router.state();
-	    var query = bindings.has('query') ? bindings.get('query') : router.query.getAll();
+	    var state = bindings.has('state') ? bindings.get('state') : null;
+	    var query = bindings.has('query') ? bindings.get('query') : false;
 	    router.update(url, state, true, query);
 
 	    e.preventDefault();

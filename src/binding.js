@@ -13,8 +13,8 @@ function applyBinding(el, bindings, ctx) {
   bindingsToApply.click = (data, e) => {
     const router = getRouter(ctx)
     const url = bindings.has('path') ? bindings.get('path') : router.canonicalPath()
-    const state = bindings.has('state') ? bindings.get('state') : router.state()
-    const query = bindings.has('query') ? bindings.get('query') : router.query.getAll()
+    const state = bindings.has('state') ? bindings.get('state') : null
+    const query = bindings.has('query') ? bindings.get('query') : false
     router.update(url, state, true, query)
 
     e.preventDefault()
