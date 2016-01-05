@@ -14,12 +14,17 @@ module.exports = function(config) {
       'test.js': 'webpack'
     },
 
-    // config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    browsers: ['Firefox'],
 
-    autoWatch: true,
+    singleRun: true,
 
-    reporters: ['dots'],
+    reporters: ['dots', 'coverage'],
+
+    coverageReporter: {
+      type: 'lcovonly',
+      dir: 'coverage/',
+      file: 'lcov.txt'
+    },
 
     webpack: {
       node: {
@@ -34,9 +39,16 @@ module.exports = function(config) {
           {
             test: /\.js$/,
             exclude: [
+              path.resolve('src/!(utils)'),
               path.resolve('node_modules/')
             ],
             loader: 'babel'
+          },
+          {
+            test: /\.js$/,
+            include: path.resolve('src/'),
+            exclude: /utils/,
+            loader: 'isparta'
           }
         ]
       }

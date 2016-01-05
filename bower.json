@@ -1,40 +1,30 @@
 {
   "name": "ko-component-router",
-  "main": "ko-component-router.js",
-  "version": "2.1.2",
-  "homepage": "https://github.com/caseyWebb/ko-component-router",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/caseyWebb/ko-component-router.git"
-  },
+  "description": "Component-based routing for KnockoutJS",
+  "main": "dist/ko-component-router.js",
   "authors": [
     "Casey Webb <notcaseywebb@gmail.com>"
   ],
-  "description": "Component-based routing for KnockoutJS",
-  "moduleType": [
-    "amd",
-    "globals",
-    "node"
-  ],
+  "license": "MIT",
   "keywords": [
-    "knockout",
     "ko",
+    "knockout",
     "component",
     "router",
     "routing",
     "spa"
   ],
-  "dependencies": {
-    "knockout": "^3.3.0"
-  },
-  "license": "MIT",
+  "homepage": "https://github.com/caseyWebb/ko-component-router",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
-    "karma.conf.js",
-    "package.json",
-    "src"
+    "tests"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "description": "Component-based routing for KnockoutJS",
   "homepage": "https://github.com/caseyWebb/ko-component-router",
   "bugs": {
@@ -12,9 +12,19 @@
   "scripts": {
     "build": "webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",
     "watch": "webpack --watch",
-    "prepublish": "npm run build",
-    "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
+    "example:build": "webpack -p --config webpack.config.example.js",
+    "example:watch": "webpack --watch --config webpack.config.example.js",
+    "example:serve": "webpack-dev-server --config webpack.config.example.js",
+    "prepublish": "npm run build && npm run example:build",
+    "stage-dist": "git add dist example/dist",
+    "test": "karma start karma.travis.js",
+    "test:watch": "karma start"
   },
+  "precommit": [
+    "build",
+    "example:build",
+    "stage-dist"
+  ],
   "keywords": [
     "ko",
     "knockout",
@@ -28,31 +38,37 @@
   "peerDependencies": {
     "knockout": "^3.3.0"
   },
-  "dependencies": {
-    "page": "^1.6.3"
-  },
-  "jshintConfig": {
-    "asi": true,
-    "node": true,
-    "browser": true
-  },
   "devDependencies": {
-    "browserify": "^11.0.1",
-    "browserify-istanbul": "^0.2.1",
-    "chai": "^3.2.0",
+    "babel-core": "^6.2.1",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.1.18",
+    "bootstrap": "^3.3.6",
+    "css-loader": "^0.23.0",
+    "es6-promise": "^3.0.2",
+    "escape-html": "^1.0.3",
+    "eslint": "^1.10.1",
+    "file-loader": "^0.8.5",
+    "font-awesome": "^4.5.0",
+    "html5-history-api": "^4.2.5",
+    "isparta-loader": "^2.0.0",
     "jquery": "^2.1.4",
-    "karma": "^0.13.9",
-    "karma-browserify": "^4.3.0",
-    "karma-coverage": "^0.5.0",
-    "karma-mocha": "^0.2.0",
-    "karma-mocha-reporter": "^1.1.1",
-    "karma-phantomjs-launcher": "^0.2.1",
+    "karma": "^0.13.15",
+    "karma-coverage": "^0.5.3",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-tap": "^1.0.3",
+    "karma-webpack": "^1.7.0",
     "knockout": "^3.3.0",
-    "mocha": "^2.2.5",
-    "phantomjs": "^1.9.18",
-    "sinon": "^1.15.4",
+    "pre-commit": "^1.1.2",
+    "prismjs": "^1.3.0",
+    "raf": "^3.1.0",
+    "style-loader": "^0.13.0",
+    "tape": "^4.4.0",
     "uglify-js": "^2.4.24",
-    "watchify": "^3.3.1",
+    "url-loader": "^0.5.7",
+    "velocity-animate": "^1.2.3",
     "webpack": "^1.11.0"
+  },
+  "dependencies": {
+    "path-to-regexp": "^1.2.1"
   }
 }
