@@ -11,6 +11,7 @@ Component-based router for developing wicked awesome single-page-apps with Knock
 
 __[DOCS](https://caseyWebb.github.io/ko-component-router/)__
 
+###### app.js ######
 ```javascript
 'use strict'
 
@@ -53,10 +54,9 @@ ko.components.register('user', {
 ko.applyBindings()
 ```
 
+###### index.html ######
 ```html
 <body>
   <app></app>
 </body>
 ```
-
-__Hooray!__ Ready for more? Check out the [docs](https://caseyWebb.github.io/ko-component-router/).
