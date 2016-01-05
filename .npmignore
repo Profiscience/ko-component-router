@@ -3,15 +3,16 @@
 .git/
 .gitignore
 
-test/
-coverage/
-karma.conf.js
-.codeclimate.yml
-.travis.yml
 .eslintrc
 
 src/
+example/
+coverage/
+
+index.html
 README.md
+test.js
+webpack.config.*
 
 node_modules/
 npm-debug.log

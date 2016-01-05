@@ -1,45 +1,49 @@
 'use strict'
 
-var istanbul = require('browserify-istanbul')
+const path = require('path')
 
 module.exports = function(config) {
   config.set({
-
     basePath: '',
 
-    frameworks: ['browserify', 'mocha'],
+    frameworks: ['tap'],
 
-    files: [
-      'test/**/*.spec.js'
-    ],
+    files: ['test.js'],
 
     preprocessors: {
-      'test/**/*.spec.js': ['browserify']
+      'test.js': 'webpack'
     },
 
-    reporters: ['mocha', 'coverage'],
-
-    browsers: ['PhantomJS'],
-
-    browserify: {
-      debug: true,
-      transform: [istanbul({
-        ignore: ['**/node_modules/**', '**/test/**']
-      })]
-    },
-
-    coverageReporter: {
-      dir : 'coverage/',
-      reporters: [
-        { type: 'html', subdir: 'html' },
-        { type: 'lcovonly', subdir: '.', file: 'lcov.txt' }
-      ]
-    },
-
-    port: 9876,
-    colors: true,
+    // config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
+
     autoWatch: true,
-    singleRun: false
+
+    reporters: ['dots'],
+
+    webpack: {
+      node: {
+        fs: 'empty'
+      },
+      isparta: {
+        embedSource: true,
+        noAutoWrap: true
+      },
+      module: {
+        preLoaders: [
+          {
+            test: /\.js$/,
+            exclude: [
+              path.resolve('node_modules/')
+            ],
+            loader: 'babel'
+          }
+        ]
+      }
+    },
+
+    webpackMiddleware: {
+      noInfo: true
+    }
   })
 }
