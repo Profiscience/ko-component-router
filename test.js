@@ -98,8 +98,7 @@ function runTests(t, config) {
     .step((done) => {
       const foo = router.query.get('foo', 'foo')
       t.equal(foo(), 'bar', 'querystring param is writeable')
-      t.comment(window.location.href)
-      t.ok(window.location.href.indexOf('%5Bfoo%5D=bar') > -1, 'non-default params are written to the querystring')
+      t.ok(decodeURIComponent(window.location.href).indexOf('[foo]=bar') > -1, 'non-default params are written to the querystring')
 
       const killMe = foo.subscribe(() => {
         t.equal(router.query.get('foo')(), 'foo', 'ctx.query.clear sets the params to defaults')
