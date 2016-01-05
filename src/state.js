@@ -34,11 +34,6 @@ module.exports = {
       if (history.state && history.state[ctx.config.depth + ctx.pathname()]) {
         const newState = history.state
         delete newState[ctx.config.depth + ctx.pathname()]
-        // history.replaceState(
-        //   newState,
-        //   document.title,
-        //   '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath()
-        // )
       }
     }
 
