@@ -33,7 +33,12 @@ class Query {
         value: ko.pureComputed({
           read() {
             trigger()
-            return qsParams[guid][prop] || defaultVal
+
+            if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
+              return qsParams[guid][prop]
+            }
+
+            return defaultVal
           },
           write(v) {
             utils.merge(qsParams, {

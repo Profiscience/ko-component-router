@@ -481,7 +481,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          value: ko.pureComputed({
 	            read: function read() {
 	              trigger();
-	              return qsParams[guid][prop] || defaultVal;
+
+	              if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
+	                return qsParams[guid][prop];
+	              }
+
+	              return defaultVal;
 	            },
 	            write: function write(v) {
 	              utils.merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
