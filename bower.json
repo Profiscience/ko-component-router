@@ -1,5 +1,6 @@
 {
   "name": "ko-component-router",
+  "version": "3.0.1",
   "description": "Component-based routing for KnockoutJS",
   "main": "dist/ko-component-router.js",
   "authors": [
@@ -26,6 +27,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "version": "3.0.0"
+  ]
 }
