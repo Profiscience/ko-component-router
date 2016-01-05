@@ -1,1 +1,62 @@
 # ko-component-router
+
+![NPM](https://img.shields.io/npm/v/ko-component-router.svg)
+![Bower](https://img.shields.io/bower/v/ko-component-router.svg)
+![MIT](https://img.shields.io/npm/l/ko-component-router.svg)
+[![Travis](https://img.shields.io/travis/caseyWebb/ko-component-router.svg)](https://travis-ci.org/caseyWebb/ko-component-router)
+[![CodeClimate](https://img.shields.io/codeclimate/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router)
+[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router/coverage)
+
+Component-based router for developing wicked awesome single-page-apps with KnockoutJS.
+
+__[DOCS](https://caseyWebb.github.io/ko-component-router/)__
+
+```javascript
+'use strict'
+
+require('ko-component-router')
+
+ko.components.register('app', {
+  viewModel: class App {
+    constructor() {
+      this.routes = {
+        '/': 'home',
+        '/user/:id': 'user'
+      }
+    }
+  },
+  template: `
+    <ko-component-router params="
+      routes: routes,
+      hashbang: false">
+    </ko-component-router>
+  `
+})
+
+ko.component.register('home', {
+  template: `<a href="/users/1234">Show user</a>`
+})
+
+ko.components.register('user', {
+  viewModel: class User {
+    constructor(ctx) {
+      // ctx.params
+      // ctx.query
+      // ctx.hash
+      //
+      // ...and more!
+    },
+    template: '<!-- ctx is also available as $router in the binding context -->'
+  }
+})
+
+ko.applyBindings()
+```
+
+```html
+<body>
+  <app></app>
+</body>
+```
+
+__Hooray!__ Ready for more? Check out the [docs](https://caseyWebb.github.io/ko-component-router/).
