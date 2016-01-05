@@ -168,7 +168,7 @@ function runTests(t, config) {
     .step(() => {
       const activeLink = $('#should-be-active', dom)
       t.ok(activeLink.hasClass('active-path'), 'path binding sets `active` class')
-      
+
       resolve()
     })
   })

@@ -21,9 +21,11 @@ module.exports = function(config) {
     reporters: ['dots', 'coverage'],
 
     coverageReporter: {
-      type: 'lcovonly',
-      dir: 'coverage/',
-      file: 'lcov.txt'
+      dir : 'coverage/',
+      reporters: [
+        { type: 'html', subdir: 'html' },
+        { type: 'lcovonly', subdir: '.', file: 'lcov.txt' }
+      ]
     },
 
     webpack: {
