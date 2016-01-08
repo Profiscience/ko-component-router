@@ -132,7 +132,7 @@ module.exports = {
   createViewModel(routerParams, componentInfo) {
     const el = componentInfo.element
     const bindingCtx = ko.contextFor(el)
-    return new Router(el, bindingCtx, routerParams)
+    return new Router(el, bindingCtx, ko.toJS(routerParams))
   }
 }
 

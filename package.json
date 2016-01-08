@@ -26,8 +26,9 @@
     "stage-dist"
   ],
   "keywords": [
-    "ko",
+    "knockoutjs",
     "knockout",
+    "ko",
     "component",
     "router",
     "routing",

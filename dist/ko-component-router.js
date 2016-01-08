@@ -226,7 +226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  createViewModel: function createViewModel(routerParams, componentInfo) {
 	    var el = componentInfo.element;
 	    var bindingCtx = ko.contextFor(el);
-	    return new Router(el, bindingCtx, routerParams);
+	    return new Router(el, bindingCtx, ko.toJS(routerParams));
 	  }
 	};
 
