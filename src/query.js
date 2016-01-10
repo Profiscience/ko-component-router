@@ -66,6 +66,12 @@ class Query {
     return ko.toJS(qsParams[guid]) || {}
   }
 
+  setDefaults(q) {
+    for (const pn in q) {
+      this.get(pn, q[pn])
+    }
+  }
+
   clear(pathname = this.ctx.pathname()) {
     const guid = this.ctx.config.depth + pathname
     for (const pn in cache[guid]) {

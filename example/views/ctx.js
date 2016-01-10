@@ -78,6 +78,20 @@ class ViewModel {
     // set 'foobar' to 'bar'
     this.foobar('bar')
 
+    this.foobar()
+    // 'bar'
+
+    // sets default values
+    ctx.query.setDefaults({
+      baz: 'quz'
+    })
+
+    ctx.query.getAll()
+    // {
+    //   foobar: 'bar',
+    //   baz: 'quz'
+    // }
+
     // reset all params to their default values; triggers only
     // one update
     ctx.query.clear()

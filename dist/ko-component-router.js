@@ -515,6 +515,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return ko.toJS(qsParams[guid]) || {};
 	    }
 	  }, {
+	    key: 'setDefaults',
+	    value: function setDefaults(q) {
+	      for (var pn in q) {
+	        this.get(pn, q[pn]);
+	      }
+	    }
+	  }, {
 	    key: 'clear',
 	    value: function clear() {
 	      var pathname = arguments.length <= 0 || arguments[0] === undefined ? this.ctx.pathname() : arguments[0];
