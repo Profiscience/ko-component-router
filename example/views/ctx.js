@@ -86,7 +86,7 @@ class ViewModel {
       baz: 'quz'
     })
 
-    ctx.query.getAll()
+    ctx.query.getAll(asObservable)
     // {
     //   foobar: 'bar',
     //   baz: 'quz'

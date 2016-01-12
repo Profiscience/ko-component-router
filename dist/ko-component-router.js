@@ -304,7 +304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        hash: this.hash,
 	        state: this.state,
 	        params: this.params,
-	        query: this.query.getAll(this.pathname())
+	        query: this.query.getAll(false, this.pathname())
 	      });
 
 	      var _route$parse = route.parse(url);
@@ -509,10 +509,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getAll',
 	    value: function getAll() {
-	      var pathname = arguments.length <= 0 || arguments[0] === undefined ? this.ctx.pathname() : arguments[0];
+	      var asObservable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
 
 	      var guid = this.ctx.config.depth + pathname;
-	      return ko.toJS(qsParams[guid]) || {};
+	      return asObservable ? ko.pureComputed({
+	        read: function read() {
+	          return this.getAll();
+	        },
+	        write: function write(q) {
+	          for (var pn in q) {
+	            this.get(pn)(q[pn]);
+	          }
+	        }
+	      }, this) : ko.toJS(qsParams[guid]) || {};
 	    }
 	  }, {
 	    key: 'setDefaults',

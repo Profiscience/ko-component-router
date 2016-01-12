@@ -61,9 +61,20 @@ class Query {
     return cache[guid][prop].value
   }
 
-  getAll(pathname = this.ctx.pathname()) {
+  getAll(asObservable = false, pathname = this.ctx.pathname()) {
     const guid = this.ctx.config.depth + pathname
-    return ko.toJS(qsParams[guid]) || {}
+    return asObservable
+      ? ko.pureComputed({
+          read() {
+            return this.getAll()
+          },
+          write(q) {
+            for (const pn in q) {
+              this.get(pn)(q[pn])
+            }
+          }
+        }, this)
+      : (ko.toJS(qsParams[guid]) || {})
   }
 
   setDefaults(q) {

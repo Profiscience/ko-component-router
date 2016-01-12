@@ -44,7 +44,7 @@ class Context {
       hash: this.hash,
       state: this.state,
       params: this.params,
-      query: this.query.getAll(this.pathname())
+      query: this.query.getAll(false, this.pathname())
     })
 
     const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
