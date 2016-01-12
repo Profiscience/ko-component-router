@@ -91,12 +91,20 @@ function runTests(t, config) {
     .step(() => {
       const foo = router.query.get('foo', 'foo')
       const query = router.query.getAll()
+      const observableQuery = router.query.getAll(true)
       router.query.setDefaults({
         bar: 'bar'
       })
       t.equal(foo(), 'foo', 'ctx.query.get works')
       t.deepEqual(query, { foo: 'foo' }, 'ctx.query.getAll works')
+      t.assert(ko.isObservable(observableQuery), 'ctx.query.getAll(true) returns as observable')
+      t.deepEqual(observableQuery(), { foo: 'foo' })
       t.equal(router.query.get('bar')(), 'bar', 'ctx.query.setDefaults works')
+      observableQuery({ bar: 'bar', baz: 'baz' })
+    })
+    .step(() => {
+      const query = router.query.getAll()
+      t.deepEqual(query, { foo: 'foo', bar: 'bar', baz: 'baz' }, 'ctx.query.getAll(true) returns writable observable')
       router.update('/about', {}, false, { foo: 'bar' })
     })
     .step((done) => {
@@ -281,7 +289,7 @@ ko.components.register('anchors', {
 })
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 29 * 4 + 4
+  const NUM_TESTS = 32 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')

@@ -55,7 +55,7 @@ class Context {
       this.query.updateFromString(querystring)
     }
 
-    query = this.query.getAll(pathname)
+    query = this.query.getAll(false, pathname)
 
     if (!sameRoute && !firstRun) {
       this.reload()
