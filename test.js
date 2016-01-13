@@ -100,11 +100,20 @@ function runTests(t, config) {
       t.assert(ko.isObservable(observableQuery), 'ctx.query.getAll(true) returns as observable')
       t.deepEqual(observableQuery(), { foo: 'foo' })
       t.equal(router.query.get('bar')(), 'bar', 'ctx.query.setDefaults works')
-      observableQuery({ bar: 'bar', baz: 'baz' })
+    })
+    .step((done) => {
+      const observableQuery = router.query.getAll(true)
+      const killMe = observableQuery.subscribe(() => {
+        killMe.dispose()
+        t.pass('ctx.query.getAll(true) is subscribable')
+        observableQuery({ bar: 'bar', baz: 'baz' })
+        done()
+      })
+      router.query.get('bar')('qux')
     })
     .step(() => {
       const query = router.query.getAll()
-      t.deepEqual(query, { foo: 'foo', bar: 'bar', baz: 'baz' }, 'ctx.query.getAll(true) returns writable observable')
+      t.deepEqual(query, { foo: 'foo', bar: 'bar', baz: 'baz' }, 'ctx.query.getAll(true) is writable')
       router.update('/about', {}, false, { foo: 'bar' })
     })
     .step((done) => {
@@ -289,7 +298,7 @@ ko.components.register('anchors', {
 })
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 32 * 4 + 4
+  const NUM_TESTS = 33 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')

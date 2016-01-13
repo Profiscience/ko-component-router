@@ -515,6 +515,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var guid = this.ctx.config.depth + pathname;
 	      return asObservable ? ko.pureComputed({
 	        read: function read() {
+	          trigger();
 	          return this.getAll();
 	        },
 	        write: function write(q) {

@@ -66,6 +66,7 @@ class Query {
     return asObservable
       ? ko.pureComputed({
           read() {
+            trigger()
             return this.getAll()
           },
           write(q) {
