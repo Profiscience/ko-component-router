@@ -23,8 +23,8 @@ class Context {
     this.state = stateFactory(this)
   }
 
-  update(url, state, push = true, query = false) {
-    url = url
+  update(origUrl, state, push = true, query = false) {
+    const url = origUrl
       .replace(this.config.base, '')
       .replace('/#!', '')
 
@@ -87,6 +87,8 @@ class Context {
       if (this.config.outTransition.length !== 4) {
         complete.call(this)
       }
+    } else if (this.config.childContext) {
+      this.config.childContext.update(childPath || '/', {}, false, {})
     }
 
     function complete() {

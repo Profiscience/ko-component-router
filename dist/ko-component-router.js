@@ -143,7 +143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        path = path.replace(this.config.base, '');
 	      }
 
-	      if (this.ctx.update(path, state, false)) {
+	      if (this.ctx.update(path, state, false, false)) {
 	        return true;
 	      }
 
@@ -184,8 +184,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var hasExternalRel = el.getAttribute('rel') === 'external';
 	      var isMailto = ~(el.getAttribute('href') || '').indexOf('mailto:');
 	      var isCrossOrigin = !sameOrigin(el.href);
+	      var isEmptyHash = el.getAttribute('href') === '#';
 
-	      if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin) {
+	      if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin || isEmptyHash) {
 	        return;
 	      }
 
@@ -282,11 +283,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  _createClass(Context, [{
 	    key: 'update',
-	    value: function update(url, state) {
+	    value: function update(origUrl, state) {
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	      url = url.replace(this.config.base, '').replace('/#!', '');
+	      var url = origUrl.replace(this.config.base, '').replace('/#!', '');
 
 	      var route = this.getRouteForUrl(url);
 	      var sameRoute = route === this.route();
@@ -353,6 +354,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.config.outTransition.length !== 4) {
 	          complete.call(this);
 	        }
+	      } else if (this.config.childContext) {
+	        this.config.childContext.update(childPath || '/', {}, false, {});
 	      }
 
 	      function complete() {
@@ -569,7 +572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'updateFromString',
 	    value: function updateFromString(str) {
 	      var queries = qs.parse(str);
-	      utils.merge(qsParams, queries, false);
+	      utils.merge(qsParams, queries, false, true);
 	      trigger(!trigger());
 	    }
 	  }, {
@@ -1164,7 +1167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var createAsObservable = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	  var prune = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	  for (var prop in src) {
+	  for (var prop in prune ? dest : src) {
 	    if (typeof dest[prop] === 'undefined') dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) dest[prop](src[prop]);else if (typeof src[prop] === 'undefined') dest[prop] = undefined;else if (src[prop].constructor === Object) {
 	      if (prune) {
 	        dest[prop] = {};

@@ -111,7 +111,7 @@ class Query {
 
   updateFromString(str) {
     const queries = qs.parse(str)
-    utils.merge(qsParams, queries, false)
+    utils.merge(qsParams, queries, false, true)
     trigger(!trigger())
   }
 

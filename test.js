@@ -293,6 +293,7 @@ ko.components.register('anchors', {
       <a rel="external"></a>
       <a href="mailto:foobar@example.com"></a>
       <a href="http://example.com/"></a>
+      <a href="#"></a>
     </div>
   `
 })
