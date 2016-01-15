@@ -57,7 +57,7 @@ class Router {
       path = path.replace(this.config.base, '')
     }
 
-    if (this.ctx.update(path, state, false)) {
+    if (this.ctx.update(path, state, false, false)) {
       return true
     }
 
@@ -94,8 +94,9 @@ class Router {
     const hasExternalRel = el.getAttribute('rel') === 'external'
     const isMailto = ~(el.getAttribute('href') || '').indexOf('mailto:')
     const isCrossOrigin = !sameOrigin(el.href)
+    const isEmptyHash = el.getAttribute('href') === '#'
 
-    if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin) {
+    if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin || isEmptyHash) {
       return
     }
 
