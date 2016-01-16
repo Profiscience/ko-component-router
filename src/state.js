@@ -30,15 +30,21 @@ module.exports = {
 
     const _dispose = state.dispose
 
-    state.clear = function() {
-      if (history.state && history.state[ctx.config.depth + ctx.pathname()]) {
-        const newState = history.state
-        delete newState[ctx.config.depth + ctx.pathname()]
+    state.clear = function(force = false, guid = ctx.config.depth + ctx.pathname()) {
+      if (!ctx.config.persistState || force) {
+        if (history.state && history.state[guid]) {
+          const newState = history.state
+          delete newState[guid]
+        }
       }
     }
 
     state.dispose = function() {
-      state.clear()
+      for (const guid in history.state) {
+        if (guid.indexOf(ctx.config.depth) === 0) {
+          state.clear(true, guid)
+        }
+      }
       _dispose.apply(state, arguments)
     }
 

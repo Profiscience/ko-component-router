@@ -187,9 +187,9 @@ function runTests(t, config) {
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'bindings', 'state binding preserves path when used alone')
+      t.equal(router.component(), 'bindings', 'state binding persistents path when used alone')
       t.deepEqual(router.state(), { foo: 'foo' }, 'state binding sets state when used alone')
-      t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'state binding preserves query when used alone')
+      t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'state binding persists query when used alone')
     })
     .step(() => {
       router.reload()
@@ -201,8 +201,8 @@ function runTests(t, config) {
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'bindings', 'query binding preserves path when used alone')
-      t.deepEqual(router.state(), { bar: 'bar' }, 'query binding preserves state when used alone')
+      t.equal(router.component(), 'bindings', 'query binding persistents path when used alone')
+      t.deepEqual(router.state(), { bar: 'bar' }, 'query binding persists state when used alone')
       t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'query binding sets query when used alone')
     })
     .step(() => {
@@ -243,6 +243,27 @@ function runTests(t, config) {
       t.equal(count, $('#ignored-links *').length, 'ignores appropriate links')
     })
 
+    // persistQuery & persistState
+    .step(() => {
+      router.update('/persistent/foo')
+    })
+    .step(() => {
+      const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      persistentRouter.state({ foo: 'foo' })
+      persistentRouter.update('/bar')
+    })
+    .step(() => {
+      const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      t.equals(persistentRouter.state(), undefined)
+      t.equals(persistentRouter.component(), 'bar')
+      persistentRouter.update('/foo')
+    })
+    .step(() => {
+      const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      t.deepEqual(persistentRouter.state(), { foo: 'foo' }, 'persistState works')
+      t.equals(persistentRouter.component(), 'foo')
+    })
+
     .step(() => resolve())
   })
 }
@@ -267,6 +288,9 @@ class RoutingTest {
 
       // named wildcard segment
       '/file/:file(*)': 'file',
+
+      // persistentQuery & persistState options
+      '/persistent/!': 'persistent-query-state',
 
       // wildcard segment
       '/*': '404'
@@ -328,9 +352,29 @@ ko.components.register('nested',  {
     }
   }
 })
+ko.components.register('foo', { synchronous: true, template: '<h1>foo</h1>' })
+ko.components.register('bar', { synchronous: true, template: '<h1>bar</h1>' })
+ko.components.register('persistent-query-state', {
+  synchronous: true,
+  template: `
+    <ko-component-router params="
+      routes: routes,
+      persistState: true,
+      persistentQuery: true
+    "></ko-component-router>
+  `,
+  viewModel: class Tabs {
+    constructor() {
+      this.routes = {
+        '/foo': 'foo',
+        '/bar': 'bar'
+      }
+    }
+  }
+})
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 35 * 4 + 4
+  const NUM_TESTS = 39 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')

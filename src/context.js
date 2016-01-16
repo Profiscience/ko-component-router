@@ -23,7 +23,7 @@ class Context {
     this.state = stateFactory(this)
   }
 
-  update(origUrl, state, push = true, query = false) {
+  update(origUrl, state = false, push = true, query = false) {
     const url = origUrl
       .replace(this.config.base, '')
       .replace('/#!', '')
@@ -73,12 +73,22 @@ class Context {
       pathname,
       canonicalPath,
       hash,
-      state,
       params,
       query
     }
 
+    if (state === false && sameRoute) {
+      utils.merge(toCtx, { state: fromCtx.state }, false)
+    } else if (!this.config.persistState && state) {
+      toCtx.state = {}
+      utils.merge(toCtx.state, state, false, true)
+    }
+
     utils.merge(this, toCtx, true)
+
+    if (this.config.persistState) {
+      toCtx.state = this.state()
+    }
 
     history[push ? 'pushState' : 'replaceState'](
       history.state,
