@@ -55,7 +55,7 @@ class Context {
 
     if (query) {
       this.query.update(query, pathname)
-    } else {
+    } else if (!this.config.persistQuery) {
       this.query.updateFromString(querystring)
     }
 
@@ -151,7 +151,7 @@ class Context {
       delete this.config.childContext
     }
 
-    this.query.destroy()
+    this.query.dispose()
     this.state.dispose()
 
     depth--
@@ -163,8 +163,8 @@ class Context {
       delete this.config.childContext
     }
 
-    this.query.destroy()
-    this.state.clear()
+    this.query.reload()
+    this.state.reload()
   }
 }
 

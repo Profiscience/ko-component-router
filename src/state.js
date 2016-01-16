@@ -30,7 +30,7 @@ module.exports = {
 
     const _dispose = state.dispose
 
-    state.clear = function(force = false, guid = ctx.config.depth + ctx.pathname()) {
+    state.reload = function(force = false, guid = ctx.config.depth + ctx.pathname()) {
       if (!ctx.config.persistState || force) {
         if (history.state && history.state[guid]) {
           const newState = history.state
@@ -42,7 +42,7 @@ module.exports = {
     state.dispose = function() {
       for (const guid in history.state) {
         if (guid.indexOf(ctx.config.depth) === 0) {
-          state.clear(true, guid)
+          state.reload(true, guid)
         }
       }
       _dispose.apply(state, arguments)

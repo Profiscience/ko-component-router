@@ -101,6 +101,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var outTransition = _ref$outTransition === undefined ? noop : _ref$outTransition;
 	    var _ref$persistState = _ref.persistState;
 	    var persistState = _ref$persistState === undefined ? false : _ref$persistState;
+	    var _ref$persistQuery = _ref.persistQuery;
+	    var persistQuery = _ref$persistQuery === undefined ? false : _ref$persistQuery;
 
 	    _classCallCheck(this, Router);
 
@@ -124,7 +126,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      routes[route] = new Route(route, routes[route]);
 	    }
 
-	    this.config = { el: el, base: base, hashbang: hashbang, routes: routes, inTransition: inTransition, outTransition: outTransition, persistState: persistState };
+	    this.config = {
+	      el: el,
+	      base: base,
+	      hashbang: hashbang,
+	      routes: routes,
+	      inTransition: inTransition,
+	      outTransition: outTransition,
+	      persistState: persistState,
+	      persistQuery: persistQuery
+	    };
+
 	    this.ctx = bindingCtx.$router = new Context(this.config);
 
 	    if (this.isRoot) {
@@ -148,25 +160,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        path = path.replace(this.config.base, '');
 	      }
 
-	      if (this.ctx.update(path, state, false, false)) {
-	        return true;
-	      }
-
-	      if (this.isRoot) {
-	        location.href = this.ctx.canonicalPath();
-	      } else {
-	        this.ctx.component(null);
-	      }
-
-	      return false;
+	      return this.ctx.update(path, state, false, false);
 	    }
 	  }, {
 	    key: 'onpopstate',
-	    value: function onpopstate(_ref2) {
-	      var state = _ref2.state;
-
+	    value: function onpopstate(e) {
 	      var guid = this.ctx.config.depth + this.ctx.pathname();
-	      this.dispatch(location.pathname + location.search + location.hash, (state || {})[guid]);
+	      this.dispatch(location.pathname + location.search + location.hash, (e.state || {})[guid]);
 	    }
 	  }, {
 	    key: 'onclick',
@@ -213,9 +213,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 
-	      e.preventDefault();
-
-	      this.dispatch(path);
+	      if (this.dispatch(path)) {
+	        e.preventDefault();
+	      }
 	    }
 	  }, {
 	    key: 'dispose',
@@ -333,7 +333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (query) {
 	        this.query.update(query, pathname);
-	      } else {
+	      } else if (!this.config.persistQuery) {
 	        this.query.updateFromString(querystring);
 	      }
 
@@ -434,7 +434,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        delete this.config.childContext;
 	      }
 
-	      this.query.destroy();
+	      this.query.dispose();
 	      this.state.dispose();
 
 	      depth--;
@@ -447,8 +447,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        delete this.config.childContext;
 	      }
 
-	      this.query.destroy();
-	      this.state.clear();
+	      this.query.reload();
+	      this.state.reload();
 	    }
 	  }]);
 
@@ -569,16 +569,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }, {
-	    key: 'destroy',
-	    value: function destroy() {
-	      var guid = this.ctx.config.depth + this.ctx.pathname();
-	      for (var p in qsParams[guid]) {
-	        if (cache[guid] && cache[guid][p]) {
-	          cache[guid][p].value.dispose();
+	    key: 'reload',
+	    value: function reload() {
+	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var guid = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.config.depth + this.ctx.pathname() : arguments[1];
+
+	      if (!this.ctx.config.persistQuery || force) {
+	        for (var p in qsParams[guid]) {
+	          if (cache[guid] && cache[guid][p]) {
+	            cache[guid][p].value.dispose();
+	          }
+	        }
+	        delete qsParams[guid];
+	        delete cache[guid];
+	      }
+	    }
+	  }, {
+	    key: 'dispose',
+	    value: function dispose() {
+	      for (var guid in qsParams) {
+	        if (guid.indexOf(this.ctx.config.depth) === 0) {
+	          this.reload(true, guid);
 	        }
 	      }
-	      delete qsParams[guid];
-	      delete cache[guid];
 	    }
 	  }, {
 	    key: 'update',
@@ -1301,7 +1314,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var _dispose = state.dispose;
 
-	    state.clear = function () {
+	    state.reload = function () {
 	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 	      var guid = arguments.length <= 1 || arguments[1] === undefined ? ctx.config.depth + ctx.pathname() : arguments[1];
 
@@ -1316,7 +1329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    state.dispose = function () {
 	      for (var guid in history.state) {
 	        if (guid.indexOf(ctx.config.depth) === 0) {
-	          state.clear(true, guid);
+	          state.reload(true, guid);
 	        }
 	      }
 	      _dispose.apply(state, arguments);
@@ -1888,8 +1901,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ctx = ctx.$parent;
 	  }
-
-	  throw new Error('ko-component-router bindings must be in the same context as, or nested within, a router');
 	}
 
 /***/ }
