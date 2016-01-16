@@ -401,13 +401,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var childPath = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
 	      var hash = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
 
-	      var base = this.config.base;
+	      var base = this.config.base.replace(/\/$/, '');
 	      var hashbang = this.config.hashbang;
 	      var querystring = this.query.getFullQueryString();
-
-	      if (pathname[pathname.length - 1] === '/' && childPath[0] === '/') {
-	        childPath = childPath.substring(1);
-	      }
 
 	      return '' + base + (hashbang ? '/#!' : '') + pathname + childPath + (querystring ? '?' + querystring : '') + (hash ? '#' + hash : '');
 	    }

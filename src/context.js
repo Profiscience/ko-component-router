@@ -114,13 +114,9 @@ class Context {
   }
 
   getCanonicalPath(pathname, childPath = '', hash = '') {
-    const base = this.config.base
+    const base = this.config.base.replace(/\/$/, '')
     const hashbang = this.config.hashbang
     const querystring = this.query.getFullQueryString()
-
-    if (pathname[pathname.length - 1] === '/' && childPath[0] === '/') {
-      childPath = childPath.substring(1)
-    }
 
     return `${base}${hashbang ? '/#!' : ''}${pathname}${childPath}${querystring ? '?' + querystring : ''}${hash ? '#' + hash : ''}`
   }
