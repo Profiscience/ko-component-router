@@ -292,7 +292,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  _createClass(Context, [{
 	    key: 'update',
-	    value: function update(origUrl) {
+	    value: function update() {
+	      var origUrl = arguments.length <= 0 || arguments[0] === undefined ? this.canonicalPath() : arguments[0];
 	      var state = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];

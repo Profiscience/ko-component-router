@@ -23,7 +23,7 @@ class Context {
     this.state = stateFactory(this)
   }
 
-  update(origUrl, state = false, push = true, query = false) {
+  update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
     const url = origUrl
       .replace(this.config.base, '')
       .replace('/#!', '')
