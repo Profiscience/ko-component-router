@@ -125,7 +125,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.config = { el: el, base: base, hashbang: hashbang, routes: routes, inTransition: inTransition, outTransition: outTransition };
 	    this.ctx = bindingCtx.$router = new Context(this.config);
 
-	    if (parentRouterCtx) {
+	    if (this.isRoot) {
+	      bindingCtx.$root.$router = this.ctx;
+	    } else {
+	      this.ctx.config.parentContext = parentRouterCtx;
 	      parentRouterCtx.config.childContext = this.ctx;
 	    }
 
@@ -294,7 +297,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var firstRun = this.route() === '';
 
 	      if (!route) {
-	        return false;
+	        if (this.isRoot) {
+	          return false;
+	        } else {
+	          var _config$parentContext;
+
+	          return (_config$parentContext = this.config.parentContext).update.apply(_config$parentContext, arguments);
+	        }
 	      }
 
 	      var fromCtx = ko.toJS({
@@ -1792,11 +1801,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var url = bindings.has('path') ? bindings.get('path') : router.canonicalPath();
 	    var state = bindings.has('state') ? bindings.get('state') : null;
 	    var query = bindings.has('query') ? bindings.get('query') : false;
-	    router.update(url, state, true, query);
 
-	    e.preventDefault();
-	    e.stopPropagation();
-	    e.stopImmediatePropagation();
+	    if (router.update(url, state, true, query)) {
+	      e.preventDefault();
+	      e.stopPropagation();
+	      e.stopImmediatePropagation();
+	    }
 	  };
 
 	  if (bindings.has('path')) {

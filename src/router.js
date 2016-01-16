@@ -39,7 +39,10 @@ class Router {
     this.config = { el, base, hashbang, routes, inTransition, outTransition }
     this.ctx = bindingCtx.$router = new Context(this.config)
 
-    if (parentRouterCtx) {
+    if (this.isRoot) {
+      bindingCtx.$root.$router = this.ctx
+    } else {
+      this.ctx.config.parentContext = parentRouterCtx
       parentRouterCtx.config.childContext = this.ctx
     }
 

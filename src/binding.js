@@ -15,11 +15,12 @@ function applyBinding(el, bindings, ctx) {
     const url = bindings.has('path') ? bindings.get('path') : router.canonicalPath()
     const state = bindings.has('state') ? bindings.get('state') : null
     const query = bindings.has('query') ? bindings.get('query') : false
-    router.update(url, state, true, query)
 
-    e.preventDefault()
-    e.stopPropagation()
-    e.stopImmediatePropagation()
+    if (router.update(url, state, true, query)) {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()  
+    }
   }
 
   if (bindings.has('path')) {

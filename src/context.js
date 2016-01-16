@@ -33,7 +33,11 @@ class Context {
     const firstRun = this.route() === ''
 
     if (!route) {
-      return false
+      if (this.isRoot) {
+        return false
+      } else {
+        return this.config.parentContext.update(...arguments)
+      }
     }
 
     const fromCtx = ko.toJS({
