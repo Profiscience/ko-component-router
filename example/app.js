@@ -105,7 +105,7 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/bindings#query'">query</a></li>
                 </ul>
               </li>
-              <li><a data-bind="path: '/nested-routing'">nested routing</a></li>
+              <li><a data-bind="path: '/nested-routing/foo'">nested routing</a></li>
             </ul>
             <hr>
             <div class="text-center">

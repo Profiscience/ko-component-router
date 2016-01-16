@@ -140,7 +140,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.ctx = bindingCtx.$router = new Context(this.config);
 
 	    if (this.isRoot) {
-	      bindingCtx.$root.$router = this.ctx;
+	      if (bindingCtx.$root) {
+	        bindingCtx.$root.$router = this.ctx;
+	      }
 	    } else {
 	      this.ctx.config.parentContext = parentRouterCtx;
 	      parentRouterCtx.config.childContext = this.ctx;
@@ -157,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'dispatch',
 	    value: function dispatch(path, state) {
 	      if (path.indexOf(this.config.base) === 0) {
-	        path = path.replace(this.config.base, '');
+	        path = path.replace(this.config.base, '') || '/';
 	      }
 
 	      return this.ctx.update(path, state, false, false);
@@ -215,6 +217,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (this.dispatch(path)) {
 	        e.preventDefault();
+	        e.stopPropagation();
+	        e.stopImmediatePropagation();
 	      }
 	    }
 	  }, {
@@ -1878,6 +1882,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      e.stopImmediatePropagation();
 	    }
 	  };
+
+	  bindingsToApply.clickBubble = false;
 
 	  if (bindings.has('path')) {
 	    bindingsToApply.css = {
