@@ -95,6 +95,8 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/context#canonicalPath'">canonicalPath</a></li>
                   <li><a data-bind="path: '/context#hash'">hash</a></li>
                   <li><a data-bind="path: '/context#update'">update</a></li>
+                  <li><a data-bind="path: '/context#parent'">$parent</a></li>
+                  <li><a data-bind="path: '/context#child'">$child</a></li>
                 </ul>
               </li>
               <li>

@@ -56,8 +56,8 @@ class Router {
         bindingCtx.$root.$router = this.ctx
       }
     } else {
-      this.ctx.config.parentContext = parentRouterCtx
-      parentRouterCtx.config.childContext = this.ctx
+      this.ctx.$parent = parentRouterCtx
+      parentRouterCtx.$child = this.ctx
     }
 
     if (dispatch) {

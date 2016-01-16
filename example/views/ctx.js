@@ -193,6 +193,24 @@ class ViewModel {
         </p>
       </section>
 
+      <section>
+        <h2 id="parent">
+          $parent
+        </h2>
+        <p>
+          parent router ctx accessor
+        </p>
+      </section>
+
+      <section>
+        <h2 id="child">
+          $child
+        </h2>
+        <p>
+          child router ctx accessor
+        </p>
+      </section>
+
       <a data-bind="path: '/config'" class="btn btn-primary"><i class="fa fa-arrow-left"></i> config</a>
       <span class="pull-right">
         <a data-bind="path: '/bindings'" class="btn btn-primary">bindings <i class="fa fa-arrow-right"></i></a>

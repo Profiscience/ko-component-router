@@ -36,7 +36,7 @@ class Context {
       if (this.isRoot) {
         return false
       } else {
-        return this.config.parentContext.update(...arguments)
+        return this.$parent.update(...arguments)
       }
     }
 
@@ -101,8 +101,8 @@ class Context {
       if (this.config.outTransition.length !== 4) {
         complete.call(this)
       }
-    } else if (this.config.childContext) {
-      this.config.childContext.update(childPath || '/', {}, false, {})
+    } else if (this.$child) {
+      this.$child.update(childPath || '/', {}, false, {})
     }
 
     function complete() {
@@ -146,9 +146,9 @@ class Context {
   }
 
   destroy() {
-    if (this.config.childContext) {
-      this.config.childContext.destroy()
-      delete this.config.childContext
+    if (this.$child) {
+      this.$child.destroy()
+      delete this.$child
     }
 
     this.query.dispose()
@@ -158,9 +158,9 @@ class Context {
   }
 
   reload() {
-    if (this.config.childContext) {
-      this.config.childContext.destroy()
-      delete this.config.childContext
+    if (this.$child) {
+      this.$child.destroy()
+      delete this.$child
     }
 
     this.query.reload()

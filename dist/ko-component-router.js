@@ -144,8 +144,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        bindingCtx.$root.$router = this.ctx;
 	      }
 	    } else {
-	      this.ctx.config.parentContext = parentRouterCtx;
-	      parentRouterCtx.config.childContext = this.ctx;
+	      this.ctx.$parent = parentRouterCtx;
+	      parentRouterCtx.$child = this.ctx;
 	    }
 
 	    if (dispatch) {
@@ -307,9 +307,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.isRoot) {
 	          return false;
 	        } else {
-	          var _config$parentContext;
+	          var _$parent;
 
-	          return (_config$parentContext = this.config.parentContext).update.apply(_config$parentContext, arguments);
+	          return (_$parent = this.$parent).update.apply(_$parent, arguments);
 	        }
 	      }
 
@@ -380,8 +380,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.config.outTransition.length !== 4) {
 	          complete.call(this);
 	        }
-	      } else if (this.config.childContext) {
-	        this.config.childContext.update(childPath || '/', {}, false, {});
+	      } else if (this.$child) {
+	        this.$child.update(childPath || '/', {}, false, {});
 	      }
 
 	      function complete() {
@@ -433,9 +433,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'destroy',
 	    value: function destroy() {
-	      if (this.config.childContext) {
-	        this.config.childContext.destroy();
-	        delete this.config.childContext;
+	      if (this.$child) {
+	        this.$child.destroy();
+	        delete this.$child;
 	      }
 
 	      this.query.dispose();
@@ -446,9 +446,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'reload',
 	    value: function reload() {
-	      if (this.config.childContext) {
-	        this.config.childContext.destroy();
-	        delete this.config.childContext;
+	      if (this.$child) {
+	        this.$child.destroy();
+	        delete this.$child;
 	      }
 
 	      this.query.reload();
