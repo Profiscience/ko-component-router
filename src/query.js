@@ -7,7 +7,6 @@ const utils = require('./utils')
 const qsParams = {}
 const trigger = ko.observable(true)
 const cache = {}
-let pendingWriteOp
 
 class Query {
   constructor(ctx) {
@@ -41,18 +40,20 @@ class Query {
             return defaultVal
           },
           write(v) {
+            if (utils.deepEquals(v, this.prev)) {
+              return
+            }
+            this.prev = v
+            
             utils.merge(qsParams, {
               [guid]: { [prop]: v }
             }, false)
 
-            if (pendingWriteOp) {
-              window.cancelAnimationFrame(pendingWriteOp)
-            }
-
-            pendingWriteOp = window.requestAnimationFrame(() => {
-              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid])
-              trigger(!trigger())
-            })
+            ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid])
+            trigger(!trigger())
+          },
+          owner: {
+            prev: null
           }
         })
       }

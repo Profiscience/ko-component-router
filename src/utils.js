@@ -47,6 +47,33 @@ function merge(dest, src, createAsObservable = true, prune = false) {
   return dest
 }
 
+function deepEquals(foo, bar) {
+  if (foo.constructor === Object && bar.constructor === Object) {
+    const fooProps = Object.keys(foo)
+    const barProps = Object.keys(bar)
+    if (fooProps.length !== barProps.length) {
+      return false
+    }
+    for (const prop of fooProps) {
+      if (!deepEquals(foo[prop], bar[prop])) {
+        return false
+      }
+    }
+    return true
+  } else if (Array.isArray(foo) && Array.isArray(bar)) {
+    if (foo.length !== bar.length) {
+      return false
+    }
+    for (const el of foo) {
+      if (bar.indexOf(el) < 0) {
+        return false
+      }
+    }
+  } else {
+    return foo === bar
+  }
+}
+
 function fromJS(obj, parentIsArray) {
   let obs
 
@@ -83,5 +110,6 @@ function isPrimitiveOrDate(obj) {
 
 module.exports = {
   decodeURLEncodedURIComponent,
-  merge
+  merge,
+  deepEquals
 }

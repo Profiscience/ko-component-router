@@ -481,7 +481,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var qsParams = {};
 	var trigger = ko.observable(true);
 	var cache = {};
-	var pendingWriteOp = undefined;
 
 	var Query = (function () {
 	  function Query(ctx) {
@@ -519,16 +518,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	              return defaultVal;
 	            },
 	            write: function write(v) {
+	              if (utils.deepEquals(v, this.prev)) {
+	                return;
+	              }
+	              this.prev = v;
+
 	              utils.merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
 
-	              if (pendingWriteOp) {
-	                window.cancelAnimationFrame(pendingWriteOp);
-	              }
+	              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
+	              trigger(!trigger());
+	            },
 
-	              pendingWriteOp = window.requestAnimationFrame(function () {
-	                ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
-	                trigger(!trigger());
-	              });
+	            owner: {
+	              prev: null
 	            }
 	          })
 	        };
@@ -1256,6 +1258,76 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return dest;
 	}
 
+	function deepEquals(foo, bar) {
+	  if (foo.constructor === Object && bar.constructor === Object) {
+	    var fooProps = Object.keys(foo);
+	    var barProps = Object.keys(bar);
+	    if (fooProps.length !== barProps.length) {
+	      return false;
+	    }
+	    var _iteratorNormalCompletion2 = true;
+	    var _didIteratorError2 = false;
+	    var _iteratorError2 = undefined;
+
+	    try {
+	      for (var _iterator2 = fooProps[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	        var prop = _step2.value;
+
+	        if (!deepEquals(foo[prop], bar[prop])) {
+	          return false;
+	        }
+	      }
+	    } catch (err) {
+	      _didIteratorError2 = true;
+	      _iteratorError2 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	          _iterator2.return();
+	        }
+	      } finally {
+	        if (_didIteratorError2) {
+	          throw _iteratorError2;
+	        }
+	      }
+	    }
+
+	    return true;
+	  } else if (Array.isArray(foo) && Array.isArray(bar)) {
+	    if (foo.length !== bar.length) {
+	      return false;
+	    }
+	    var _iteratorNormalCompletion3 = true;
+	    var _didIteratorError3 = false;
+	    var _iteratorError3 = undefined;
+
+	    try {
+	      for (var _iterator3 = foo[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	        var el = _step3.value;
+
+	        if (bar.indexOf(el) < 0) {
+	          return false;
+	        }
+	      }
+	    } catch (err) {
+	      _didIteratorError3 = true;
+	      _iteratorError3 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	          _iterator3.return();
+	        }
+	      } finally {
+	        if (_didIteratorError3) {
+	          throw _iteratorError3;
+	        }
+	      }
+	    }
+	  } else {
+	    return foo === bar;
+	  }
+	}
+
 	function fromJS(obj, parentIsArray) {
 	  var obs = undefined;
 
@@ -1282,7 +1354,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 	  decodeURLEncodedURIComponent: decodeURLEncodedURIComponent,
-	  merge: merge
+	  merge: merge,
+	  deepEquals: deepEquals
 	};
 
 /***/ },
