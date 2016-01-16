@@ -563,9 +563,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'clear',
-	    value: function clear() {
-	      var pathname = arguments.length <= 0 || arguments[0] === undefined ? this.ctx.pathname() : arguments[0];
-
+	    value: function clear(pathname) {
+	      if (typeof pathname !== 'string') {
+	        pathname = this.ctx.pathname();
+	      }
 	      var guid = this.ctx.config.depth + pathname;
 	      for (var pn in cache[guid]) {
 	        var p = cache[guid][pn];

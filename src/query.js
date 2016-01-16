@@ -84,7 +84,10 @@ class Query {
     }
   }
 
-  clear(pathname = this.ctx.pathname()) {
+  clear(pathname) {
+    if (typeof pathname !== 'string') {
+      pathname = this.ctx.pathname()
+    }
     const guid = this.ctx.config.depth + pathname
     for (const pn in cache[guid]) {
       const p = cache[guid][pn]
