@@ -25,10 +25,6 @@ module.exports = function(config) {
       node: {
         fs: 'empty'
       },
-      isparta: {
-        embedSource: true,
-        noAutoWrap: true
-      },
       module: {
         preLoaders: [
           {

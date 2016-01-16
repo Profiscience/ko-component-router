@@ -70,9 +70,24 @@ function runTests(t, config) {
     .step(() => {
       router.update('/nested/foo')
     })
+    // path binding is applied asynchronously
+    // this is by design, not a hack to get passing tests
+    .step((done) => window.requestAnimationFrame(done))
     .step(() => {
       const nestedRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
-      t.equal(nestedRouter.component(), 'foo', 'nested routing works')
+      const link = $('#nested-bar', dom).get(0)
+      t.equal(nestedRouter.component(), 'nested-foo', 'nested routing works')
+      link.click()
+    })
+    .step((done) => window.requestAnimationFrame(done))
+    .step(() => {
+      const nestedRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      const link = $('#parent-about', dom).get(0)
+      t.equal(nestedRouter.component(), 'nested-bar', 'path binding works in nested router within same context')
+      link.click()
+    })
+    .step(() => {
+      t.equal(router.component(), 'about', 'path binding traverses routers if not found')
     })
 
     // hash
@@ -149,6 +164,10 @@ function runTests(t, config) {
     .step(() => {
       router.update('/bindings')
     })
+    // path binding is applied asynchronously so that links that occur before
+    // the router in the dom can use the bindings
+    //
+    // this is by design and not a hack to get passing tests
     .step((done) => window.requestAnimationFrame(done))
     .step(() => {
       const link = $('#all-bindings-anchor', dom).get(0)
@@ -259,18 +278,6 @@ ko.components.register('about',   { synchronous: true, template: 'ABOUT' })
 ko.components.register('user',    { synchronous: true, template: 'USER' })
 ko.components.register('404',     { synchronous: true, template: '404' })
 ko.components.register('file',    { synchronous: true, template: 'FILE' })
-ko.components.register('foo',     { synchronous: true, template: 'FOO' })
-ko.components.register('nested',  {
-  synchronous: true,
-  template: 'NESTED <ko-component-router params="routes: routes"></ko-component-router>',
-  viewModel: class Nested {
-    constructor() {
-      this.routes = {
-        '/foo': 'foo'
-      }
-    }
-  }
-})
 ko.components.register('bindings', {
   synchronous: true,
   template: `
@@ -297,9 +304,33 @@ ko.components.register('anchors', {
     </div>
   `
 })
+ko.components.register('nested-foo', {
+  synchronous: true,
+  template: `
+    <a id="nested-bar" data-bind="path: \'/bar\'"></a>
+  `
+})
+ko.components.register('nested-bar', {
+  synchronous: true,
+  template: `
+    <a id="parent-about" data-bind="path: \'/about\'"></a>
+  `
+})
+ko.components.register('nested',  {
+  synchronous: true,
+  template: 'NESTED <ko-component-router params="routes: routes"></ko-component-router>',
+  viewModel: class Nested {
+    constructor() {
+      this.routes = {
+        '/foo': 'nested-foo',
+        '/bar': 'nested-bar'
+      }
+    }
+  }
+})
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 33 * 4 + 4
+  const NUM_TESTS = 35 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')
