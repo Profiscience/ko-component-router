@@ -102,7 +102,7 @@ class Context {
         complete.call(this)
       }
     } else if (this.$child) {
-      this.$child.update(childPath || '/', {}, false, {})
+      this.$child.update(childPath, {}, false, {})
     }
 
     function complete() {
@@ -117,6 +117,10 @@ class Context {
     const base = this.config.base
     const hashbang = this.config.hashbang
     const querystring = this.query.getFullQueryString()
+
+    if (pathname[pathname.length - 1] === '/' && childPath[0] === '/') {
+      childPath = childPath.substring(1)
+    }
 
     return `${base}${hashbang ? '/#!' : ''}${pathname}${childPath}${querystring ? '?' + querystring : ''}${hash ? '#' + hash : ''}`
   }

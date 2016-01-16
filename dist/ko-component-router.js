@@ -381,7 +381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          complete.call(this);
 	        }
 	      } else if (this.$child) {
-	        this.$child.update(childPath || '/', {}, false, {});
+	        this.$child.update(childPath, {}, false, {});
 	      }
 
 	      function complete() {
@@ -404,6 +404,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var base = this.config.base;
 	      var hashbang = this.config.hashbang;
 	      var querystring = this.query.getFullQueryString();
+
+	      if (pathname[pathname.length - 1] === '/' && childPath[0] === '/') {
+	        childPath = childPath.substring(1);
+	      }
 
 	      return '' + base + (hashbang ? '/#!' : '') + pathname + childPath + (querystring ? '?' + querystring : '') + (hash ? '#' + hash : '');
 	    }
