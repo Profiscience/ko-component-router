@@ -15,7 +15,8 @@ class Router {
     hashbang = false,
     inTransition = noop,
     outTransition = noop,
-    persistState = false
+    persistState = false,
+    persistQuery = false
   }) {
     const parentRouterCtx = (bindingCtx.$parentContext && bindingCtx.$parentContext.$router)
     let dispatch = true
@@ -37,7 +38,17 @@ class Router {
       routes[route] = new Route(route, routes[route])
     }
 
-    this.config = { el, base, hashbang, routes, inTransition, outTransition, persistState }
+    this.config = {
+      el,
+      base,
+      hashbang,
+      routes,
+      inTransition,
+      outTransition,
+      persistState,
+      persistQuery
+    }
+
     this.ctx = bindingCtx.$router = new Context(this.config)
 
     if (this.isRoot) {
@@ -61,22 +72,12 @@ class Router {
       path = path.replace(this.config.base, '')
     }
 
-    if (this.ctx.update(path, state, false, false)) {
-      return true
-    }
-
-    if (this.isRoot) {
-      location.href = this.ctx.canonicalPath()
-    } else {
-      this.ctx.component(null)
-    }
-
-    return false
+    return this.ctx.update(path, state, false, false)
   }
 
-  onpopstate({ state }) {
+  onpopstate(e) {
     const guid = this.ctx.config.depth + this.ctx.pathname()
-    this.dispatch(location.pathname + location.search + location.hash, (state || {})[guid])
+    this.dispatch(location.pathname + location.search + location.hash, (e.state || {})[guid])
   }
 
   onclick(e) {
@@ -122,9 +123,9 @@ class Router {
       return
     }
 
-    e.preventDefault()
-
-    this.dispatch(path)
+    if (this.dispatch(path)) {
+      e.preventDefault()
+    }
   }
 
   dispose() {

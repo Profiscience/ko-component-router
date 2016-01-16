@@ -250,17 +250,20 @@ function runTests(t, config) {
     .step(() => {
       const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       persistentRouter.state({ foo: 'foo' })
+      persistentRouter.query.get('foo')('foo')
       persistentRouter.update('/bar')
     })
     .step(() => {
       const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       t.equals(persistentRouter.state(), undefined)
+      t.deepEquals(persistentRouter.query.getAll(), {})
       t.equals(persistentRouter.component(), 'bar')
       persistentRouter.update('/foo')
     })
     .step(() => {
       const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       t.deepEqual(persistentRouter.state(), { foo: 'foo' }, 'persistState works')
+      t.equals(persistentRouter.query.get('foo')(), 'foo', 'persistQuery works')
       t.equals(persistentRouter.component(), 'foo')
     })
 
@@ -289,7 +292,7 @@ class RoutingTest {
       // named wildcard segment
       '/file/:file(*)': 'file',
 
-      // persistentQuery & persistState options
+      // persistQuery & persistState options
       '/persistent/!': 'persistent-query-state',
 
       // wildcard segment
@@ -360,7 +363,7 @@ ko.components.register('persistent-query-state', {
     <ko-component-router params="
       routes: routes,
       persistState: true,
-      persistentQuery: true
+      persistQuery: true
     "></ko-component-router>
   `,
   viewModel: class Tabs {
@@ -374,7 +377,7 @@ ko.components.register('persistent-query-state', {
 })
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 39 * 4 + 4
+  const NUM_TESTS = 41 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')

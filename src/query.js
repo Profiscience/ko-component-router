@@ -92,15 +92,24 @@ class Query {
     }
   }
 
-  destroy() {
-    const guid = this.ctx.config.depth + this.ctx.pathname()
-    for (const p in qsParams[guid]) {
-      if (cache[guid] && cache[guid][p]) {
-        cache[guid][p].value.dispose()
+  reload(force = false, guid = this.ctx.config.depth + this.ctx.pathname()) {
+    if (!this.ctx.config.persistQuery || force) {
+      for (const p in qsParams[guid]) {
+        if (cache[guid] && cache[guid][p]) {
+          cache[guid][p].value.dispose()
+        }
+      }
+      delete qsParams[guid]
+      delete cache[guid]
+    }
+  }
+
+  dispose() {
+    for (const guid in qsParams) {
+      if (guid.indexOf(this.ctx.config.depth) === 0) {
+        this.reload(true, guid)
       }
     }
-    delete qsParams[guid]
-    delete cache[guid]
   }
 
   update(query = {}, pathname = this.ctx.pathname()) {
