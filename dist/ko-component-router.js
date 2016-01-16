@@ -99,6 +99,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var inTransition = _ref$inTransition === undefined ? noop : _ref$inTransition;
 	    var _ref$outTransition = _ref.outTransition;
 	    var outTransition = _ref$outTransition === undefined ? noop : _ref$outTransition;
+	    var _ref$persistState = _ref.persistState;
+	    var persistState = _ref$persistState === undefined ? false : _ref$persistState;
 
 	    _classCallCheck(this, Router);
 
@@ -122,7 +124,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      routes[route] = new Route(route, routes[route]);
 	    }
 
-	    this.config = { el: el, base: base, hashbang: hashbang, routes: routes, inTransition: inTransition, outTransition: outTransition };
+	    this.config = { el: el, base: base, hashbang: hashbang, routes: routes, inTransition: inTransition, outTransition: outTransition, persistState: persistState };
 	    this.ctx = bindingCtx.$router = new Context(this.config);
 
 	    if (this.isRoot) {
@@ -286,7 +288,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  _createClass(Context, [{
 	    key: 'update',
-	    value: function update(origUrl, state) {
+	    value: function update(origUrl) {
+	      var state = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
@@ -348,12 +351,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        pathname: pathname,
 	        canonicalPath: canonicalPath,
 	        hash: hash,
-	        state: state,
 	        params: params,
 	        query: query
 	      };
 
+	      if (state === false && sameRoute) {
+	        utils.merge(toCtx, { state: fromCtx.state }, false);
+	      } else if (!this.config.persistState && state) {
+	        toCtx.state = {};
+	        utils.merge(toCtx.state, state, false, true);
+	      }
+
 	      utils.merge(this, toCtx, true);
+
+	      if (this.config.persistState) {
+	        toCtx.state = this.state();
+	      }
 
 	      history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? this.config.base : canonicalPath);
 
@@ -1176,14 +1189,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var createAsObservable = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	  var prune = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	  for (var prop in prune ? dest : src) {
-	    if (typeof dest[prop] === 'undefined') dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) dest[prop](src[prop]);else if (typeof src[prop] === 'undefined') dest[prop] = undefined;else if (src[prop].constructor === Object) {
-	      if (prune) {
-	        dest[prop] = {};
-	      }
+	  if (!src) {
+	    return prune ? undefined : dest;
+	  }
 
-	      merge(dest[prop], src[prop], createAsObservable);
-	    } else dest[prop] = src[prop];
+	  var props = Object.keys(src);
+
+	  if (prune) {
+	    for (var prop in dest) {
+	      if (props.indexOf(prop) < 0) {
+	        props.push(prop);
+	      }
+	    }
+	  }
+
+	  var _iteratorNormalCompletion = true;
+	  var _didIteratorError = false;
+	  var _iteratorError = undefined;
+
+	  try {
+	    for (var _iterator = props[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	      var prop = _step.value;
+
+	      if (typeof dest[prop] === 'undefined') dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) dest[prop](src[prop]);else if (typeof src[prop] === 'undefined') dest[prop] = undefined;else if (src[prop].constructor === Object) {
+	        if (prune) {
+	          dest[prop] = {};
+	        }
+
+	        merge(dest[prop], src[prop], createAsObservable);
+	      } else dest[prop] = src[prop];
+	    }
+	  } catch (err) {
+	    _didIteratorError = true;
+	    _iteratorError = err;
+	  } finally {
+	    try {
+	      if (!_iteratorNormalCompletion && _iterator.return) {
+	        _iterator.return();
+	      }
+	    } finally {
+	      if (_didIteratorError) {
+	        throw _iteratorError;
+	      }
+	    }
 	  }
 
 	  return dest;
@@ -1254,14 +1302,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _dispose = state.dispose;
 
 	    state.clear = function () {
-	      if (history.state && history.state[ctx.config.depth + ctx.pathname()]) {
-	        var newState = history.state;
-	        delete newState[ctx.config.depth + ctx.pathname()];
+	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var guid = arguments.length <= 1 || arguments[1] === undefined ? ctx.config.depth + ctx.pathname() : arguments[1];
+
+	      if (!ctx.config.persistState || force) {
+	        if (history.state && history.state[guid]) {
+	          var newState = history.state;
+	          delete newState[guid];
+	        }
 	      }
 	    };
 
 	    state.dispose = function () {
-	      state.clear();
+	      for (var guid in history.state) {
+	        if (guid.indexOf(ctx.config.depth) === 0) {
+	          state.clear(true, guid);
+	        }
+	      }
 	      _dispose.apply(state, arguments);
 	    };
 
@@ -1799,7 +1856,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bindingsToApply.click = function (data, e) {
 	    var router = getRouter(ctx);
 	    var url = bindings.has('path') ? bindings.get('path') : router.canonicalPath();
-	    var state = bindings.has('state') ? bindings.get('state') : null;
+	    var state = bindings.has('state') ? bindings.get('state') : false;
 	    var query = bindings.has('query') ? bindings.get('query') : false;
 
 	    if (router.update(url, state, true, query)) {

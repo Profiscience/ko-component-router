@@ -14,7 +14,8 @@ class Router {
     base = '',
     hashbang = false,
     inTransition = noop,
-    outTransition = noop
+    outTransition = noop,
+    persistState = false
   }) {
     const parentRouterCtx = (bindingCtx.$parentContext && bindingCtx.$parentContext.$router)
     let dispatch = true
@@ -36,7 +37,7 @@ class Router {
       routes[route] = new Route(route, routes[route])
     }
 
-    this.config = { el, base, hashbang, routes, inTransition, outTransition }
+    this.config = { el, base, hashbang, routes, inTransition, outTransition, persistState }
     this.ctx = bindingCtx.$router = new Context(this.config)
 
     if (this.isRoot) {

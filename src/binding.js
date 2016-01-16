@@ -13,13 +13,13 @@ function applyBinding(el, bindings, ctx) {
   bindingsToApply.click = (data, e) => {
     const router = getRouter(ctx)
     const url = bindings.has('path') ? bindings.get('path') : router.canonicalPath()
-    const state = bindings.has('state') ? bindings.get('state') : null
+    const state = bindings.has('state') ? bindings.get('state') : false
     const query = bindings.has('query') ? bindings.get('query') : false
 
     if (router.update(url, state, true, query)) {
       e.preventDefault()
       e.stopPropagation()
-      e.stopImmediatePropagation()  
+      e.stopImmediatePropagation()
     }
   }
 
@@ -30,7 +30,6 @@ function applyBinding(el, bindings, ctx) {
             ? ctx.$router.route().matches(bindings.get('path'))
             : false)
       }
-
   }
 
   // allow adjacent routers to initialize

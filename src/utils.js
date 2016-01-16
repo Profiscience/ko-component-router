@@ -8,7 +8,21 @@ function decodeURLEncodedURIComponent(val) {
 }
 
 function merge(dest, src, createAsObservable = true, prune = false) {
-  for (const prop in (prune ? dest : src)) {
+  if (!src) {
+    return prune ? undefined : dest
+  }
+
+  const props = Object.keys(src)
+
+  if (prune) {
+    for (const prop in dest) {
+      if (props.indexOf(prop) < 0) {
+        props.push(prop)
+      }
+    }
+  }
+
+  for (const prop of props) {
     if (typeof dest[prop] === 'undefined')
       dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop]
 
