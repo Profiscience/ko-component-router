@@ -23,6 +23,8 @@ function applyBinding(el, bindings, ctx) {
     }
   }
 
+  bindingsToApply.clickBubble = false
+
   if (bindings.has('path')) {
     bindingsToApply.css = {
         'active-path': ko.pureComputed(() =>

@@ -24,6 +24,10 @@ ko.components.register('bindings', {
         </h2>
         <p>
 <pre><code data-bind="prism: 'html'">${escape(`<div data-bind="path: '/user'"></div>`)}</code></pre>
+        <span class="label label-info">note</span>
+        this uses <code>ctx.update</code> behind the scenes, so it bubbles up in
+        the same manner — i.e. you can bind to any url that the current or any
+        parent router knows how to handle
         </p>
       </section>
       <section>

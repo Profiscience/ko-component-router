@@ -52,7 +52,9 @@ class Router {
     this.ctx = bindingCtx.$router = new Context(this.config)
 
     if (this.isRoot) {
-      bindingCtx.$root.$router = this.ctx
+      if (bindingCtx.$root) {
+        bindingCtx.$root.$router = this.ctx
+      }
     } else {
       this.ctx.config.parentContext = parentRouterCtx
       parentRouterCtx.config.childContext = this.ctx
@@ -69,7 +71,7 @@ class Router {
 
   dispatch(path, state) {
     if (path.indexOf(this.config.base) === 0) {
-      path = path.replace(this.config.base, '')
+      path = path.replace(this.config.base, '') || '/'
     }
 
     return this.ctx.update(path, state, false, false)
@@ -125,6 +127,8 @@ class Router {
 
     if (this.dispatch(path)) {
       e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
     }
   }
 

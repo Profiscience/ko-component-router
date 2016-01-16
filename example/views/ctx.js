@@ -180,7 +180,8 @@ class ViewModel {
           <small class="text-muted">(url, state = {}, push = true, query = false) => {}</small>
         </h2>
         <p>
-          updates the context and trigger one update
+          updates the context and trigger one update; bubbles up to parent router(s)
+          if matching route is not found
         </p>
         <p>
           if <code>push === true</code>, use <code>pushState</code>, else <code>replaceState</code>
