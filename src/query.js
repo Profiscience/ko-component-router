@@ -44,7 +44,7 @@ class Query {
               return
             }
             this.prev = v
-            
+
             utils.merge(qsParams, {
               [guid]: { [prop]: v }
             }, false)

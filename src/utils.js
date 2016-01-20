@@ -26,8 +26,11 @@ function merge(dest, src, createAsObservable = true, prune = false) {
     if (typeof dest[prop] === 'undefined')
       dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop]
 
-    else if (ko.isWritableObservable(dest[prop]))
-      dest[prop](src[prop])
+    else if (ko.isWritableObservable(dest[prop])) {
+      if (!deepEquals(dest[prop](), src[prop])) {
+        dest[prop](src[prop])
+      }
+    }
 
     else if (typeof src[prop] === 'undefined')
       dest[prop] = undefined
@@ -48,6 +51,10 @@ function merge(dest, src, createAsObservable = true, prune = false) {
 }
 
 function deepEquals(foo, bar) {
+  if (typeof foo === 'undefined') {
+    return typeof bar === 'undefined'
+  }
+  
   if (foo.constructor === Object && bar.constructor === Object) {
     const fooProps = Object.keys(foo)
     const barProps = Object.keys(bar)

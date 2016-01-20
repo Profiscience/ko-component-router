@@ -35,7 +35,7 @@ function applyBinding(el, bindings, ctx) {
   }
 
   // allow adjacent routers to initialize
-  window.requestAnimationFrame(() => {
+  ko.tasks.schedule(() => {
     ko.applyBindingsToNode(el, bindingsToApply)
   })
 }

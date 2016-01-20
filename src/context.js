@@ -95,7 +95,9 @@ class Context {
       document.title,
       '' === canonicalPath ? this.config.base : canonicalPath)
 
-    if (!sameRoute) {
+    if (firstRun) {
+      complete.call(this)
+    } else if (!sameRoute) {
       this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this))
 
       if (this.config.outTransition.length !== 4) {
@@ -107,7 +109,8 @@ class Context {
 
     function complete() {
       this.component(route.component)
-      window.requestAnimationFrame(() => this.config.inTransition(this.config.el, fromCtx, toCtx))
+      ko.tasks.runEarly()
+      ko.tasks.schedule(() => this.config.inTransition(this.config.el, fromCtx, toCtx))
     }
 
     return true
