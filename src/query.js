@@ -12,6 +12,14 @@ class Query {
   constructor(ctx) {
     this.ctx = ctx
 
+    if (!this.ctx.$parent) {
+      const qsIndex = window.location.href.indexOf('?')
+      if (~qsIndex) {
+        this.updateFromString(window.location.href.split('?')[1])
+      }
+    }
+
+    // make work w/ click bindings w/o closure
     this.get = this.get.bind(this)
     this.clear = this.clear.bind(this)
     this.update = this.update.bind(this)
@@ -120,12 +128,18 @@ class Query {
     const guid = this.ctx.config.depth + pathname
     utils.merge(qsParams, { [guid]: query }, false)
     trigger(!trigger())
+    // ko.tasks.runEarly()
   }
 
-  updateFromString(str) {
-    const queries = qs.parse(str)
-    utils.merge(qsParams, queries, false, true)
+  updateFromString(str, pathname) {
+    if (pathname) {
+      const guid = this.ctx.config.depth + pathname
+      utils.merge(qsParams, { [guid]: qs.parse(str)[guid] }, false)
+    } else {
+      utils.merge(qsParams, qs.parse(str), false)
+    }
     trigger(!trigger())
+    // ko.tasks.runEarly()
   }
 
   getNonDefaultParams() {

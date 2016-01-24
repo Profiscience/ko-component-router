@@ -63,7 +63,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	ko.components.register('ko-component-router', {
 	  synchronous: true,
 	  viewModel: router,
-	  template: '<div data-bind=\'if: ctx.component\'>\n      <div data-bind=\'component: {\n        name: ctx.component,\n        params: ctx\n      }\'></div>\n    </div>'
+	  template: '<div data-bind=\'if: ctx.component\'>\n      <div class="component-wrapper" data-bind=\'component: {\n        name: ctx.component,\n        params: ctx\n      }\'></div>\n    </div>'
 	});
 
 /***/ },
@@ -106,22 +106,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    _classCallCheck(this, Router);
 
-	    var parentRouterCtx = bindingCtx.$parentContext && bindingCtx.$parentContext.$router;
-	    var dispatch = true;
-	    if (parentRouterCtx) {
-	      base = parentRouterCtx.config.base + (parentRouterCtx.config.hashbang ? '/#!' : '') + parentRouterCtx.pathname();
-	      dispatch = parentRouterCtx.path() !== parentRouterCtx.canonicalPath();
-	      this.isRoot = false;
-	    } else {
-	      this.isRoot = true;
-	    }
-
-	    this.onpopstate = this.onpopstate.bind(this);
-	    this.onclick = this.onclick.bind(this);
-
-	    window.addEventListener('popstate', this.onpopstate, false);
-	    document.addEventListener(clickEvent, this.onclick, false);
-
 	    for (var route in routes) {
 	      routes[route] = new Route(route, routes[route]);
 	    }
@@ -137,15 +121,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      persistQuery: persistQuery
 	    };
 
-	    this.ctx = bindingCtx.$router = new Context(this.config);
+	    this.ctx = new Context(bindingCtx, this.config);
 
-	    if (this.isRoot) {
-	      if (bindingCtx.$root) {
-	        bindingCtx.$root.$router = this.ctx;
-	      }
-	    } else {
-	      this.ctx.$parent = parentRouterCtx;
-	      parentRouterCtx.$child = this.ctx;
+	    this.onpopstate = this.onpopstate.bind(this);
+	    this.onclick = this.onclick.bind(this);
+	    window.addEventListener('popstate', this.onpopstate, false);
+	    document.addEventListener(clickEvent, this.onclick, false);
+
+	    var dispatch = true;
+	    if (this.ctx.$parent) {
+	      dispatch = this.ctx.$parent.path() !== this.ctx.$parent.canonicalPath();
 	    }
 
 	    if (dispatch) {
@@ -226,6 +211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function dispose() {
 	      document.removeEventListener(clickEvent, this.onclick, false);
 	      window.removeEventListener('popstate', this.onpopstate, false);
+	      this.ctx.destroy();
 	    }
 	  }]);
 
@@ -270,14 +256,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	var stateFactory = __webpack_require__(10).factory;
 	var utils = __webpack_require__(9);
 
-	var depth = 0;
-
 	var Context = function () {
-	  function Context(config) {
+	  function Context(bindingCtx, config) {
 	    _classCallCheck(this, Context);
 
+	    var parentRouterBindingCtx = bindingCtx;
+	    while (parentRouterBindingCtx.$parentContext) {
+	      parentRouterBindingCtx = parentRouterBindingCtx.$parentContext;
+	      if (parentRouterBindingCtx.$router) {
+	        break;
+	      }
+	    }
+
+	    if (parentRouterBindingCtx.$router) {
+	      bindingCtx.$router = this;
+	      this.$parent = parentRouterBindingCtx.$router;
+	      this.$parent.$child = this;
+	      config.base = this.$parent.pathname();
+	    } else {
+	      parentRouterBindingCtx.$router = this;
+	    }
+
 	    this.config = config;
-	    this.config.depth = depth++;
+	    this.config.depth = Context.getDepth(this);
 
 	    this.route = ko.observable('');
 	    this.component = ko.observable();
@@ -298,20 +299,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	      var url = origUrl.replace(this.config.base, '').replace('/#!', '');
+	      var url = origUrl.replace('/#!', '');
+
+	      var p = this;
+	      while (p) {
+	        url = url.replace(p.config.base, '');
+	        p = p.$parent;
+	      }
 
 	      var route = this.getRouteForUrl(url);
-	      var sameRoute = route === this.route();
 	      var firstRun = this.route() === '';
 
 	      if (!route) {
-	        if (this.isRoot) {
-	          return false;
-	        } else {
-	          var _$parent;
+	        var _$parent;
 
-	          return (_$parent = this.$parent).update.apply(_$parent, arguments);
-	        }
+	        return this.$parent ? (_$parent = this.$parent).update.apply(_$parent, arguments) : false;
 	      }
 
 	      var fromCtx = ko.toJS({
@@ -339,16 +341,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (query) {
 	        this.query.update(query, pathname);
 	      } else if (!this.config.persistQuery) {
-	        this.query.updateFromString(querystring);
+	        this.query.updateFromString(querystring, pathname);
 	      }
 
 	      query = this.query.getAll(false, pathname);
 
-	      if (!sameRoute && !firstRun) {
+	      var samePage = this.pathname() === pathname;
+	      if (!samePage && !firstRun) {
 	        this.reload();
 	      }
 
-	      var canonicalPath = this.getCanonicalPath(pathname, childPath, hash);
+	      var canonicalPath = Context.getCanonicalPath(Context.getBase(this).replace(/\/$/, ''), pathname, childPath, this.query.getFullQueryString(), hash);
 
 	      var toCtx = {
 	        route: route,
@@ -360,7 +363,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        query: query
 	      };
 
-	      if (state === false && sameRoute) {
+	      if (state === false && samePage) {
 	        utils.merge(toCtx, { state: fromCtx.state }, false);
 	      } else if (!this.config.persistState && state) {
 	        toCtx.state = {};
@@ -373,43 +376,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	        toCtx.state = this.state();
 	      }
 
-	      history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? this.config.base : canonicalPath);
+	      history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? Context.getBase(this) : canonicalPath);
 
 	      if (firstRun) {
 	        complete.call(this);
-	      } else if (!sameRoute) {
+	      } else if (!samePage) {
 	        this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this));
 
 	        if (this.config.outTransition.length !== 4) {
 	          complete.call(this);
 	        }
 	      } else if (this.$child) {
-	        this.$child.update(childPath, {}, false, {});
+	        this.$child.update(childPath || '/', {}, false, {});
 	      }
 
 	      function complete() {
-	        var _this = this;
-
 	        this.component(route.component);
 	        ko.tasks.runEarly();
-	        ko.tasks.schedule(function () {
-	          return _this.config.inTransition(_this.config.el, fromCtx, toCtx);
-	        });
+	        doInTransitionIfReady(this.config.el.getElementsByClassName('component-wrapper')[0], this.config.inTransition);
+
+	        function doInTransitionIfReady(el, transitionFn) {
+	          if (el.children.length > 0) {
+	            // two more for good measure w/ deferred updates.
+	            // this shit happens incredibly fast.
+	            transitionFn(el, fromCtx, toCtx);
+	          } else {
+	            window.requestAnimationFrame(function () {
+	              return doInTransitionIfReady(el, transitionFn);
+	            });
+	          }
+	        }
 	      }
 
 	      return true;
-	    }
-	  }, {
-	    key: 'getCanonicalPath',
-	    value: function getCanonicalPath(pathname) {
-	      var childPath = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-	      var hash = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
-
-	      var base = this.config.base.replace(/\/$/, '');
-	      var hashbang = this.config.hashbang;
-	      var querystring = this.query.getFullQueryString();
-
-	      return '' + base + (hashbang ? '/#!' : '') + pathname + childPath + (querystring ? '?' + querystring : '') + (hash ? '#' + hash : '');
 	    }
 	  }, {
 	    key: 'getRouteForUrl',
@@ -428,7 +427,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            fewestMatchingSegments = r._keys.length;
 	            matchingRouteWithFewestDynamicSegments = r;
 	          }
-	          return r;
 	        }
 	      }
 
@@ -444,8 +442,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      this.query.dispose();
 	      this.state.dispose();
-
-	      depth--;
 	    }
 	  }, {
 	    key: 'reload',
@@ -457,6 +453,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      this.query.reload();
 	      this.state.reload();
+	    }
+	  }], [{
+	    key: 'getBase',
+	    value: function getBase(ctx) {
+	      var base = '';
+	      var p = ctx;
+	      while (p) {
+	        base = p.config.base + (p.$parent ? '' : '/#!') + base;
+	        p = p.$parent;
+	      }
+	      return base;
+	    }
+	  }, {
+	    key: 'getCanonicalPath',
+	    value: function getCanonicalPath(base, pathname) {
+	      var childPath = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+	      var querystring = arguments[3];
+	      var hash = arguments.length <= 4 || arguments[4] === undefined ? '' : arguments[4];
+
+	      return '' + base + pathname + childPath + (querystring ? '?' + querystring : '') + (hash ? '#' + hash : '');
+	    }
+	  }, {
+	    key: 'getDepth',
+	    value: function getDepth(ctx) {
+	      var depth = 0;
+	      while (ctx.$parent) {
+	        ctx = ctx.$parent;
+	        depth++;
+	      }
+	      return depth;
 	    }
 	  }]);
 
@@ -491,6 +517,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    this.ctx = ctx;
 
+	    if (!this.ctx.$parent) {
+	      var qsIndex = window.location.href.indexOf('?');
+	      if (~qsIndex) {
+	        this.updateFromString(window.location.href.split('?')[1]);
+	      }
+	    }
+
+	    // make work w/ click bindings w/o closure
 	    this.get = this.get.bind(this);
 	    this.clear = this.clear.bind(this);
 	    this.update = this.update.bind(this);
@@ -613,13 +647,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var guid = this.ctx.config.depth + pathname;
 	      utils.merge(qsParams, _defineProperty({}, guid, query), false);
 	      trigger(!trigger());
+	      // ko.tasks.runEarly()
 	    }
 	  }, {
 	    key: 'updateFromString',
-	    value: function updateFromString(str) {
-	      var queries = qs.parse(str);
-	      utils.merge(qsParams, queries, false, true);
+	    value: function updateFromString(str, pathname) {
+	      if (pathname) {
+	        var guid = this.ctx.config.depth + pathname;
+	        utils.merge(qsParams, _defineProperty({}, guid, qs.parse(str)[guid]), false);
+	      } else {
+	        utils.merge(qsParams, qs.parse(str), false);
+	      }
 	      trigger(!trigger());
+	      // ko.tasks.runEarly()
 	    }
 	  }, {
 	    key: 'getNonDefaultParams',
@@ -1153,6 +1193,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var ko = __webpack_require__(1);
 
 	function decodeURLEncodedURIComponent(val) {
@@ -1219,6 +1261,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function deepEquals(foo, bar) {
+	  if (foo === null && bar !== null || foo !== null && bar === null) {
+	    return false;
+	  }
+	  if ((typeof foo === 'undefined' ? 'undefined' : _typeof(foo)) !== (typeof bar === 'undefined' ? 'undefined' : _typeof(bar))) {
+	    return false;
+	  }
 	  if (typeof foo === 'undefined') {
 	    return typeof bar === 'undefined';
 	  }
@@ -1328,10 +1376,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 	var ko = __webpack_require__(1);
-	var utils = __webpack_require__(9);
 
 	module.exports = {
 	  factory: function factory(ctx) {
@@ -1344,13 +1389,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      write: function write(v) {
 	        if (v) {
-	          var oldState = history.state || {};
+	          var _state = history.state || {};
 	          var key = ctx.config.depth + ctx.pathname();
-	          delete oldState[key];
 
-	          history.replaceState(utils.merge(oldState, _defineProperty({}, key, v), false), document.title, '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath());
+	          if (_state[key]) {
+	            delete _state[key];
+	          }
 
+	          _state[key] = v;
+	          history.replaceState(_state, document.title);
 	          trigger(!trigger());
+	          ko.tasks.runEarly();
 	        }
 	      }
 	    });
@@ -1912,8 +1961,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bindingsToApply.click = function (data, e) {
 	    var router = getRouter(ctx);
 	    var url = bindings.has('path') ? bindings.get('path') : router.canonicalPath();
-	    var state = bindings.has('state') ? bindings.get('state') : false;
+	    var state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false;
 	    var query = bindings.has('query') ? bindings.get('query') : false;
+
+	    while (url.indexOf('/..') > -1) {
+	      router = router.$parent;
+	      url = url.replace('/..', '');
+	    }
 
 	    if (router.update(url, state, true, query)) {
 	      e.preventDefault();
@@ -1927,14 +1981,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (bindings.has('path')) {
 	    bindingsToApply.css = {
 	      'active-path': ko.pureComputed(function () {
-	        return ctx.$router.route() !== '' ? ctx.$router.route().matches(bindings.get('path')) : false;
+	        var router = getRouter(ctx);
+	        return router.route() !== '' ? router.route().matches(ko.unwrap(bindings.get('path'))) : false;
 	      })
 	    };
 	  }
 
 	  // allow adjacent routers to initialize
 	  ko.tasks.schedule(function () {
-	    ko.applyBindingsToNode(el, bindingsToApply);
+	    return ko.applyBindingsToNode(el, bindingsToApply);
 	  });
 	}
 
@@ -1944,7 +1999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return ctx.$router;
 	    }
 
-	    ctx = ctx.$parent;
+	    ctx = ctx.$parentContext;
 	  }
 	}
 

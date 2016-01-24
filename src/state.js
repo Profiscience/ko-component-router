@@ -1,7 +1,6 @@
 'use strict'
 
 const ko = require('knockout')
-const utils = require('./utils')
 
 module.exports = {
   factory(ctx) {
@@ -14,16 +13,17 @@ module.exports = {
       },
       write(v) {
         if (v) {
-          const oldState = history.state || {}
+          const state = history.state || {}
           const key = ctx.config.depth + ctx.pathname()
-          delete oldState[key]
 
-          history.replaceState(
-            utils.merge(oldState, { [key]: v }, false),
-            document.title,
-            '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath())
+          if (state[key]) {
+            delete state[key]
+          }
 
+          state[key] = v
+          history.replaceState(state, document.title)
           trigger(!trigger())
+          ko.tasks.runEarly()
         }
       }
     })
