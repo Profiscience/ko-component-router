@@ -79,6 +79,8 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/config#routes'">routes</a></li>
                   <li><a data-bind="path: '/config#base'">base</a></li>
                   <li><a data-bind="path: '/config#hashbang'">hashbang</a></li>
+                  <li><a data-bind="path: '/config#persistQuery'">persistQuery</a></li>
+                  <li><a data-bind="path: '/config#persistState'">persistState</a></li>
                   <li><a data-bind="path: '/config#inTransition'">inTransition</a></li>
                   <li><a data-bind="path: '/config#outTransition'"">outTransition</a></li>
                 </ul>

@@ -275,6 +275,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      config.base = this.$parent.pathname();
 	    } else {
 	      parentRouterBindingCtx.$router = this;
+	      ko.router = {
+	        update: this.update.bind(this)
+	      };
 	    }
 
 	    this.config = config;
@@ -423,7 +426,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (r.matches(pathname)) {
 	          if (r._keys.length === 0) {
 	            return r;
-	          } else if (r._keys.length < fewestMatchingSegments) {
+	          } else if (fewestMatchingSegments === Infinity || r._keys.length < fewestMatchingSegments && r._keys[0].pattern !== '.*') {
 	            fewestMatchingSegments = r._keys.length;
 	            matchingRouteWithFewestDynamicSegments = r;
 	          }
@@ -1982,7 +1985,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    bindingsToApply.css = {
 	      'active-path': ko.pureComputed(function () {
 	        var router = getRouter(ctx);
-	        return router.route() !== '' ? router.route().matches(ko.unwrap(bindings.get('path'))) : false;
+	        var path = ko.unwrap(bindings.get('path'));
+	        return router.route() !== '' && path ? router.route().matches(path) : false;
 	      })
 	    };
 	  }

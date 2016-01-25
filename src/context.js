@@ -22,6 +22,9 @@ class Context {
       config.base = this.$parent.pathname()
     } else {
       parentRouterBindingCtx.$router = this
+      ko.router = {
+        update: this.update.bind(this)
+      }
     }
 
     this.config = config
@@ -80,7 +83,13 @@ class Context {
       this.reload()
     }
 
-    const canonicalPath = Context.getCanonicalPath(Context.getBase(this).replace(/\/$/, ''), pathname, childPath, this.query.getFullQueryString(), hash)
+    const canonicalPath = Context
+      .getCanonicalPath(
+        Context.getBase(this).replace(/\/$/, ''),
+        pathname,
+        childPath,
+        this.query.getFullQueryString(),
+        hash)
 
     const toCtx = {
       route,
@@ -154,7 +163,8 @@ class Context {
       if (r.matches(pathname)) {
         if (r._keys.length === 0) {
           return r
-        } else if (r._keys.length < fewestMatchingSegments) {
+        } else if (fewestMatchingSegments === Infinity ||
+          (r._keys.length < fewestMatchingSegments && r._keys[0].pattern !== '.*')) {
           fewestMatchingSegments = r._keys.length
           matchingRouteWithFewestDynamicSegments = r
         }

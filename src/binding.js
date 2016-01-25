@@ -34,8 +34,9 @@ function applyBinding(el, bindings, ctx) {
     bindingsToApply.css = {
       'active-path': ko.pureComputed(() => {
         const router = getRouter(ctx)
-        return router.route() !== ''
-          ? router.route().matches(ko.unwrap(bindings.get('path')))
+        const path = ko.unwrap(bindings.get('path'))
+        return router.route() !== '' && path
+          ? router.route().matches(path)
           : false
         })
     }

@@ -29,6 +29,14 @@ ko.components.register('bindings', {
         the same manner — i.e. you can bind to any url that the current or any
         parent router knows how to handle
         </p>
+        <p>
+        if you need to force a bubble up to the parent router, you can add <code>..</code>
+        for each level you want to go up. e.g. <code>data-bind="path: '../user/1234'"</code>
+        </p>
+        <div class="alert alert-info">
+          the path binding also binds the class <code>active-path</code> when applicable.
+          you can use this to easily style active links, such as those in navs
+        </div>
       </section>
       <section>
         <h2>
