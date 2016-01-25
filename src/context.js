@@ -5,12 +5,30 @@ const queryFactory = require('./query').factory
 const stateFactory = require('./state').factory
 const utils = require('./utils')
 
-let depth = 0
-
 class Context {
-  constructor(config) {
+  constructor(bindingCtx, config) {
+    let parentRouterBindingCtx = bindingCtx
+    while (parentRouterBindingCtx.$parentContext) {
+      parentRouterBindingCtx = parentRouterBindingCtx.$parentContext
+      if (parentRouterBindingCtx.$router) {
+        break
+      }
+    }
+
+    if (parentRouterBindingCtx.$router) {
+      bindingCtx.$router = this
+      this.$parent = parentRouterBindingCtx.$router
+      this.$parent.$child = this
+      config.base = this.$parent.pathname()
+    } else {
+      parentRouterBindingCtx.$router = this
+      ko.router = {
+        update: this.update.bind(this)
+      }
+    }
+
     this.config = config
-    this.config.depth = depth++
+    this.config.depth = Context.getDepth(this)
 
     this.route = ko.observable('')
     this.component = ko.observable()
@@ -24,20 +42,19 @@ class Context {
   }
 
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
-    const url = origUrl
-      .replace(this.config.base, '')
-      .replace('/#!', '')
+    let url = origUrl.replace('/#!', '')
+
+    let p = this
+    while (p) {
+      url = url.replace(p.config.base, '')
+      p = p.$parent
+    }
 
     const route = this.getRouteForUrl(url)
-    const sameRoute = route === this.route()
     const firstRun = this.route() === ''
 
     if (!route) {
-      if (this.isRoot) {
-        return false
-      } else {
-        return this.$parent.update(...arguments)
-      }
+      return this.$parent ? this.$parent.update(...arguments) : false
     }
 
     const fromCtx = ko.toJS({
@@ -56,16 +73,23 @@ class Context {
     if (query) {
       this.query.update(query, pathname)
     } else if (!this.config.persistQuery) {
-      this.query.updateFromString(querystring)
+      this.query.updateFromString(querystring, pathname)
     }
 
     query = this.query.getAll(false, pathname)
 
-    if (!sameRoute && !firstRun) {
+    const samePage = this.pathname() === pathname
+    if (!samePage && !firstRun) {
       this.reload()
     }
 
-    const canonicalPath = this.getCanonicalPath(pathname, childPath, hash)
+    const canonicalPath = Context
+      .getCanonicalPath(
+        Context.getBase(this).replace(/\/$/, ''),
+        pathname,
+        childPath,
+        this.query.getFullQueryString(),
+        hash)
 
     const toCtx = {
       route,
@@ -77,7 +101,7 @@ class Context {
       query
     }
 
-    if (state === false && sameRoute) {
+    if (state === false && samePage) {
       utils.merge(toCtx, { state: fromCtx.state }, false)
     } else if (!this.config.persistState && state) {
       toCtx.state = {}
@@ -93,35 +117,37 @@ class Context {
     history[push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
-      '' === canonicalPath ? this.config.base : canonicalPath)
+      '' === canonicalPath ? Context.getBase(this) : canonicalPath)
 
     if (firstRun) {
       complete.call(this)
-    } else if (!sameRoute) {
+    } else if (!samePage) {
       this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this))
 
       if (this.config.outTransition.length !== 4) {
         complete.call(this)
       }
     } else if (this.$child) {
-      this.$child.update(childPath, {}, false, {})
+      this.$child.update(childPath || '/', {}, false, {})
     }
 
     function complete() {
       this.component(route.component)
       ko.tasks.runEarly()
-      ko.tasks.schedule(() => this.config.inTransition(this.config.el, fromCtx, toCtx))
+      doInTransitionIfReady(this.config.el.getElementsByClassName('component-wrapper')[0], this.config.inTransition)
+
+      function doInTransitionIfReady(el, transitionFn) {
+        if (el.children.length > 0) {
+          // two more for good measure w/ deferred updates.
+          // this shit happens incredibly fast.
+          transitionFn(el, fromCtx, toCtx)
+        } else {
+          window.requestAnimationFrame(() => doInTransitionIfReady(el, transitionFn))
+        }
+      }
     }
 
     return true
-  }
-
-  getCanonicalPath(pathname, childPath = '', hash = '') {
-    const base = this.config.base.replace(/\/$/, '')
-    const hashbang = this.config.hashbang
-    const querystring = this.query.getFullQueryString()
-
-    return `${base}${hashbang ? '/#!' : ''}${pathname}${childPath}${querystring ? '?' + querystring : ''}${hash ? '#' + hash : ''}`
   }
 
   getRouteForUrl(url) {
@@ -137,11 +163,11 @@ class Context {
       if (r.matches(pathname)) {
         if (r._keys.length === 0) {
           return r
-        } else if (r._keys.length < fewestMatchingSegments) {
+        } else if (fewestMatchingSegments === Infinity ||
+          (r._keys.length < fewestMatchingSegments && r._keys[0].pattern !== '.*')) {
           fewestMatchingSegments = r._keys.length
           matchingRouteWithFewestDynamicSegments = r
         }
-        return r
       }
     }
 
@@ -156,8 +182,6 @@ class Context {
 
     this.query.dispose()
     this.state.dispose()
-
-    depth--
   }
 
   reload() {
@@ -168,6 +192,29 @@ class Context {
 
     this.query.reload()
     this.state.reload()
+  }
+
+  static getBase(ctx) {
+    let base = ''
+    let p = ctx
+    while (p) {
+      base = p.config.base + (p.$parent ? '' : '/#!') + base
+      p = p.$parent
+    }
+    return base
+  }
+
+  static getCanonicalPath(base, pathname, childPath = '', querystring, hash = '') {
+    return `${base}${pathname}${childPath}${querystring ? '?' + querystring : ''}${hash ? '#' + hash : ''}`
+  }
+
+  static getDepth(ctx) {
+    let depth = 0
+    while (ctx.$parent) {
+      ctx = ctx.$parent
+      depth++
+    }
+    return depth
   }
 }
 

@@ -18,22 +18,6 @@ class Router {
     persistState = false,
     persistQuery = false
   }) {
-    const parentRouterCtx = (bindingCtx.$parentContext && bindingCtx.$parentContext.$router)
-    let dispatch = true
-    if (parentRouterCtx) {
-      base = parentRouterCtx.config.base + (parentRouterCtx.config.hashbang ? '/#!' : '') + parentRouterCtx.pathname()
-      dispatch = parentRouterCtx.path() !== parentRouterCtx.canonicalPath()
-      this.isRoot = false
-    } else {
-      this.isRoot = true
-    }
-
-    this.onpopstate = this.onpopstate.bind(this)
-    this.onclick = this.onclick.bind(this)
-
-    window.addEventListener('popstate', this.onpopstate, false)
-    document.addEventListener(clickEvent, this.onclick, false)
-
     for (const route in routes) {
       routes[route] = new Route(route, routes[route])
     }
@@ -49,15 +33,16 @@ class Router {
       persistQuery
     }
 
-    this.ctx = bindingCtx.$router = new Context(this.config)
+    this.ctx = new Context(bindingCtx, this.config)
 
-    if (this.isRoot) {
-      if (bindingCtx.$root) {
-        bindingCtx.$root.$router = this.ctx
-      }
-    } else {
-      this.ctx.$parent = parentRouterCtx
-      parentRouterCtx.$child = this.ctx
+    this.onpopstate = this.onpopstate.bind(this)
+    this.onclick = this.onclick.bind(this)
+    window.addEventListener('popstate', this.onpopstate, false)
+    document.addEventListener(clickEvent, this.onclick, false)
+
+    let dispatch = true
+    if (this.ctx.$parent) {
+      dispatch = this.ctx.$parent.path() !== this.ctx.$parent.canonicalPath()
     }
 
     if (dispatch) {
@@ -135,6 +120,7 @@ class Router {
   dispose() {
     document.removeEventListener(clickEvent, this.onclick, false)
     window.removeEventListener('popstate', this.onpopstate, false)
+    this.ctx.destroy()
   }
 }
 

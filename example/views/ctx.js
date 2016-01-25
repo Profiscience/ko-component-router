@@ -191,6 +191,9 @@ class ViewModel {
           <br>
           if <code>query</code> is an object, set this context's query to the contents
         </p>
+        <div class="alert alert-info">
+         The top level router's <code>update</code> function is available at <code>ko.router.update()</code>
+        <div>
       </section>
 
       <section>
