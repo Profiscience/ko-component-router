@@ -7,24 +7,28 @@ const utils = require('./utils')
 
 class Context {
   constructor(bindingCtx, config) {
+    bindingCtx.$router = this
+
     let parentRouterBindingCtx = bindingCtx
+    let isRoot = true
     while (parentRouterBindingCtx.$parentContext) {
       parentRouterBindingCtx = parentRouterBindingCtx.$parentContext
       if (parentRouterBindingCtx.$router) {
+        isRoot = false
         break
+      } else {
+        parentRouterBindingCtx.$router = this
       }
     }
 
-    if (parentRouterBindingCtx.$router) {
-      bindingCtx.$router = this
-      this.$parent = parentRouterBindingCtx.$router
-      this.$parent.$child = this
-      config.base = this.$parent.pathname()
-    } else {
-      parentRouterBindingCtx.$router = this
+    if (isRoot) {
       ko.router = {
         update: this.update.bind(this)
       }
+    } else {
+      this.$parent = parentRouterBindingCtx.$router
+      this.$parent.$child = this
+      config.base = this.$parent.pathname()
     }
 
     this.config = config
