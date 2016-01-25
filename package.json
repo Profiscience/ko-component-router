@@ -35,7 +35,7 @@
     "spa"
   ],
   "author": "Casey Webb <notcaseywebb@gmail.com>",
-  "license": "MIT",
+  "license": "WTFPL",
   "peerDependencies": {
     "knockout": "^3.3.0"
   },
