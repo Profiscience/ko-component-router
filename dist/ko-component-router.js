@@ -467,7 +467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var base = '';
 	      var p = ctx;
 	      while (p) {
-	        base = p.config.base + (p.$parent ? '' : '/#!') + base;
+	        base = p.config.base + (!p.config.hashbang || p.$parent ? '' : '/#!') + base;
 	        p = p.$parent;
 	      }
 	      return base;
