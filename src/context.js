@@ -34,6 +34,8 @@ class Context {
     this.config = config
     this.config.depth = Context.getDepth(this)
 
+    this.isNavigating = ko.observable(true)
+
     this.route = ko.observable('')
     this.component = ko.observable()
     this.canonicalPath = ko.observable('')
@@ -136,17 +138,19 @@ class Context {
     }
 
     function complete() {
+      const el = this.config.el.getElementsByClassName('component-wrapper')[0]
+      this.isNavigating(true)
       this.component(route.component)
       ko.tasks.runEarly()
-      doInTransitionIfReady(this.config.el.getElementsByClassName('component-wrapper')[0], this.config.inTransition)
 
-      function doInTransitionIfReady(el, transitionFn) {
+      waitForReady.call(this)
+
+      function waitForReady() {
         if (el.children.length > 0) {
-          // two more for good measure w/ deferred updates.
-          // this shit happens incredibly fast.
-          transitionFn(el, fromCtx, toCtx)
+          this.isNavigating(false)
+          this.config.inTransition(el, fromCtx, toCtx)
         } else {
-          window.requestAnimationFrame(() => doInTransitionIfReady(el, transitionFn))
+          window.requestAnimationFrame(waitForReady.bind(this))
         }
       }
     }

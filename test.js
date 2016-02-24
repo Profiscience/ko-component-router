@@ -6,11 +6,7 @@ const test = require('tape')
 
 // polyfills
 require('es6-promise').polyfill()
-if (!window.requestAnimationFrame) {
-  const raf = require('raf')
-  window.requestAnimationFrame = raf
-  window.cancelAnimationFrame = raf.cancel
-}
+require('raf').polyfill()
 
 require('./src')
 
