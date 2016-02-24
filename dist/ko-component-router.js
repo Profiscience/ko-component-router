@@ -143,8 +143,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Router, [{
 	    key: 'dispatch',
 	    value: function dispatch(path, state) {
-	      if (path.indexOf(this.config.base) === 0) {
-	        path = path.replace(this.config.base, '') || '/';
+	      if (path.toLowerCase().indexOf(this.config.base.toLowerCase()) === 0) {
+	        path = path.substr(this.config.base.length) || '/';
 	      }
 
 	      return this.ctx.update(path, state, false, false);
@@ -188,7 +188,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // same page
 	      var orig = path;
 	      var base = this.config.base.replace('/#!', '');
-	      if (path.indexOf(base) === 0) {
+	      if (path.toLowerCase().indexOf(base.toLowerCase()) === 0) {
 	        path = path.substr(base.length);
 	      }
 
