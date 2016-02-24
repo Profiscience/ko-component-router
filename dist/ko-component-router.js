@@ -1268,8 +1268,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function deepEquals(foo, bar) {
-	  if (foo === null && bar !== null || foo !== null && bar === null) {
-	    return false;
+	  if (foo === null || bar === null) {
+	    return foo === null && bar === null;
 	  }
 	  if ((typeof foo === 'undefined' ? 'undefined' : _typeof(foo)) !== (typeof bar === 'undefined' ? 'undefined' : _typeof(bar))) {
 	    return false;
@@ -1496,7 +1496,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var qsIndex = path.indexOf('?');
 	      var pathname = undefined,
-	          querystring = undefined;
+	          querystring = undefined; // eslint-disable-line
 
 	      var _ref = ~qsIndex ? path.split('?') : [path];
 
