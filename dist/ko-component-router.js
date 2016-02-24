@@ -1995,7 +1995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var path = _getRoute4[1];
 
 	      var querystring = bindings.has('query') ? '?' + qs.stringify(bindings.get('query')) : '';
-	      return router.config.base + (!router.config.hashbang || router.$parent ? '' : '/#!') + path + querystring;
+	      return router ? router.config.base + (!router.config.hashbang || router.$parent ? '' : '/#!') + path + querystring : '#';
 	    })
 	  };
 
@@ -2022,13 +2022,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function getRoute(ctx, bindings) {
 	  var router = getRouter(ctx);
-	  var path = bindings.has('path') ? bindings.get('path') : false;
+	  var path = bindings.has('path') ? ko.unwrap(bindings.get('path')) : false;
 
 	  if (path === false) {
 	    path = router.canonicalPath();
 	  }
 
-	  while (path.match(/\/?\.\./i)) {
+	  while (path && path.match(/\/?\.\./i) && router.$parent) {
 	    router = router.$parent;
 	    path = path.replace(/\/?\.\./i, '');
 	  }

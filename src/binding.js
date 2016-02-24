@@ -28,10 +28,12 @@ function applyBinding(el, bindings, ctx) {
       const querystring = bindings.has('query')
         ? '?' + qs.stringify(bindings.get('query'))
         : ''
-      return router.config.base
-        + (!router.config.hashbang || router.$parent ? '' : '/#!')
-        + path
-        + querystring
+      return router
+        ? router.config.base
+          + (!router.config.hashbang || router.$parent ? '' : '/#!')
+          + path
+          + querystring
+        : '#'
     })
   }
 
@@ -52,13 +54,13 @@ function applyBinding(el, bindings, ctx) {
 
 function getRoute(ctx, bindings) {
   let router = getRouter(ctx)
-  let path = bindings.has('path') ? bindings.get('path') : false
+  let path = bindings.has('path') ? ko.unwrap(bindings.get('path')) : false
 
   if (path === false) {
     path = router.canonicalPath()
   }
 
-  while (path.match(/\/?\.\./i)) {
+  while (path && path.match(/\/?\.\./i) && router.$parent) {
     router = router.$parent
     path = path.replace(/\/?\.\./i, '')
   }
