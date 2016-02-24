@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "Component-based routing for KnockoutJS",
   "homepage": "https://github.com/caseyWebb/ko-component-router",
   "bugs": {
