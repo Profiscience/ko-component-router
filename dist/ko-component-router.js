@@ -202,8 +202,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (this.dispatch(path)) {
 	        e.preventDefault();
-	        e.stopPropagation();
-	        e.stopImmediatePropagation();
 	      }
 	    }
 	  }, {
@@ -286,6 +284,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    this.config = config;
 	    this.config.depth = Context.getDepth(this);
+
+	    this.isNavigating = ko.observable(true);
 
 	    this.route = ko.observable('');
 	    this.component = ko.observable();
@@ -398,19 +398,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      function complete() {
+	        var el = this.config.el.getElementsByClassName('component-wrapper')[0];
+	        this.isNavigating(true);
 	        this.component(route.component);
 	        ko.tasks.runEarly();
-	        doInTransitionIfReady(this.config.el.getElementsByClassName('component-wrapper')[0], this.config.inTransition);
 
-	        function doInTransitionIfReady(el, transitionFn) {
+	        waitForReady.call(this);
+
+	        function waitForReady() {
 	          if (el.children.length > 0) {
-	            // two more for good measure w/ deferred updates.
-	            // this shit happens incredibly fast.
-	            transitionFn(el, fromCtx, toCtx);
+	            this.isNavigating(false);
+	            this.config.inTransition(el, fromCtx, toCtx);
 	          } else {
-	            window.requestAnimationFrame(function () {
-	              return doInTransitionIfReady(el, transitionFn);
-	            });
+	            window.requestAnimationFrame(waitForReady.bind(this));
 	          }
 	        }
 	      }
@@ -1943,7 +1943,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 	var ko = __webpack_require__(1);
+	var qs = __webpack_require__(5);
 
 	ko.bindingHandlers.path = {
 	  init: function init(e, xx, b, x, c) {
@@ -1966,30 +1969,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	  el.href = '#';
 
 	  bindingsToApply.click = function (data, e) {
-	    var router = getRouter(ctx);
-	    var url = bindings.has('path') ? bindings.get('path') : router.canonicalPath();
+	    if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
+	      return true;
+	    }
+
+	    var _getRoute = getRoute(ctx, bindings);
+
+	    var _getRoute2 = _slicedToArray(_getRoute, 2);
+
+	    var router = _getRoute2[0];
+	    var path = _getRoute2[1];
+
 	    var state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false;
 	    var query = bindings.has('query') ? bindings.get('query') : false;
-
-	    while (url.indexOf('/..') > -1) {
-	      router = router.$parent;
-	      url = url.replace('/..', '');
-	    }
-
-	    if (router.update(url, state, true, query)) {
-	      e.preventDefault();
-	      e.stopPropagation();
-	      e.stopImmediatePropagation();
-	    }
+	    return !router.update(path, state, true, query);
 	  };
 
-	  bindingsToApply.clickBubble = false;
+	  bindingsToApply.attr = {
+	    href: ko.pureComputed(function () {
+	      var _getRoute3 = getRoute(ctx, bindings);
+
+	      var _getRoute4 = _slicedToArray(_getRoute3, 2);
+
+	      var router = _getRoute4[0];
+	      var path = _getRoute4[1];
+
+	      var querystring = bindings.has('query') ? '?' + qs.stringify(bindings.get('query')) : '';
+	      return router.config.base + (!router.config.hashbang || router.$parent ? '' : '/#!') + path + querystring;
+	    })
+	  };
 
 	  if (bindings.has('path')) {
 	    bindingsToApply.css = {
 	      'active-path': ko.pureComputed(function () {
-	        var router = getRouter(ctx);
-	        var path = ko.unwrap(bindings.get('path'));
+	        var _getRoute5 = getRoute(ctx, bindings);
+
+	        var _getRoute6 = _slicedToArray(_getRoute5, 2);
+
+	        var router = _getRoute6[0];
+	        var path = _getRoute6[1];
+
 	        return router.route() !== '' && path ? router.route().matches(path) : false;
 	      })
 	    };
@@ -2001,6 +2020,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
+	function getRoute(ctx, bindings) {
+	  var router = getRouter(ctx);
+	  var path = bindings.has('path') ? bindings.get('path') : false;
+
+	  if (path === false) {
+	    path = router.canonicalPath();
+	  }
+
+	  while (path.match(/\/?\.\./i)) {
+	    router = router.$parent;
+	    path = path.replace(/\/?\.\./i, '');
+	  }
+
+	  return [router, path];
+	}
+
 	function getRouter(ctx) {
 	  while (typeof ctx !== 'undefined') {
 	    if (typeof ctx.$router !== 'undefined') {
@@ -2009,6 +2044,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ctx = ctx.$parentContext;
 	  }
+	}
+
+	function which(e) {
+	  e = e || window.event;
+	  return null === e.which ? e.button : e.which;
 	}
 
 /***/ }

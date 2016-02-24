@@ -112,8 +112,6 @@ class Router {
 
     if (this.dispatch(path)) {
       e.preventDefault()
-      e.stopPropagation()
-      e.stopImmediatePropagation()
     }
   }
 
