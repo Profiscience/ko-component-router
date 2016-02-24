@@ -19,7 +19,14 @@ function applyBinding(el, bindings, ctx) {
     const [router, path] = getRoute(ctx, bindings)
     const state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false
     const query = bindings.has('query') ? bindings.get('query') : false
-    return !router.update(path, state, true, query)
+    const handled = router.update(path, state, true, query)
+
+    if (handled) {
+      e.preventDefault()
+      e.stopImmediatePropagation()
+    }
+
+    return !handled
   }
 
   bindingsToApply.attr = {
