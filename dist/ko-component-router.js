@@ -193,7 +193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      if (this.config.hashbang) {
-	        path = path.replace('#!', '');
+	        path = path.replace('/#!', '');
 	      }
 
 	      if (this.config.base && orig === path) {
