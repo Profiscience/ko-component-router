@@ -22,9 +22,7 @@ class Context {
     }
 
     if (isRoot) {
-      ko.router = {
-        update: this.update.bind(this)
-      }
+      ko.router = this
     } else {
       this.$parent = parentRouterBindingCtx.$router
       this.$parent.$child = this
