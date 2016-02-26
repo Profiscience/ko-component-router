@@ -23,7 +23,6 @@ function applyBinding(el, bindings, ctx) {
 
     if (handled) {
       e.preventDefault()
-      e.stopImmediatePropagation()
     }
 
     return !handled
