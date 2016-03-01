@@ -1,0 +1,31 @@
+{
+  "name": "ko-component-router",
+  "description": "Component-based routing for KnockoutJS",
+  "main": "dist/ko-component-router.js",
+  "authors": [
+    "Casey Webb <notcaseywebb@gmail.com>"
+  ],
+  "license": "WTFPL",
+  "keywords": [
+    "knockoutjs",
+    "knockout",
+    "ko",
+    "component",
+    "router",
+    "routing",
+    "spa"
+  ],
+  "homepage": "https://github.com/caseyWebb/ko-component-router",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
