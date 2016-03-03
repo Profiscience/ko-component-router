@@ -304,7 +304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	      var url = origUrl.replace('/#!', '');
+	      var url = (origUrl + '').replace('/#!', '');
 
 	      var p = this;
 	      while (p) {

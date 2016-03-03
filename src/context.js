@@ -46,7 +46,7 @@ class Context {
   }
 
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
-    let url = origUrl.replace('/#!', '')
+    let url = (origUrl + '').replace('/#!', '')
 
     let p = this
     while (p) {
