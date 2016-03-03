@@ -405,7 +405,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        waitForReady.call(this);
 
 	        function waitForReady() {
-	          if (el.children.length > 0) {
+	          if (el && el.children.length > 0) {
 	            this.isNavigating(false);
 	            this.config.inTransition(el, fromCtx, toCtx);
 	          } else {
