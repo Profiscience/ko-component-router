@@ -1,13 +1,12 @@
 # ko-component-router
 
-[![Join the chat at https://gitter.im/caseyWebb/ko-component-router](https://badges.gitter.im/caseyWebb/ko-component-router.svg)](https://gitter.im/caseyWebb/ko-component-router?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 ![NPM](https://img.shields.io/npm/v/ko-component-router.svg)
 ![WTFPL](https://img.shields.io/npm/l/ko-component-router.svg)
 [![Travis](https://img.shields.io/travis/caseyWebb/ko-component-router.svg)](https://travis-ci.org/caseyWebb/ko-component-router)
 [![CodeClimate](https://img.shields.io/codeclimate/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router)
 [![Test Coverage](https://img.shields.io/codeclimate/coverage/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router/coverage)
 [![Dependency Status](https://img.shields.io/david/caseyWebb/ko-component-router.svg)](https://david-dm.org/caseyWebb/ko-component-router)
+[![Join the chat at https://gitter.im/caseyWebb/ko-component-router](https://badges.gitter.im/caseyWebb/ko-component-router.svg)](https://gitter.im/caseyWebb/ko-component-router?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
 
