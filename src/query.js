@@ -66,7 +66,6 @@ class Query {
         })
       }
     }
-
     return cache[guid][prop].value
   }
 
@@ -126,9 +125,13 @@ class Query {
 
   update(query = {}, pathname = this.ctx.pathname()) {
     const guid = this.ctx.config.depth + pathname
+
+    if (utils.deepEquals(qsParams[guid], query)) {
+      return
+    }
+
     utils.merge(qsParams, { [guid]: query }, false)
     trigger(!trigger())
-    // ko.tasks.runEarly()
   }
 
   updateFromString(str, pathname) {
@@ -139,7 +142,6 @@ class Query {
       utils.merge(qsParams, qs.parse(str), false)
     }
     trigger(!trigger())
-    // ko.tasks.runEarly()
   }
 
   getNonDefaultParams() {

@@ -578,7 +578,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          })
 	        };
 	      }
-
 	      return cache[guid][prop].value;
 	    }
 	  }, {
@@ -651,9 +650,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
 
 	      var guid = this.ctx.config.depth + pathname;
+
+	      if (utils.deepEquals(qsParams[guid], query)) {
+	        return;
+	      }
+
 	      utils.merge(qsParams, _defineProperty({}, guid, query), false);
 	      trigger(!trigger());
-	      // ko.tasks.runEarly()
 	    }
 	  }, {
 	    key: 'updateFromString',
@@ -665,7 +668,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        utils.merge(qsParams, qs.parse(str), false);
 	      }
 	      trigger(!trigger());
-	      // ko.tasks.runEarly()
 	    }
 	  }, {
 	    key: 'getNonDefaultParams',
@@ -1384,6 +1386,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var ko = __webpack_require__(1);
+	var utils = __webpack_require__(9);
 
 	module.exports = {
 	  factory: function factory(ctx) {
@@ -1396,17 +1399,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      write: function write(v) {
 	        if (v) {
-	          var _state = history.state || {};
+	          var s = history.state || {};
 	          var key = ctx.config.depth + ctx.pathname();
 
-	          if (_state[key]) {
-	            delete _state[key];
+	          if (!utils.deepEquals(v, history.state ? history.state[ctx.config.depth + ctx.pathname()] : {})) {
+	            if (s[key]) {
+	              delete s[key];
+	            }
+	            s[key] = v;
+	            history.replaceState(s, document.title);
+	            trigger(!trigger());
 	          }
-
-	          _state[key] = v;
-	          history.replaceState(_state, document.title);
-	          trigger(!trigger());
-	          ko.tasks.runEarly();
 	        }
 	      }
 	    });
