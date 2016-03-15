@@ -10,6 +10,8 @@ require('raf').polyfill()
 
 require('./src')
 
+ko.options.deferUpdates = true
+
 function runTests(t, config) {
   return new Promise((resolve) => {
     t.comment(JSON.stringify(config))
@@ -41,11 +43,11 @@ function runTests(t, config) {
 
     // routing
     .step(() => {
-      t.equal(router.component(), 'about', 'explicit path (and initialization)')
+      t.equal(router.route().component, 'about', 'explicit path (and initialization)')
       router.update('/user/casey/')
     })
     .step(() => {
-      t.equal(router.component(), 'user', 'routes w/ missing optional parameter')
+      t.equal(router.route().component, 'user', 'routes w/ missing optional parameter')
       t.equal(router.params.name(), 'casey', 'attaches required param to ctx.params[PARAM_NAME]')
       t.equal(router.params.operation(), undefined, 'optional param is `undefined` when missing')
       router.update('/user/casey/edit')
@@ -55,7 +57,7 @@ function runTests(t, config) {
       router.update('/this/page/does/not/exist')
     })
     .step(() => {
-      t.equal(router.component(), '404', 'asterisk route catches 404s')
+      t.equal(router.route().component, '404', 'asterisk route catches 404s')
       router.update('/file/foo/bar.zip')
     })
     .step(() => {
@@ -65,25 +67,26 @@ function runTests(t, config) {
     // nested routing
     .step(() => {
       router.update('/nested/foo')
+      ko.tasks.runEarly()
     })
     // path binding is applied asynchronously
     // this is by design, not a hack to get passing tests
-    .step((done) => window.requestAnimationFrame(done))
+    .step((done) => ko.tasks.schedule(done))
     .step(() => {
       const nestedRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       const link = $('#nested-bar', dom).get(0)
-      t.equal(nestedRouter.component(), 'nested-foo', 'nested routing works')
+      t.equal(nestedRouter.route().component, 'nested-foo', 'nested routing works')
       link.click()
     })
     .step((done) => window.requestAnimationFrame(done))
     .step(() => {
       const nestedRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       const link = $('#parent-about', dom).get(0)
-      t.equal(nestedRouter.component(), 'nested-bar', 'path binding works in nested router within same context')
+      t.equal(nestedRouter.route().component, 'nested-bar', 'path binding works in nested router within same context')
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'about', 'path binding traverses routers if not found')
+      t.equal(router.route().component, 'about', 'path binding traverses routers if not found')
     })
 
     // hash
@@ -170,7 +173,7 @@ function runTests(t, config) {
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'about', 'path binding navigates (used together)')
+      t.equal(router.route().component, 'about', 'path binding navigates (used together)')
       t.deepEqual(router.state(), { foo: 'foo' }, 'state binding sets state (used together)')
       t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'query binding sets query (used together)')
     })
@@ -183,7 +186,7 @@ function runTests(t, config) {
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'bindings', 'state binding persistents path when used alone')
+      t.equal(router.route().component, 'bindings', 'state binding persistents path when used alone')
       t.deepEqual(router.state(), { foo: 'foo' }, 'state binding sets state when used alone')
       t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'state binding persists query when used alone')
     })
@@ -197,7 +200,7 @@ function runTests(t, config) {
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'bindings', 'query binding persistents path when used alone')
+      t.equal(router.route().component, 'bindings', 'query binding persistents path when used alone')
       t.deepEqual(router.state(), { bar: 'bar' }, 'query binding persists state when used alone')
       t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'query binding sets query when used alone')
     })
@@ -218,7 +221,7 @@ function runTests(t, config) {
     })
     .step(() => {
       const aboutLink = $('#about-link').get(0)
-      t.equal(ko.contextFor(aboutLink).$router.component(), 'about', 'clicking a link navigates')
+      t.equal(ko.contextFor(aboutLink).$router.route().component, 'about', 'clicking a link navigates')
     })
     .step(() => {
       router.update('/anchors')
@@ -253,14 +256,14 @@ function runTests(t, config) {
       const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       t.equals(persistentRouter.state(), undefined)
       t.deepEquals(persistentRouter.query.getAll(), {})
-      t.equals(persistentRouter.component(), 'bar')
+      t.equals(persistentRouter.route().component, 'bar')
       persistentRouter.update('/foo')
     })
     .step(() => {
       const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       t.deepEqual(persistentRouter.state(), { foo: 'foo' }, 'persistState works')
       t.equals(persistentRouter.query.get('foo')(), 'foo', 'persistQuery works')
-      t.equals(persistentRouter.component(), 'foo')
+      t.equals(persistentRouter.route().component, 'foo')
     })
 
     .step(() => resolve())
@@ -392,12 +395,14 @@ test('ko-component-router', (t) => {
 
 function step(fn) {
   const p = new Promise((resolve) => {
-    if (fn.length === 1) {
-      fn(resolve)
-    } else {
-      fn()
-      resolve()
-    }
+    ko.tasks.schedule(() => {
+      if (fn.length === 1) {
+          fn(resolve)
+      } else {
+        fn()
+        resolve()
+      }
+    })
   })
 
   return {
@@ -405,14 +410,18 @@ function step(fn) {
       if (nextFn.length === 1) {
         return step((done) => {
           p.then(() => {
-            nextFn(done)
+            ko.tasks.schedule(() => {
+              nextFn(done)
+            })
           })
         })
       } else {
         return step((done) => {
           p.then(() => {
-            nextFn()
-            done()
+            ko.tasks.schedule(() => {
+              nextFn()
+              done()
+            })
           })
         })
       }

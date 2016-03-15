@@ -113,6 +113,7 @@ class Query {
       delete qsParams[guid]
       delete cache[guid]
     }
+    trigger(!trigger())
   }
 
   dispose() {
@@ -144,17 +145,23 @@ class Query {
     trigger(!trigger())
   }
 
-  getNonDefaultParams() {
+  getNonDefaultParams(query, pathname) {
     const nonDefaultParams = {}
-    for (const id in qsParams) {
+    const workingParams = qsParams
+
+    if (query) {
+      utils.merge(workingParams, { [this.ctx.config.depth + pathname]: query }, false)
+    }
+
+    for (const id in workingParams) {
       if (!cache[id]) {
-        nonDefaultParams[id] = qsParams[id]
+        nonDefaultParams[id] = workingParams[id]
       } else {
         nonDefaultParams[id] = {}
-        for (const pn in qsParams[id]) {
-          const p = qsParams[id][pn]
+        for (const pn in workingParams[id]) {
+          const p = workingParams[id][pn]
           const d = cache[id][pn].defaultVal
-          if (typeof p !== 'undefined' && p !== d) {
+          if (typeof p !== 'undefined' && !utils.deepEquals(p, d)) {
             nonDefaultParams[id][pn] = p
           }
         }
@@ -164,8 +171,8 @@ class Query {
     return nonDefaultParams
   }
 
-  getFullQueryString() {
-    return qs.stringify(this.getNonDefaultParams())
+  getFullQueryString(query, pathname) {
+    return qs.stringify(this.getNonDefaultParams(query, pathname))
   }
 }
 

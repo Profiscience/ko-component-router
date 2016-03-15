@@ -63,7 +63,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	ko.components.register('ko-component-router', {
 	  synchronous: true,
 	  viewModel: router,
-	  template: '<div data-bind=\'if: ctx.component\'>\n      <div class="component-wrapper" data-bind=\'component: {\n        name: ctx.component,\n        params: ctx\n      }\'></div>\n    </div>'
+	  template: '<div data-bind=\'if: ctx.route().component\'>\n      <div class="component-wrapper" data-bind=\'component: {\n        name: ctx.route().component,\n        params: ctx\n      }\'></div>\n    </div>'
 	});
 
 /***/ },
@@ -250,7 +250,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var ko = __webpack_require__(1);
-	var queryFactory = __webpack_require__(4).factory;
+	var qs = __webpack_require__(4);
+	var queryFactory = __webpack_require__(8).factory;
 	var stateFactory = __webpack_require__(10).factory;
 	var utils = __webpack_require__(9);
 
@@ -286,7 +287,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.isNavigating = ko.observable(true);
 
 	    this.route = ko.observable('');
-	    this.component = ko.observable();
 	    this.canonicalPath = ko.observable('');
 	    this.path = ko.observable('');
 	    this.pathname = ko.observable('');
@@ -344,20 +344,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var childPath = _route$parse2[5];
 
 
-	      if (query) {
-	        this.query.update(query, pathname);
-	      } else if (!this.config.persistQuery) {
-	        this.query.updateFromString(querystring, pathname);
-	      }
-
-	      query = this.query.getAll(false, pathname);
-
 	      var samePage = this.pathname() === pathname;
 	      if (!samePage && !firstRun) {
+	        this.isNavigating(true);
 	        this.reload();
 	      }
 
-	      var canonicalPath = Context.getCanonicalPath(Context.getBase(this).replace(/\/$/, ''), pathname, childPath, this.query.getFullQueryString(), hash);
+	      if (!query && querystring) {
+	        query = qs.parse(querystring)[this.config.depth + pathname];
+	      }
+
+	      var canonicalPath = Context.getCanonicalPath(Context.getBase(this).replace(/\/$/, ''), pathname, childPath, this.query.getFullQueryString(query, pathname), hash);
 
 	      var toCtx = {
 	        route: route,
@@ -376,8 +373,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        utils.merge(toCtx.state, state, false, true);
 	      }
 
-	      utils.merge(this, toCtx, true);
-
 	      if (this.config.persistState) {
 	        toCtx.state = this.state();
 	      }
@@ -385,32 +380,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	      history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? Context.getBase(this) : canonicalPath);
 
 	      if (firstRun) {
-	        complete.call(this);
+	        complete.call(this, true);
 	      } else if (!samePage) {
 	        this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this));
 
 	        if (this.config.outTransition.length !== 4) {
-	          complete.call(this);
+	          complete.call(this, true);
 	        }
 	      } else if (this.$child) {
 	        this.$child.update(childPath || '/', {}, false, {});
+	        complete.call(this);
+	      } else {
+	        complete.call(this);
 	      }
 
-	      function complete() {
+	      function complete(animate) {
 	        var el = this.config.el.getElementsByClassName('component-wrapper')[0];
-	        this.isNavigating(true);
-	        this.component(route.component);
+	        delete toCtx.query;
+	        utils.merge(this, toCtx);
+	        if (query) {
+	          this.query.update(query, pathname);
+	        }
+	        this.isNavigating(false);
 	        ko.tasks.runEarly();
 
-	        waitForReady.call(this);
-
-	        function waitForReady() {
-	          if (el && el.children.length > 0) {
-	            this.isNavigating(false);
-	            this.config.inTransition(el, fromCtx, toCtx);
-	          } else {
-	            window.requestAnimationFrame(waitForReady.bind(this));
-	          }
+	        if (animate) {
+	          this.config.inTransition(el, fromCtx, toCtx);
 	        }
 	      }
 
@@ -435,7 +430,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	      }
-
 	      return matchingRouteWithFewestDynamicSegments;
 	    }
 	  }, {
@@ -503,217 +497,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var ko = __webpack_require__(1);
-	var qs = __webpack_require__(5);
-	var utils = __webpack_require__(9);
-
-	var qsParams = {};
-	var trigger = ko.observable(true);
-	var cache = {};
-
-	var Query = function () {
-	  function Query(ctx) {
-	    _classCallCheck(this, Query);
-
-	    this.ctx = ctx;
-
-	    if (!this.ctx.$parent) {
-	      var qsIndex = window.location.href.indexOf('?');
-	      if (~qsIndex) {
-	        this.updateFromString(window.location.href.split('?')[1]);
-	      }
-	    }
-
-	    // make work w/ click bindings w/o closure
-	    this.get = this.get.bind(this);
-	    this.clear = this.clear.bind(this);
-	    this.update = this.update.bind(this);
-	  }
-
-	  _createClass(Query, [{
-	    key: 'get',
-	    value: function get(prop, defaultVal) {
-	      var query = this;
-	      var ctx = this.ctx;
-	      var guid = this.ctx.config.depth + ctx.pathname();
-
-	      if (!cache[guid]) {
-	        cache[guid] = {};
-	      }
-
-	      if (!cache[guid][prop]) {
-	        cache[guid][prop] = {
-	          defaultVal: defaultVal,
-	          value: ko.pureComputed({
-	            read: function read() {
-	              trigger();
-
-	              if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
-	                return qsParams[guid][prop];
-	              }
-
-	              return defaultVal;
-	            },
-	            write: function write(v) {
-	              if (utils.deepEquals(v, this.prev)) {
-	                return;
-	              }
-	              this.prev = v;
-
-	              utils.merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
-
-	              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
-	              trigger(!trigger());
-	            },
-
-	            owner: {
-	              prev: null
-	            }
-	          })
-	        };
-	      }
-	      return cache[guid][prop].value;
-	    }
-	  }, {
-	    key: 'getAll',
-	    value: function getAll() {
-	      var asObservable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
-
-	      var guid = this.ctx.config.depth + pathname;
-	      return asObservable ? ko.pureComputed({
-	        read: function read() {
-	          trigger();
-	          return this.getAll();
-	        },
-	        write: function write(q) {
-	          for (var pn in q) {
-	            this.get(pn)(q[pn]);
-	          }
-	        }
-	      }, this) : ko.toJS(qsParams[guid]) || {};
-	    }
-	  }, {
-	    key: 'setDefaults',
-	    value: function setDefaults(q) {
-	      for (var pn in q) {
-	        this.get(pn, q[pn]);
-	      }
-	    }
-	  }, {
-	    key: 'clear',
-	    value: function clear(pathname) {
-	      if (typeof pathname !== 'string') {
-	        pathname = this.ctx.pathname();
-	      }
-	      var guid = this.ctx.config.depth + pathname;
-	      for (var pn in cache[guid]) {
-	        var p = cache[guid][pn];
-	        p.value(p.defaultVal);
-	      }
-	    }
-	  }, {
-	    key: 'reload',
-	    value: function reload() {
-	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-	      var guid = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.config.depth + this.ctx.pathname() : arguments[1];
-
-	      if (!this.ctx.config.persistQuery || force) {
-	        for (var p in qsParams[guid]) {
-	          if (cache[guid] && cache[guid][p]) {
-	            cache[guid][p].value.dispose();
-	          }
-	        }
-	        delete qsParams[guid];
-	        delete cache[guid];
-	      }
-	    }
-	  }, {
-	    key: 'dispose',
-	    value: function dispose() {
-	      for (var guid in qsParams) {
-	        if (guid.indexOf(this.ctx.config.depth) === 0) {
-	          this.reload(true, guid);
-	        }
-	      }
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update() {
-	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
-
-	      var guid = this.ctx.config.depth + pathname;
-
-	      if (utils.deepEquals(qsParams[guid], query)) {
-	        return;
-	      }
-
-	      utils.merge(qsParams, _defineProperty({}, guid, query), false);
-	      trigger(!trigger());
-	    }
-	  }, {
-	    key: 'updateFromString',
-	    value: function updateFromString(str, pathname) {
-	      if (pathname) {
-	        var guid = this.ctx.config.depth + pathname;
-	        utils.merge(qsParams, _defineProperty({}, guid, qs.parse(str)[guid]), false);
-	      } else {
-	        utils.merge(qsParams, qs.parse(str), false);
-	      }
-	      trigger(!trigger());
-	    }
-	  }, {
-	    key: 'getNonDefaultParams',
-	    value: function getNonDefaultParams() {
-	      var nonDefaultParams = {};
-	      for (var id in qsParams) {
-	        if (!cache[id]) {
-	          nonDefaultParams[id] = qsParams[id];
-	        } else {
-	          nonDefaultParams[id] = {};
-	          for (var pn in qsParams[id]) {
-	            var p = qsParams[id][pn];
-	            var d = cache[id][pn].defaultVal;
-	            if (typeof p !== 'undefined' && p !== d) {
-	              nonDefaultParams[id][pn] = p;
-	            }
-	          }
-	        }
-	      }
-
-	      return nonDefaultParams;
-	    }
-	  }, {
-	    key: 'getFullQueryString',
-	    value: function getFullQueryString() {
-	      return qs.stringify(this.getNonDefaultParams());
-	    }
-	  }]);
-
-	  return Query;
-	}();
-
-	module.exports = {
-	  factory: function factory(ctx) {
-	    return new Query(ctx);
-	  }
-	};
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Stringify = __webpack_require__(6);
-	var Parse = __webpack_require__(8);
+	var Stringify = __webpack_require__(5);
+	var Parse = __webpack_require__(7);
 
 	module.exports = {
 	    stringify: Stringify,
@@ -722,12 +507,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Utils = __webpack_require__(7);
+	var Utils = __webpack_require__(6);
 
 	var internals = {
 	    delimiter: '&',
@@ -859,7 +644,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1027,12 +812,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Utils = __webpack_require__(7);
+	var Utils = __webpack_require__(6);
 
 	var internals = {
 	    delimiter: '&',
@@ -1197,6 +982,222 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var ko = __webpack_require__(1);
+	var qs = __webpack_require__(4);
+	var utils = __webpack_require__(9);
+
+	var qsParams = {};
+	var trigger = ko.observable(true);
+	var cache = {};
+
+	var Query = function () {
+	  function Query(ctx) {
+	    _classCallCheck(this, Query);
+
+	    this.ctx = ctx;
+
+	    if (!this.ctx.$parent) {
+	      var qsIndex = window.location.href.indexOf('?');
+	      if (~qsIndex) {
+	        this.updateFromString(window.location.href.split('?')[1]);
+	      }
+	    }
+
+	    // make work w/ click bindings w/o closure
+	    this.get = this.get.bind(this);
+	    this.clear = this.clear.bind(this);
+	    this.update = this.update.bind(this);
+	  }
+
+	  _createClass(Query, [{
+	    key: 'get',
+	    value: function get(prop, defaultVal) {
+	      var query = this;
+	      var ctx = this.ctx;
+	      var guid = this.ctx.config.depth + ctx.pathname();
+
+	      if (!cache[guid]) {
+	        cache[guid] = {};
+	      }
+
+	      if (!cache[guid][prop]) {
+	        cache[guid][prop] = {
+	          defaultVal: defaultVal,
+	          value: ko.pureComputed({
+	            read: function read() {
+	              trigger();
+
+	              if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
+	                return qsParams[guid][prop];
+	              }
+
+	              return defaultVal;
+	            },
+	            write: function write(v) {
+	              if (utils.deepEquals(v, this.prev)) {
+	                return;
+	              }
+	              this.prev = v;
+
+	              utils.merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
+
+	              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
+	              trigger(!trigger());
+	            },
+
+	            owner: {
+	              prev: null
+	            }
+	          })
+	        };
+	      }
+	      return cache[guid][prop].value;
+	    }
+	  }, {
+	    key: 'getAll',
+	    value: function getAll() {
+	      var asObservable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
+
+	      var guid = this.ctx.config.depth + pathname;
+	      return asObservable ? ko.pureComputed({
+	        read: function read() {
+	          trigger();
+	          return this.getAll();
+	        },
+	        write: function write(q) {
+	          for (var pn in q) {
+	            this.get(pn)(q[pn]);
+	          }
+	        }
+	      }, this) : ko.toJS(qsParams[guid]) || {};
+	    }
+	  }, {
+	    key: 'setDefaults',
+	    value: function setDefaults(q) {
+	      for (var pn in q) {
+	        this.get(pn, q[pn]);
+	      }
+	    }
+	  }, {
+	    key: 'clear',
+	    value: function clear(pathname) {
+	      if (typeof pathname !== 'string') {
+	        pathname = this.ctx.pathname();
+	      }
+	      var guid = this.ctx.config.depth + pathname;
+	      for (var pn in cache[guid]) {
+	        var p = cache[guid][pn];
+	        p.value(p.defaultVal);
+	      }
+	    }
+	  }, {
+	    key: 'reload',
+	    value: function reload() {
+	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var guid = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.config.depth + this.ctx.pathname() : arguments[1];
+
+	      if (!this.ctx.config.persistQuery || force) {
+	        for (var p in qsParams[guid]) {
+	          if (cache[guid] && cache[guid][p]) {
+	            cache[guid][p].value.dispose();
+	          }
+	        }
+	        delete qsParams[guid];
+	        delete cache[guid];
+	      }
+	      trigger(!trigger());
+	    }
+	  }, {
+	    key: 'dispose',
+	    value: function dispose() {
+	      for (var guid in qsParams) {
+	        if (guid.indexOf(this.ctx.config.depth) === 0) {
+	          this.reload(true, guid);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'update',
+	    value: function update() {
+	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
+
+	      var guid = this.ctx.config.depth + pathname;
+
+	      if (utils.deepEquals(qsParams[guid], query)) {
+	        return;
+	      }
+
+	      utils.merge(qsParams, _defineProperty({}, guid, query), false);
+	      trigger(!trigger());
+	    }
+	  }, {
+	    key: 'updateFromString',
+	    value: function updateFromString(str, pathname) {
+	      if (pathname) {
+	        var guid = this.ctx.config.depth + pathname;
+	        utils.merge(qsParams, _defineProperty({}, guid, qs.parse(str)[guid]), false);
+	      } else {
+	        utils.merge(qsParams, qs.parse(str), false);
+	      }
+	      trigger(!trigger());
+	    }
+	  }, {
+	    key: 'getNonDefaultParams',
+	    value: function getNonDefaultParams(query, pathname) {
+	      var nonDefaultParams = {};
+	      var workingParams = qsParams;
+
+	      if (query) {
+	        utils.merge(workingParams, _defineProperty({}, this.ctx.config.depth + pathname, query), false);
+	      }
+
+	      for (var id in workingParams) {
+	        if (!cache[id]) {
+	          nonDefaultParams[id] = workingParams[id];
+	        } else {
+	          nonDefaultParams[id] = {};
+	          for (var pn in workingParams[id]) {
+	            var p = workingParams[id][pn];
+	            var d = cache[id][pn].defaultVal;
+	            if (typeof p !== 'undefined' && !utils.deepEquals(p, d)) {
+	              nonDefaultParams[id][pn] = p;
+	            }
+	          }
+	        }
+	      }
+
+	      return nonDefaultParams;
+	    }
+	  }, {
+	    key: 'getFullQueryString',
+	    value: function getFullQueryString(query, pathname) {
+	      return qs.stringify(this.getNonDefaultParams(query, pathname));
+	    }
+	  }]);
+
+	  return Query;
+	}();
+
+	module.exports = {
+	  factory: function factory(ctx) {
+	    return new Query(ctx);
+	  }
+	};
+
+/***/ },
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1278,6 +1279,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  if (typeof foo === 'undefined') {
 	    return typeof bar === 'undefined';
+	  }
+	  if (isPrimitiveOrDate(foo) && isPrimitiveOrDate(bar)) {
+	    return foo === bar;
 	  }
 
 	  if (foo.constructor === Object && bar.constructor === Object) {
@@ -1949,7 +1953,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 	var ko = __webpack_require__(1);
-	var qs = __webpack_require__(5);
+	var qs = __webpack_require__(4);
 
 	ko.bindingHandlers.path = {
 	  init: function init(e, xx, b, x, c) {
