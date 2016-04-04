@@ -2022,7 +2022,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var router = _getRoute6[0];
 	        var path = _getRoute6[1];
 
-	        return router.route() !== '' && path ? router.route().matches(path) : false;
+	        return !router.isNavigating() && router.route() !== '' && path ? router.route().matches(path) : false;
 	      })
 	    };
 	  }
