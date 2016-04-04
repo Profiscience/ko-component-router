@@ -2016,6 +2016,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (handled) {
 	      e.preventDefault();
+	      e.stopImmediatePropagation();
 	    }
 
 	    return !handled;
