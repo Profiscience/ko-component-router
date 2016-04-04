@@ -1023,6 +1023,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Query, [{
 	    key: 'get',
 	    value: function get(prop, defaultVal) {
+	      var parser = arguments.length <= 2 || arguments[2] === undefined ? utils.identity : arguments[2];
+
 	      var query = this;
 	      var ctx = this.ctx;
 	      var guid = this.ctx.config.depth + ctx.pathname();
@@ -1034,12 +1036,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!cache[guid][prop]) {
 	        cache[guid][prop] = {
 	          defaultVal: defaultVal,
+	          parser: parser,
 	          value: ko.pureComputed({
 	            read: function read() {
 	              trigger();
 
 	              if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
-	                return qsParams[guid][prop];
+	                return cache[guid][prop].parser(qsParams[guid][prop]);
 	              }
 
 	              return defaultVal;
@@ -1081,13 +1084,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.get(pn)(q[pn]);
 	          }
 	        }
-	      }, this) : ko.toJS(qsParams[guid]) || {};
+	      }, this) : ko.toJS(utils.mapKeys(qsParams[guid] || {}, function (prop) {
+	        return cache[guid] && cache[guid][prop] ? cache[guid][prop].parser(qsParams[guid][prop]) : qsParams[guid][prop];
+	      }));
 	    }
+	    // cache[guid][prop].parser(qsParams[guid][prop])
+
 	  }, {
 	    key: 'setDefaults',
 	    value: function setDefaults(q) {
+	      var parser = arguments.length <= 1 || arguments[1] === undefined ? utils.identity : arguments[1];
+
 	      for (var pn in q) {
-	        this.get(pn, q[pn]);
+	        this.get(pn, q[pn], parser);
 	      }
 	    }
 	  }, {
@@ -1212,6 +1221,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return val;
 	  }
 	  return decodeURIComponent(val.replace(/\+/g, ' '));
+	}
+
+	function mapKeys(obj, fn) {
+	  var mappedObj = {};
+	  Object.keys(obj).forEach(function (k) {
+	    return mappedObj[k] = fn(k);
+	  });
+	  return mappedObj;
 	}
 
 	function merge(dest, src) {
@@ -1373,14 +1390,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return obs;
 	}
 
+	function identity(x) {
+	  return x;
+	}
+
 	function isPrimitiveOrDate(obj) {
 	  return obj === null || obj === undefined || obj.constructor === String || obj.constructor === Number || obj.constructor === Boolean || obj instanceof Date;
 	}
 
 	module.exports = {
 	  decodeURLEncodedURIComponent: decodeURLEncodedURIComponent,
+	  mapKeys: mapKeys,
 	  merge: merge,
-	  deepEquals: deepEquals
+	  deepEquals: deepEquals,
+	  identity: identity
 	};
 
 /***/ },

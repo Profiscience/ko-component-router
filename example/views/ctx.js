@@ -52,7 +52,18 @@ class ViewModel {
         </h2>
         <p>
           read/write query parameter observables are accessible via
-          <code>ctx.query.get(parameterName, defaultValue)</code>
+          <code>ctx.query.get(parameterName, [defaultValue], [parser])</code>
+        </p>
+        <p>
+          Default values and an optional parsing function may be supplied via
+          <code>ctx.query.get(parameterName, defaultValue, parser)</code> or
+          <code>ctx.query.setDefaults({ parameterName: defaultValue }, parser)</code>.
+
+          Default values a) will cause query params to be ommitted from the query string
+          if they are equal to the default and b) will initialize the value if it
+          is ot present in the query string. The parsing function can be especially
+          handy when you want to use an array of integers, an they will normally be
+          parsed as strings.
         </p>
         <p>
           query params are scoped to the local router, so you may use the same
@@ -84,7 +95,7 @@ class ViewModel {
     // sets default values
     ctx.query.setDefaults({
       baz: 'quz'
-    })
+    }, [parser])
 
     ctx.query.getAll(asObservable)
     // {

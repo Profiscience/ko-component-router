@@ -25,7 +25,7 @@ class Query {
     this.update = this.update.bind(this)
   }
 
-  get(prop, defaultVal) {
+  get(prop, defaultVal, parser = utils.identity) {
     const query = this
     const ctx = this.ctx
     const guid = this.ctx.config.depth + ctx.pathname()
@@ -37,12 +37,13 @@ class Query {
     if (!cache[guid][prop]) {
       cache[guid][prop] = {
         defaultVal,
+        parser,
         value: ko.pureComputed({
           read() {
             trigger()
 
             if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
-              return qsParams[guid][prop]
+              return cache[guid][prop].parser(qsParams[guid][prop])
             }
 
             return defaultVal
@@ -83,12 +84,16 @@ class Query {
             }
           }
         }, this)
-      : (ko.toJS(qsParams[guid]) || {})
+      : ko.toJS(utils.mapKeys(qsParams[guid] || {}, (prop) =>
+          cache[guid] && cache[guid][prop]
+            ? cache[guid][prop].parser(qsParams[guid][prop])
+            : qsParams[guid][prop]))
   }
+  // cache[guid][prop].parser(qsParams[guid][prop])
 
-  setDefaults(q) {
+  setDefaults(q, parser = utils.identity) {
     for (const pn in q) {
-      this.get(pn, q[pn])
+      this.get(pn, q[pn], parser)
     }
   }
 

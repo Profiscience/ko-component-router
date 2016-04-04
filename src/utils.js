@@ -7,6 +7,12 @@ function decodeURLEncodedURIComponent(val) {
   return decodeURIComponent(val.replace(/\+/g, ' '))
 }
 
+function mapKeys(obj, fn) {
+  const mappedObj = {}
+  Object.keys(obj).forEach((k) => mappedObj[k] = fn(k))
+  return mappedObj
+}
+
 function merge(dest, src, createAsObservable = true, prune = false) {
   if (!src) {
     return prune ? undefined : dest
@@ -116,6 +122,10 @@ function fromJS(obj, parentIsArray) {
   return obs
 }
 
+function identity(x) {
+  return x
+}
+
 function isPrimitiveOrDate(obj) {
   return obj === null ||
          obj === undefined ||
@@ -127,6 +137,8 @@ function isPrimitiveOrDate(obj) {
 
 module.exports = {
   decodeURLEncodedURIComponent,
+  mapKeys,
   merge,
-  deepEquals
+  deepEquals,
+  identity
 }
