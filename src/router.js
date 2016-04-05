@@ -3,8 +3,9 @@
 const ko = require('knockout')
 const Context = require('./context')
 const Route = require('./route')
+const { isUndefined } = require('./utils')
 
-const clickEvent = ('undefined' !== typeof document) && document.ontouchstart
+const clickEvent = (!isUndefined(document)) && document.ontouchstart
   ? 'touchstart'
   : 'click'
 
