@@ -29,7 +29,7 @@ function merge(dest, src, createAsObservable = true, prune = false) {
   }
 
   for (const prop of props) {
-    if (isUndefined(dest[prop]))
+    if (typeof dest[prop] === 'undefined')
       dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop]
 
     else if (ko.isWritableObservable(dest[prop])) {
@@ -38,7 +38,7 @@ function merge(dest, src, createAsObservable = true, prune = false) {
       }
     }
 
-    else if (isUndefined(src[prop]))
+    else if (typeof src[prop] === 'undefined')
       dest[prop] = undefined
 
     else if (src[prop].constructor === Object) {
@@ -63,8 +63,8 @@ function deepEquals(foo, bar) {
   if (typeof foo !== typeof bar) {
     return false
   }
-  if (isUndefined(foo)) {
-    return isUndefined(bar)
+  if (typeof foo === 'undefined') {
+    return typeof bar === 'undefined'
   }
   if (isPrimitiveOrDate(foo) && isPrimitiveOrDate(bar)) {
     return foo === bar
@@ -126,10 +126,6 @@ function identity(x) {
   return x
 }
 
-function isUndefined(x) {
-  return typeof x === 'undefined'
-}
-
 function isPrimitiveOrDate(obj) {
   return obj === null ||
          obj === undefined ||
@@ -144,6 +140,5 @@ module.exports = {
   mapKeys,
   merge,
   deepEquals,
-  identity,
-  isUndefined
+  identity
 }

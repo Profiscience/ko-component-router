@@ -2,7 +2,6 @@
 
 const ko = require('knockout')
 const qs = require('qs')
-const { isUndefined } = require('./utils')
 
 ko.bindingHandlers.path = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
 ko.bindingHandlers.state = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
@@ -77,8 +76,8 @@ function getRoute(ctx, bindings) {
 }
 
 function getRouter(ctx) {
-  while (!isUndefined(ctx)) {
-    if (!isUndefined(ctx.$router)) {
+  while (typeof ctx !== 'undefined') {
+    if (typeof ctx.$router !== 'undefined') {
       return ctx.$router
     }
 

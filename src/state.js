@@ -1,7 +1,7 @@
 'use strict'
 
 const ko = require('knockout')
-const { deepEquals } = require('./utils')
+const utils = require('./utils')
 
 module.exports = {
   factory(ctx) {
@@ -17,7 +17,7 @@ module.exports = {
           const s = history.state || {}
           const key = ctx.config.depth + ctx.pathname()
 
-          if (!deepEquals(v, history.state ? history.state[ctx.config.depth + ctx.pathname()] : {})) {
+          if (!utils.deepEquals(v, history.state ? history.state[ctx.config.depth + ctx.pathname()] : {})) {
             if (s[key]) {
               delete s[key]
             }

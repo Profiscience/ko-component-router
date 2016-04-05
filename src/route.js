@@ -1,7 +1,7 @@
 'use strict'
 
 const pathtoRegexp = require('path-to-regexp')
-const { decodeURLEncodedURIComponent, isUndefined } = require('./utils')
+const utils = require('./utils')
 
 class Route {
   constructor(path, component) {
@@ -36,7 +36,7 @@ class Route {
     if (~hIndex) {
       const parts = path.split('#')
       path = parts[0]
-      hash = decodeURLEncodedURIComponent(parts[1])
+      hash = utils.decodeURLEncodedURIComponent(parts[1])
     }
 
     const qsIndex = path.indexOf('?')
@@ -46,10 +46,10 @@ class Route {
 
     for (let i = 1, len = matches.length; i < len; ++i) {
       const k = this._keys[i - 1]
-      const v = decodeURLEncodedURIComponent(matches[i])
-      if (!isUndefined(v)|| !(hasOwnProperty.call(params, k.name))) {
+      const v = utils.decodeURLEncodedURIComponent(matches[i])
+      if (v !== undefined || !(hasOwnProperty.call(params, k.name))) {
         if (k.name === 'child_path') {
-          if (!isUndefined(v)) {
+          if (v !== undefined) {
             childPath = `/${v}`
             path = path.substring(0, path.lastIndexOf(childPath))
             pathname = pathname.substring(0, pathname.lastIndexOf(childPath))

@@ -2,7 +2,7 @@
 
 const ko = require('knockout')
 const qs = require('qs')
-const { deepEquals, identity, isUndefined, mapKeys, merge } = require('./utils')
+const utils = require('./utils')
 
 const qsParams = {}
 const trigger = ko.observable(true)
@@ -25,7 +25,7 @@ class Query {
     this.update = this.update.bind(this)
   }
 
-  get(prop, defaultVal, parser = identity) {
+  get(prop, defaultVal, parser = utils.identity) {
     const query = this
     const ctx = this.ctx
     const guid = this.ctx.config.depth + ctx.pathname()
@@ -41,19 +41,20 @@ class Query {
         value: ko.pureComputed({
           read() {
             trigger()
-            if (qsParams && qsParams[guid] && isUndefined(qsParams[guid][prop])) {
+
+            if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
               return cache[guid][prop].parser(qsParams[guid][prop])
             }
 
             return defaultVal
           },
           write(v) {
-            if (deepEquals(v, this.prev)) {
+            if (utils.deepEquals(v, this.prev)) {
               return
             }
             this.prev = v
 
-            merge(qsParams, {
+            utils.merge(qsParams, {
               [guid]: { [prop]: v }
             }, false)
 
@@ -83,14 +84,14 @@ class Query {
             }
           }
         }, this)
-      : ko.toJS(mapKeys(qsParams[guid] || {}, (prop) =>
+      : ko.toJS(utils.mapKeys(qsParams[guid] || {}, (prop) =>
           cache[guid] && cache[guid][prop]
             ? cache[guid][prop].parser(qsParams[guid][prop])
             : qsParams[guid][prop]))
   }
   // cache[guid][prop].parser(qsParams[guid][prop])
 
-  setDefaults(q, parser = identity) {
+  setDefaults(q, parser = utils.identity) {
     for (const pn in q) {
       this.get(pn, q[pn], parser)
     }
@@ -131,20 +132,20 @@ class Query {
   update(query = {}, pathname = this.ctx.pathname()) {
     const guid = this.ctx.config.depth + pathname
 
-    if (deepEquals(qsParams[guid], query)) {
+    if (utils.deepEquals(qsParams[guid], query)) {
       return
     }
 
-    merge(qsParams, { [guid]: query }, false)
+    utils.merge(qsParams, { [guid]: query }, false)
     trigger(!trigger())
   }
 
   updateFromString(str, pathname) {
     if (pathname) {
       const guid = this.ctx.config.depth + pathname
-      merge(qsParams, { [guid]: qs.parse(str)[guid] }, false)
+      utils.merge(qsParams, { [guid]: qs.parse(str)[guid] }, false)
     } else {
-      merge(qsParams, qs.parse(str), false)
+      utils.merge(qsParams, qs.parse(str), false)
     }
     trigger(!trigger())
   }
@@ -154,7 +155,7 @@ class Query {
     const workingParams = qsParams
 
     if (query) {
-      merge(workingParams, { [this.ctx.config.depth + pathname]: query }, false)
+      utils.merge(workingParams, { [this.ctx.config.depth + pathname]: query }, false)
     }
 
     for (const id in workingParams) {
@@ -165,7 +166,7 @@ class Query {
         for (const pn in workingParams[id]) {
           const p = workingParams[id][pn]
           const d = cache[id][pn].defaultVal
-          if (!isUndefined(p) && !deepEquals(p, d)) {
+          if (typeof p !== 'undefined' && !utils.deepEquals(p, d)) {
             nonDefaultParams[id][pn] = p
           }
         }

@@ -86,12 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Context = __webpack_require__(3);
 	var Route = __webpack_require__(11);
 
-	var _require = __webpack_require__(9);
-
-	var isUndefined = _require.isUndefined;
-
-
-	var clickEvent = !isUndefined(document) && document.ontouchstart ? 'touchstart' : 'click';
+	var clickEvent = 'undefined' !== typeof document && document.ontouchstart ? 'touchstart' : 'click';
 
 	var Router = function () {
 	  function Router(el, bindingCtx, _ref) {
@@ -258,10 +253,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var qs = __webpack_require__(4);
 	var queryFactory = __webpack_require__(8).factory;
 	var stateFactory = __webpack_require__(10).factory;
-
-	var _require = __webpack_require__(9);
-
-	var merge = _require.merge;
+	var utils = __webpack_require__(9);
 
 	var Context = function () {
 	  function Context(bindingCtx, config) {
@@ -375,10 +367,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 
 	      if (state === false && samePage) {
-	        merge(toCtx, { state: fromCtx.state }, false);
+	        utils.merge(toCtx, { state: fromCtx.state }, false);
 	      } else if (!this.config.persistState && state) {
 	        toCtx.state = {};
-	        merge(toCtx.state, state, false, true);
+	        utils.merge(toCtx.state, state, false, true);
 	      }
 
 	      if (this.config.persistState) {
@@ -405,7 +397,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      function complete(animate) {
 	        var el = this.config.el.getElementsByClassName('component-wrapper')[0];
 	        delete toCtx.query;
-	        merge(this, toCtx);
+	        utils.merge(this, toCtx);
 	        if (query) {
 	          this.query.update(query, pathname);
 	        }
@@ -1003,15 +995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var ko = __webpack_require__(1);
 	var qs = __webpack_require__(4);
-
-	var _require = __webpack_require__(9);
-
-	var deepEquals = _require.deepEquals;
-	var identity = _require.identity;
-	var isUndefined = _require.isUndefined;
-	var mapKeys = _require.mapKeys;
-	var merge = _require.merge;
-
+	var utils = __webpack_require__(9);
 
 	var qsParams = {};
 	var trigger = ko.observable(true);
@@ -1039,7 +1023,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Query, [{
 	    key: 'get',
 	    value: function get(prop, defaultVal) {
-	      var parser = arguments.length <= 2 || arguments[2] === undefined ? identity : arguments[2];
+	      var parser = arguments.length <= 2 || arguments[2] === undefined ? utils.identity : arguments[2];
 
 	      var query = this;
 	      var ctx = this.ctx;
@@ -1056,19 +1040,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	          value: ko.pureComputed({
 	            read: function read() {
 	              trigger();
-	              if (qsParams && qsParams[guid] && isUndefined(qsParams[guid][prop])) {
+
+	              if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
 	                return cache[guid][prop].parser(qsParams[guid][prop]);
 	              }
 
 	              return defaultVal;
 	            },
 	            write: function write(v) {
-	              if (deepEquals(v, this.prev)) {
+	              if (utils.deepEquals(v, this.prev)) {
 	                return;
 	              }
 	              this.prev = v;
 
-	              merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
+	              utils.merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
 
 	              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
 	              trigger(!trigger());
@@ -1099,7 +1084,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.get(pn)(q[pn]);
 	          }
 	        }
-	      }, this) : ko.toJS(mapKeys(qsParams[guid] || {}, function (prop) {
+	      }, this) : ko.toJS(utils.mapKeys(qsParams[guid] || {}, function (prop) {
 	        return cache[guid] && cache[guid][prop] ? cache[guid][prop].parser(qsParams[guid][prop]) : qsParams[guid][prop];
 	      }));
 	    }
@@ -1108,7 +1093,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'setDefaults',
 	    value: function setDefaults(q) {
-	      var parser = arguments.length <= 1 || arguments[1] === undefined ? identity : arguments[1];
+	      var parser = arguments.length <= 1 || arguments[1] === undefined ? utils.identity : arguments[1];
 
 	      for (var pn in q) {
 	        this.get(pn, q[pn], parser);
@@ -1160,11 +1145,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var guid = this.ctx.config.depth + pathname;
 
-	      if (deepEquals(qsParams[guid], query)) {
+	      if (utils.deepEquals(qsParams[guid], query)) {
 	        return;
 	      }
 
-	      merge(qsParams, _defineProperty({}, guid, query), false);
+	      utils.merge(qsParams, _defineProperty({}, guid, query), false);
 	      trigger(!trigger());
 	    }
 	  }, {
@@ -1172,9 +1157,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function updateFromString(str, pathname) {
 	      if (pathname) {
 	        var guid = this.ctx.config.depth + pathname;
-	        merge(qsParams, _defineProperty({}, guid, qs.parse(str)[guid]), false);
+	        utils.merge(qsParams, _defineProperty({}, guid, qs.parse(str)[guid]), false);
 	      } else {
-	        merge(qsParams, qs.parse(str), false);
+	        utils.merge(qsParams, qs.parse(str), false);
 	      }
 	      trigger(!trigger());
 	    }
@@ -1185,7 +1170,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var workingParams = qsParams;
 
 	      if (query) {
-	        merge(workingParams, _defineProperty({}, this.ctx.config.depth + pathname, query), false);
+	        utils.merge(workingParams, _defineProperty({}, this.ctx.config.depth + pathname, query), false);
 	      }
 
 	      for (var id in workingParams) {
@@ -1196,7 +1181,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          for (var pn in workingParams[id]) {
 	            var p = workingParams[id][pn];
 	            var d = cache[id][pn].defaultVal;
-	            if (!isUndefined(p) && !deepEquals(p, d)) {
+	            if (typeof p !== 'undefined' && !utils.deepEquals(p, d)) {
 	              nonDefaultParams[id][pn] = p;
 	            }
 	          }
@@ -1272,11 +1257,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (var _iterator = props[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	      var prop = _step.value;
 
-	      if (isUndefined(dest[prop])) dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) {
+	      if (typeof dest[prop] === 'undefined') dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) {
 	        if (!deepEquals(dest[prop](), src[prop])) {
 	          dest[prop](src[prop]);
 	        }
-	      } else if (isUndefined(src[prop])) dest[prop] = undefined;else if (src[prop].constructor === Object) {
+	      } else if (typeof src[prop] === 'undefined') dest[prop] = undefined;else if (src[prop].constructor === Object) {
 	        if (prune) {
 	          dest[prop] = {};
 	        }
@@ -1309,8 +1294,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if ((typeof foo === 'undefined' ? 'undefined' : _typeof(foo)) !== (typeof bar === 'undefined' ? 'undefined' : _typeof(bar))) {
 	    return false;
 	  }
-	  if (isUndefined(foo)) {
-	    return isUndefined(bar);
+	  if (typeof foo === 'undefined') {
+	    return typeof bar === 'undefined';
 	  }
 	  if (isPrimitiveOrDate(foo) && isPrimitiveOrDate(bar)) {
 	    return foo === bar;
@@ -1409,10 +1394,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return x;
 	}
 
-	function isUndefined(x) {
-	  return typeof x === 'undefined';
-	}
-
 	function isPrimitiveOrDate(obj) {
 	  return obj === null || obj === undefined || obj.constructor === String || obj.constructor === Number || obj.constructor === Boolean || obj instanceof Date;
 	}
@@ -1422,8 +1403,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  mapKeys: mapKeys,
 	  merge: merge,
 	  deepEquals: deepEquals,
-	  identity: identity,
-	  isUndefined: isUndefined
+	  identity: identity
 	};
 
 /***/ },
@@ -1433,11 +1413,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var ko = __webpack_require__(1);
-
-	var _require = __webpack_require__(9);
-
-	var deepEquals = _require.deepEquals;
-
+	var utils = __webpack_require__(9);
 
 	module.exports = {
 	  factory: function factory(ctx) {
@@ -1453,7 +1429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var s = history.state || {};
 	          var key = ctx.config.depth + ctx.pathname();
 
-	          if (!deepEquals(v, history.state ? history.state[ctx.config.depth + ctx.pathname()] : {})) {
+	          if (!utils.deepEquals(v, history.state ? history.state[ctx.config.depth + ctx.pathname()] : {})) {
 	            if (s[key]) {
 	              delete s[key];
 	            }
@@ -1505,11 +1481,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var pathtoRegexp = __webpack_require__(12);
-
-	var _require = __webpack_require__(9);
-
-	var decodeURLEncodedURIComponent = _require.decodeURLEncodedURIComponent;
-	var isUndefined = _require.isUndefined;
+	var utils = __webpack_require__(9);
 
 	var Route = function () {
 	  function Route(path, component) {
@@ -1549,7 +1521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (~hIndex) {
 	        var parts = path.split('#');
 	        path = parts[0];
-	        hash = decodeURLEncodedURIComponent(parts[1]);
+	        hash = utils.decodeURLEncodedURIComponent(parts[1]);
 	      }
 
 	      var qsIndex = path.indexOf('?');
@@ -1567,10 +1539,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      for (var i = 1, len = matches.length; i < len; ++i) {
 	        var k = this._keys[i - 1];
-	        var v = decodeURLEncodedURIComponent(matches[i]);
-	        if (!isUndefined(v) || !hasOwnProperty.call(params, k.name)) {
+	        var v = utils.decodeURLEncodedURIComponent(matches[i]);
+	        if (v !== undefined || !hasOwnProperty.call(params, k.name)) {
 	          if (k.name === 'child_path') {
-	            if (!isUndefined(v)) {
+	            if (v !== undefined) {
 	              childPath = '/' + v;
 	              path = path.substring(0, path.lastIndexOf(childPath));
 	              pathname = pathname.substring(0, pathname.lastIndexOf(childPath));
@@ -2006,11 +1978,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ko = __webpack_require__(1);
 	var qs = __webpack_require__(4);
 
-	var _require = __webpack_require__(9);
-
-	var isUndefined = _require.isUndefined;
-
-
 	ko.bindingHandlers.path = {
 	  init: function init(e, xx, b, x, c) {
 	    applyBinding.call(this, e, b, c);
@@ -2107,8 +2074,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function getRouter(ctx) {
-	  while (!isUndefined(ctx)) {
-	    if (!isUndefined(ctx.$router)) {
+	  while (typeof ctx !== 'undefined') {
+	    if (typeof ctx.$router !== 'undefined') {
 	      return ctx.$router;
 	    }
 
