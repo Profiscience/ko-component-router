@@ -41,7 +41,7 @@ class Query {
         value: ko.pureComputed({
           read() {
             trigger()
-            
+
             if (qsParams && qsParams[guid] && !isUndefined(qsParams[guid][prop])) {
               return cache[guid][prop].parser(qsParams[guid][prop])
             }
@@ -86,10 +86,11 @@ class Query {
         }, this)
       : ko.toJS(mapKeys(qsParams[guid] || {}, (prop) =>
           cache[guid] && cache[guid][prop]
-            ? cache[guid][prop].parser(qsParams[guid][prop])
+            ? isUndefined(qsParams[guid][prop])
+              ? undefined
+              : cache[guid][prop].parser(qsParams[guid][prop])
             : qsParams[guid][prop]))
   }
-  // cache[guid][prop].parser(qsParams[guid][prop])
 
   setDefaults(q, parser = identity) {
     for (const pn in q) {
