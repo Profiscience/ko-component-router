@@ -16,6 +16,7 @@ function applyBinding(el, bindings, ctx) {
     if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
       return true
     }
+    if (e.target.target) return true
 
     const [router, path] = getRoute(ctx, bindings)
     const state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false

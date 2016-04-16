@@ -424,7 +424,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function getRouteForUrl(url) {
 	      var pathname = url.split('#')[0].split('?')[0];
 
-	      var matchingRouteWithFewestDynamicSegments = undefined;
+	      var matchingRouteWithFewestDynamicSegments = void 0;
 	      var fewestMatchingSegments = Infinity;
 
 	      for (var rn in this.config.routes) {
@@ -1269,19 +1269,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  try {
 	    for (var _iterator = props[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	      var prop = _step.value;
+	      var _prop = _step.value;
 
-	      if (isUndefined(dest[prop])) dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) {
-	        if (!deepEquals(dest[prop](), src[prop])) {
-	          dest[prop](src[prop]);
+	      if (isUndefined(dest[_prop])) dest[_prop] = createAsObservable ? fromJS(src[_prop]) : src[_prop];else if (ko.isWritableObservable(dest[_prop])) {
+	        if (!deepEquals(dest[_prop](), src[_prop])) {
+	          dest[_prop](src[_prop]);
 	        }
-	      } else if (isUndefined(src[prop])) dest[prop] = undefined;else if (src[prop].constructor === Object) {
+	      } else if (isUndefined(src[_prop])) dest[_prop] = undefined;else if (src[_prop].constructor === Object) {
 	        if (prune) {
-	          dest[prop] = {};
+	          dest[_prop] = {};
 	        }
 
-	        merge(dest[prop], src[prop], createAsObservable);
-	      } else dest[prop] = src[prop];
+	        merge(dest[_prop], src[_prop], createAsObservable);
+	      } else dest[_prop] = src[_prop];
 	    }
 	  } catch (err) {
 	    _didIteratorError = true;
@@ -1385,7 +1385,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function fromJS(obj, parentIsArray) {
-	  var obs = undefined;
+	  var obs = void 0;
 
 	  if (isPrimitiveOrDate(obj)) obs = parentIsArray ? obj : ko.observable(obj);else if (obj instanceof Array) {
 	    obs = [];
@@ -1539,7 +1539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'parse',
 	    value: function parse(path) {
-	      var childPath = undefined;
+	      var childPath = void 0;
 	      var hash = '';
 	      var params = {};
 	      var hIndex = path.indexOf('#');
@@ -1551,8 +1551,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      var qsIndex = path.indexOf('?');
-	      var pathname = undefined,
-	          querystring = undefined; // eslint-disable-line
+	      var pathname = void 0,
+	          querystring = void 0; // eslint-disable-line
 
 	      var _ref = ~qsIndex ? path.split('?') : [path];
 
@@ -2033,6 +2033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
 	      return true;
 	    }
+	    if (e.target.target) return true;
 
 	    var _getRoute = getRoute(ctx, bindings);
 
