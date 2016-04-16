@@ -2,6 +2,7 @@
 
 const ko = require('knockout')
 const qs = require('qs')
+const { isUndefined } = require('./utils')
 
 ko.bindingHandlers.path = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
 ko.bindingHandlers.state = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
@@ -23,6 +24,7 @@ function applyBinding(el, bindings, ctx) {
 
     if (handled) {
       e.preventDefault()
+      e.stopImmediatePropagation()
     }
 
     return !handled
@@ -47,7 +49,7 @@ function applyBinding(el, bindings, ctx) {
     bindingsToApply.css = {
       'active-path': ko.pureComputed(() => {
         const [router, path] = getRoute(ctx, bindings)
-        return router.route() !== '' && path
+        return !router.isNavigating() && router.route() !== '' && path
           ? router.route().matches(path)
           : false
         })
@@ -75,8 +77,8 @@ function getRoute(ctx, bindings) {
 }
 
 function getRouter(ctx) {
-  while (typeof ctx !== 'undefined') {
-    if (typeof ctx.$router !== 'undefined') {
+  while (!isUndefined(ctx)) {
+    if (!isUndefined(ctx.$router)) {
       return ctx.$router
     }
 
