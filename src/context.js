@@ -57,7 +57,7 @@ class Context {
     const route = this.getRouteForUrl(url)
     const firstRun = this.route() === ''
 
-    if (!firstRun && !route) {
+    if (!route) {
       return this.$parent ? this.$parent.update(...arguments) : false
     }
 
@@ -144,7 +144,8 @@ class Context {
       ko.tasks.runEarly()
 
       if (animate) {
-        this.config.inTransition(el, fromCtx, toCtx)
+        ko.tasks.schedule(() =>
+          this.config.inTransition(el, fromCtx, toCtx))
       }
     }
 

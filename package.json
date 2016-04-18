@@ -69,7 +69,8 @@
     "uglify-js": "^2.4.24",
     "url-loader": "^0.5.7",
     "velocity-animate": "^1.2.3",
-    "webpack": "^1.11.0"
+    "webpack": "^1.11.0",
+    "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
     "path-to-regexp": "^1.2.1",

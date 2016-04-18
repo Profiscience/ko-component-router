@@ -323,7 +323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var route = this.getRouteForUrl(url);
 	      var firstRun = this.route() === '';
 
-	      if (!firstRun && !route) {
+	      if (!route) {
 	        var _$parent;
 
 	        return this.$parent ? (_$parent = this.$parent).update.apply(_$parent, arguments) : false;
@@ -403,6 +403,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      function complete(animate) {
+	        var _this = this;
+
 	        var el = this.config.el.getElementsByClassName('component-wrapper')[0];
 	        delete toCtx.query;
 	        merge(this, toCtx);
@@ -413,7 +415,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ko.tasks.runEarly();
 
 	        if (animate) {
-	          this.config.inTransition(el, fromCtx, toCtx);
+	          ko.tasks.schedule(function () {
+	            return _this.config.inTransition(el, fromCtx, toCtx);
+	          });
 	        }
 	      }
 
