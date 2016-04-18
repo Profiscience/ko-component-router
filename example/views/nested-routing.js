@@ -170,7 +170,7 @@ ko.components.register('foo-router', {
         <a data-bind="path: '/bar'" class="btn btn-danger">bar</a>
         <a data-bind="path: '/baz'" class="btn btn-info">baz</a>
         <a data-bind="path: '/qux'" class="btn btn-warning">qux</a>
-        <a data-bind="path: '/fooception/foo', query: { foo: randomString() }, state: randomObj()" class="btn btn-primary">foo-ception</a>
+        <a data-bind="path: './fooception/foo', query: { foo: randomString() }, state: randomObj()" class="btn btn-primary">foo-ception</a>
         <br><br>
         <ko-component-router params="routes: routes">
         </ko-component-router>

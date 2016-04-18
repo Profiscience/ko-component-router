@@ -314,10 +314,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var url = (origUrl + '').replace('/#!', '');
 
-	      var p = this;
-	      while (p) {
-	        url = url.replace(p.config.base, '');
-	        p = p.$parent;
+	      if (url.indexOf('./') === 0) {
+	        url = url.replace('./', '/');
+	      } else {
+	        var p = this;
+	        while (p) {
+	          url = url.replace(p.config.base, '');
+	          p = p.$parent;
+	        }
 	      }
 
 	      var route = this.getRouteForUrl(url);
@@ -2057,7 +2061,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (handled) {
 	      e.preventDefault();
 	      e.stopImmediatePropagation();
-	    } else {
+	    } else if (!router.$parent) {
 	      console.error('[ko-component-router] ' + path + ' did not match any routes!'); // eslint-disable-line
 	    }
 
@@ -2074,6 +2078,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var path = _getRoute4[1];
 
 	      var querystring = bindings.has('query') ? '?' + qs.stringify(bindings.get('query')) : '';
+
+	      while (router.$parent) {
+	        path = router.config.base + path;
+	        router = router.$parent;
+	      }
+
 	      return router ? router.config.base + (!router.config.hashbang || router.$parent ? '' : '/#!') + path + querystring : '#';
 	    })
 	  };

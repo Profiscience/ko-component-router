@@ -48,10 +48,14 @@ class Context {
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
     let url = (origUrl + '').replace('/#!', '')
 
-    let p = this
-    while (p) {
-      url = url.replace(p.config.base, '')
-      p = p.$parent
+    if (url.indexOf('./') === 0) {
+      url = url.replace('./', '/')
+    } else {
+      let p = this
+      while (p) {
+        url = url.replace(p.config.base, '')
+        p = p.$parent
+      }
     }
 
     const route = this.getRouteForUrl(url)

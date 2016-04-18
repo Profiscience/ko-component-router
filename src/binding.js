@@ -30,7 +30,7 @@ function applyBinding(el, bindings, ctx) {
     if (handled) {
       e.preventDefault()
       e.stopImmediatePropagation()
-    } else {
+    } else if (!router.$parent) {
       console.error(`[ko-component-router] ${path} did not match any routes!`) // eslint-disable-line
     }
 
@@ -39,10 +39,16 @@ function applyBinding(el, bindings, ctx) {
 
   bindingsToApply.attr = {
     href: ko.pureComputed(() => {
-      const [router, path] = getRoute(ctx, bindings)
+      let [router, path] = getRoute(ctx, bindings)
       const querystring = bindings.has('query')
         ? '?' + qs.stringify(bindings.get('query'))
         : ''
+
+      while (router.$parent) {
+        path = router.config.base + path
+        router = router.$parent
+      }
+
       return router
         ? router.config.base
           + (!router.config.hashbang || router.$parent ? '' : '/#!')
