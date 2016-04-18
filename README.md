@@ -64,4 +64,4 @@ ko.applyBindings()
 </body>
 ```
 
-_Requires [babel-polyfill]() for IE support_
+_Requires [babel-polyfill](https://babeljs.io/docs/usage/polyfill/) for IE support_
