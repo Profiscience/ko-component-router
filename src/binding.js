@@ -21,7 +21,7 @@ function applyBinding(el, bindings, ctx) {
     if (debounce || hasOtherTarget || hasExternalRel || modifierKey) {
       return true
     }
-    
+
     const [router, path] = getRoute(ctx, bindings)
     const state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false
     const query = bindings.has('query') ? bindings.get('query') : false
@@ -30,6 +30,8 @@ function applyBinding(el, bindings, ctx) {
     if (handled) {
       e.preventDefault()
       e.stopImmediatePropagation()
+    } else {
+      console.error(`[ko-component-router] ${path} did not match any routes!`) // eslint-disable-line
     }
 
     return !handled

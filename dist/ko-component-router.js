@@ -2053,6 +2053,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (handled) {
 	      e.preventDefault();
 	      e.stopImmediatePropagation();
+	    } else {
+	      console.error('[ko-component-router] ' + path + ' did not match any routes!'); // eslint-disable-line
 	    }
 
 	    return !handled;
