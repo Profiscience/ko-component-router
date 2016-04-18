@@ -1,7 +1,10 @@
 'use strict'
 
 module.exports = {
-  entry: './example/app.js',
+  entry: [
+    'babel-polyfill',
+    './example/app.js'
+  ],
 
   output: {
     path: 'example/dist',

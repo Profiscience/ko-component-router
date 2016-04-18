@@ -63,3 +63,5 @@ ko.applyBindings()
   <app></app>
 </body>
 ```
+
+_Requires [babel-polyfill]() for IE support_
