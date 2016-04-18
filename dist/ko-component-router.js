@@ -2030,7 +2030,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  el.href = '#';
 
 	  bindingsToApply.click = function (data, e) {
-	    if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
+	    var debounce = 1 !== which(e);
+	    var hasOtherTarget = el.hasAttribute('target');
+	    var hasExternalRel = el.getAttribute('rel') === 'external';
+	    var modifierKey = e.metaKey || e.ctrlKey || e.shiftKey;
+
+	    if (debounce || hasOtherTarget || hasExternalRel || modifierKey) {
 	      return true;
 	    }
 

@@ -13,10 +13,15 @@ function applyBinding(el, bindings, ctx) {
   el.href = '#'
 
   bindingsToApply.click = (data, e) => {
-    if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
+    const debounce = 1 !== which(e)
+    const hasOtherTarget = el.hasAttribute('target')
+    const hasExternalRel = el.getAttribute('rel') === 'external'
+    const modifierKey = e.metaKey || e.ctrlKey || e.shiftKey
+
+    if (debounce || hasOtherTarget || hasExternalRel || modifierKey) {
       return true
     }
-
+    
     const [router, path] = getRoute(ctx, bindings)
     const state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false
     const query = bindings.has('query') ? bindings.get('query') : false
