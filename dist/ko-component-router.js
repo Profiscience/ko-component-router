@@ -323,7 +323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var route = this.getRouteForUrl(url);
 	      var firstRun = this.route() === '';
 
-	      if (!route) {
+	      if (!firstRun && !route) {
 	        var _$parent;
 
 	        return this.$parent ? (_$parent = this.$parent).update.apply(_$parent, arguments) : false;

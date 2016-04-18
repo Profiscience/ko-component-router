@@ -57,7 +57,7 @@ class Context {
     const route = this.getRouteForUrl(url)
     const firstRun = this.route() === ''
 
-    if (!route) {
+    if (!firstRun && !route) {
       return this.$parent ? this.$parent.update(...arguments) : false
     }
 
