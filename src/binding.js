@@ -82,7 +82,7 @@ function getRoute(ctx, bindings) {
   }
 
   if (path.indexOf('//') === 0) {
-    path.replace('//', '/')
+    path = path.replace('//', '/')
 
     while (router.$parent) {
       router = router.$parent
