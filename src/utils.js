@@ -7,6 +7,12 @@ function decodeURLEncodedURIComponent(val) {
   return decodeURIComponent(val.replace(/\+/g, ' '))
 }
 
+function mapKeys(obj, fn) {
+  const mappedObj = {}
+  Object.keys(obj).forEach((k) => mappedObj[k] = fn(k))
+  return mappedObj
+}
+
 function merge(dest, src, createAsObservable = true, prune = false) {
   if (!src) {
     return prune ? undefined : dest
@@ -23,7 +29,7 @@ function merge(dest, src, createAsObservable = true, prune = false) {
   }
 
   for (const prop of props) {
-    if (typeof dest[prop] === 'undefined')
+    if (isUndefined(dest[prop]))
       dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop]
 
     else if (ko.isWritableObservable(dest[prop])) {
@@ -32,7 +38,7 @@ function merge(dest, src, createAsObservable = true, prune = false) {
       }
     }
 
-    else if (typeof src[prop] === 'undefined')
+    else if (isUndefined(src[prop]))
       dest[prop] = undefined
 
     else if (src[prop].constructor === Object) {
@@ -57,8 +63,8 @@ function deepEquals(foo, bar) {
   if (typeof foo !== typeof bar) {
     return false
   }
-  if (typeof foo === 'undefined') {
-    return typeof bar === 'undefined'
+  if (isUndefined(foo)) {
+    return isUndefined(bar)
   }
   if (isPrimitiveOrDate(foo) && isPrimitiveOrDate(bar)) {
     return foo === bar
@@ -116,6 +122,14 @@ function fromJS(obj, parentIsArray) {
   return obs
 }
 
+function identity(x) {
+  return x
+}
+
+function isUndefined(x) {
+  return typeof x === 'undefined'
+}
+
 function isPrimitiveOrDate(obj) {
   return obj === null ||
          obj === undefined ||
@@ -127,6 +141,9 @@ function isPrimitiveOrDate(obj) {
 
 module.exports = {
   decodeURLEncodedURIComponent,
+  mapKeys,
   merge,
-  deepEquals
+  deepEquals,
+  identity,
+  isUndefined
 }

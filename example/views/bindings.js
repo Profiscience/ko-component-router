@@ -33,6 +33,13 @@ ko.components.register('bindings', {
         if you need to force a bubble up to the parent router, you can add <code>..</code>
         for each level you want to go up. e.g. <code>data-bind="path: '../user/1234'"</code>
         </p>
+        <p>
+        if you need to force the router to evaluate the route without bubbling,
+        you can prepend <code>./</code>
+        </p>
+        <p>
+        if you'd like to force the route to be evaluated top-down, prefix your route with <code>//</code>
+        </p>
         <div class="alert alert-info">
           the path binding also binds the class <code>active-path</code> when applicable.
           you can use this to easily style active links, such as those in navs

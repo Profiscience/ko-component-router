@@ -99,21 +99,27 @@ function runTests(t, config) {
 
     // query
     .step(() => {
-      router.update('/about', {}, false, { foo: 'foo' })
+      router.update('/about', {}, false, { foo: 'foo', bazs: ['1', '2', '3'], quxs: ['1', '2', '3'] })
       router.query.get('foo', 'foo')
     })
     .step(() => {
-      const foo = router.query.get('foo', 'foo')
-      const query = router.query.getAll()
-      const observableQuery = router.query.getAll(true)
       router.query.setDefaults({
         bar: 'bar'
       })
+      router.query.setDefaults({ bazs: [] }, (vs) => vs.map((v) => parseInt(v)))
+      router.query.get('quxs', [], (vs) => vs.map((v) => parseInt(v)))
+
+      const foo = router.query.get('foo', 'foo')
+      const query = router.query.getAll()
+      const observableQuery = router.query.getAll(true)
+
       t.equal(foo(), 'foo', 'ctx.query.get works')
-      t.deepEqual(query, { foo: 'foo' }, 'ctx.query.getAll works')
+      t.deepEqual(query, { foo: 'foo', bazs: [1, 2, 3], quxs: [1, 2, 3]  }, 'ctx.query.getAll works')
       t.assert(ko.isObservable(observableQuery), 'ctx.query.getAll(true) returns as observable')
-      t.deepEqual(observableQuery(), { foo: 'foo' })
+      t.deepEqual(observableQuery(), { bazs: [ 1, 2, 3 ], foo: 'foo', quxs: [ 1, 2, 3 ] })
       t.equal(router.query.get('bar')(), 'bar', 'ctx.query.setDefaults works')
+      t.deepEqual(router.query.get('bazs')(), [1,2,3], 'ctx.query.get parsing works')
+      t.deepEqual(router.query.get('quxs')(), [1,2,3], 'ctx.query.setDefaults parsing works')
     })
     .step((done) => {
       const observableQuery = router.query.getAll(true)
@@ -127,7 +133,7 @@ function runTests(t, config) {
     })
     .step(() => {
       const query = router.query.getAll()
-      t.deepEqual(query, { foo: 'foo', bar: 'bar', baz: 'baz' }, 'ctx.query.getAll(true) is writable')
+      t.deepEqual(query, { foo: 'foo', bar: 'bar', baz: 'baz', bazs: [1,2,3], quxs: [1,2,3] }, 'ctx.query.getAll(true) is writable')
       router.update('/about', {}, false, { foo: 'bar' })
     })
     .step((done) => {
@@ -148,7 +154,13 @@ function runTests(t, config) {
       const baz = router.query.get('baz')
 
       const killMe = baz.subscribe(() => {
-        t.deepEqual(router.query.getAll(), { foo: 'bar', bar: 'bar', baz: 'qux' }, 'ctx.query.update works')
+        t.deepEqual(router.query.getAll(), {
+          foo: 'bar',
+          bar: 'bar',
+          baz: 'qux',
+          bazs: [],
+          quxs: []
+        }, 'ctx.query.update works')
         killMe.dispose()
         done()
       })
@@ -376,7 +388,7 @@ ko.components.register('persistent-query-state', {
 })
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 41 * 4 + 4
+  const NUM_TESTS = 43 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')

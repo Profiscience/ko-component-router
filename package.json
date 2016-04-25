@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "3.6.11",
+  "version": "3.7.11",
   "description": "Component-based routing for KnockoutJS",
   "homepage": "https://github.com/caseyWebb/ko-component-router",
   "bugs": {
@@ -42,6 +42,7 @@
   "devDependencies": {
     "babel-core": "^6.2.1",
     "babel-loader": "^6.2.0",
+    "babel-polyfill": "^6.7.4",
     "babel-preset-es2015": "^6.1.18",
     "bootstrap": "^3.3.6",
     "codeclimate-test-reporter": "^0.3.0",
@@ -68,7 +69,8 @@
     "uglify-js": "^2.4.24",
     "url-loader": "^0.5.7",
     "velocity-animate": "^1.2.3",
-    "webpack": "^1.11.0"
+    "webpack": "^1.11.0",
+    "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
     "path-to-regexp": "^1.2.1",

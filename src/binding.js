@@ -2,6 +2,7 @@
 
 const ko = require('knockout')
 const qs = require('qs')
+const { isUndefined } = require('./utils')
 
 ko.bindingHandlers.path = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
 ko.bindingHandlers.state = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
@@ -12,7 +13,12 @@ function applyBinding(el, bindings, ctx) {
   el.href = '#'
 
   bindingsToApply.click = (data, e) => {
-    if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
+    const debounce = 1 !== which(e)
+    const hasOtherTarget = el.hasAttribute('target')
+    const hasExternalRel = el.getAttribute('rel') === 'external'
+    const modifierKey = e.metaKey || e.ctrlKey || e.shiftKey
+
+    if (debounce || hasOtherTarget || hasExternalRel || modifierKey) {
       return true
     }
 
@@ -23,6 +29,9 @@ function applyBinding(el, bindings, ctx) {
 
     if (handled) {
       e.preventDefault()
+      e.stopImmediatePropagation()
+    } else if (!router.$parent) {
+      console.error(`[ko-component-router] ${path} did not match any routes!`) // eslint-disable-line
     }
 
     return !handled
@@ -30,10 +39,16 @@ function applyBinding(el, bindings, ctx) {
 
   bindingsToApply.attr = {
     href: ko.pureComputed(() => {
-      const [router, path] = getRoute(ctx, bindings)
+      let [router, path] = getRoute(ctx, bindings)
       const querystring = bindings.has('query')
         ? '?' + qs.stringify(bindings.get('query'))
         : ''
+
+      while (router.$parent) {
+        path = router.config.base + path
+        router = router.$parent
+      }
+
       return router
         ? router.config.base
           + (!router.config.hashbang || router.$parent ? '' : '/#!')
@@ -47,7 +62,7 @@ function applyBinding(el, bindings, ctx) {
     bindingsToApply.css = {
       'active-path': ko.pureComputed(() => {
         const [router, path] = getRoute(ctx, bindings)
-        return router.route() !== '' && path
+        return !router.isNavigating() && router.route() !== '' && path
           ? router.route().matches(path)
           : false
         })
@@ -66,17 +81,25 @@ function getRoute(ctx, bindings) {
     path = router.canonicalPath()
   }
 
-  while (path && path.match(/\/?\.\./i) && router.$parent) {
-    router = router.$parent
-    path = path.replace(/\/?\.\./i, '')
+  if (path.indexOf('//') === 0) {
+    path = path.replace('//', '/')
+
+    while (router.$parent) {
+      router = router.$parent
+    }
+  } else {
+    while (path && path.match(/\/?\.\./i) && router.$parent) {
+      router = router.$parent
+      path = path.replace(/\/?\.\./i, '')
+    }
   }
 
   return [router, path]
 }
 
 function getRouter(ctx) {
-  while (typeof ctx !== 'undefined') {
-    if (typeof ctx.$router !== 'undefined') {
+  while (!isUndefined(ctx)) {
+    if (!isUndefined(ctx.$router)) {
       return ctx.$router
     }
 

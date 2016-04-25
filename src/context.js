@@ -4,7 +4,7 @@ const ko = require('knockout')
 const qs = require('qs')
 const queryFactory = require('./query').factory
 const stateFactory = require('./state').factory
-const utils = require('./utils')
+const { merge } = require('./utils')
 
 class Context {
   constructor(bindingCtx, config) {
@@ -57,10 +57,14 @@ class Context {
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
     let url = (origUrl + '').replace('/#!', '')
 
-    let p = this
-    while (p) {
-      url = url.replace(p.config.base, '')
-      p = p.$parent
+    if (url.indexOf('./') === 0) {
+      url = url.replace('./', '/')
+    } else {
+      let p = this
+      while (p) {
+        url = url.replace(p.config.base, '')
+        p = p.$parent
+      }
     }
 
     const route = this.getRouteForUrl(url)
@@ -112,10 +116,10 @@ class Context {
     }
 
     if (state === false && samePage) {
-      utils.merge(toCtx, { state: fromCtx.state }, false)
+      merge(toCtx, { state: fromCtx.state }, false)
     } else if (!this.config.persistState && state) {
       toCtx.state = {}
-      utils.merge(toCtx.state, state, false, true)
+      merge(toCtx.state, state, false, true)
     }
 
     if (this.config.persistState) {
@@ -145,7 +149,7 @@ class Context {
     function complete(animate) {
       const el = this.config.el.getElementsByClassName('component-wrapper')[0]
       delete toCtx.query
-      utils.merge(this, toCtx)
+      merge(this, toCtx)
       if (query) {
         this.query.update(query, pathname)
       }
@@ -153,7 +157,8 @@ class Context {
       ko.tasks.runEarly()
 
       if (animate) {
-        this.config.inTransition(el, fromCtx, toCtx)
+        ko.tasks.schedule(() =>
+          this.config.inTransition(el, fromCtx, toCtx))
       }
     }
 
