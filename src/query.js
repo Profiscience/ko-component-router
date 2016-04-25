@@ -7,12 +7,19 @@ const utils = require('./utils')
 const qsParams = {}
 const trigger = ko.observable(true)
 const cache = {}
-let pendingWriteOp
 
 class Query {
   constructor(ctx) {
     this.ctx = ctx
 
+    if (!this.ctx.$parent) {
+      const qsIndex = window.location.href.indexOf('?')
+      if (~qsIndex) {
+        this.updateFromString(window.location.href.split('?')[1])
+      }
+    }
+
+    // make work w/ click bindings w/o closure
     this.get = this.get.bind(this)
     this.clear = this.clear.bind(this)
     this.update = this.update.bind(this)
@@ -33,21 +40,28 @@ class Query {
         value: ko.pureComputed({
           read() {
             trigger()
-            return qsParams[guid][prop] || defaultVal
+
+            if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
+              return qsParams[guid][prop]
+            }
+
+            return defaultVal
           },
           write(v) {
+            if (utils.deepEquals(v, this.prev)) {
+              return
+            }
+            this.prev = v
+
             utils.merge(qsParams, {
               [guid]: { [prop]: v }
             }, false)
 
-            if (pendingWriteOp) {
-              window.cancelAnimationFrame(pendingWriteOp)
-            }
-
-            pendingWriteOp = window.requestAnimationFrame(() => {
-              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid])
-              trigger(!trigger())
-            })
+            ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid])
+            trigger(!trigger())
+          },
+          owner: {
+            prev: null
           }
         })
       }
@@ -56,12 +70,33 @@ class Query {
     return cache[guid][prop].value
   }
 
-  getAll(pathname = this.ctx.pathname()) {
+  getAll(asObservable = false, pathname = this.ctx.pathname()) {
     const guid = this.ctx.config.depth + pathname
-    return ko.toJS(qsParams[guid]) || {}
+    return asObservable
+      ? ko.pureComputed({
+          read() {
+            trigger()
+            return this.getAll()
+          },
+          write(q) {
+            for (const pn in q) {
+              this.get(pn)(q[pn])
+            }
+          }
+        }, this)
+      : (ko.toJS(qsParams[guid]) || {})
   }
 
-  clear(pathname = this.ctx.pathname()) {
+  setDefaults(q) {
+    for (const pn in q) {
+      this.get(pn, q[pn])
+    }
+  }
+
+  clear(pathname) {
+    if (typeof pathname !== 'string') {
+      pathname = this.ctx.pathname()
+    }
     const guid = this.ctx.config.depth + pathname
     for (const pn in cache[guid]) {
       const p = cache[guid][pn]
@@ -69,27 +104,42 @@ class Query {
     }
   }
 
-  destroy() {
-    const guid = this.ctx.config.depth + this.ctx.pathname()
-    for (const p in qsParams[guid]) {
-      if (cache[guid] && cache[guid][p]) {
-        cache[guid][p].value.dispose()
+  reload(force = false, guid = this.ctx.config.depth + this.ctx.pathname()) {
+    if (!this.ctx.config.persistQuery || force) {
+      for (const p in qsParams[guid]) {
+        if (cache[guid] && cache[guid][p]) {
+          cache[guid][p].value.dispose()
+        }
+      }
+      delete qsParams[guid]
+      delete cache[guid]
+    }
+  }
+
+  dispose() {
+    for (const guid in qsParams) {
+      if (guid.indexOf(this.ctx.config.depth) === 0) {
+        this.reload(true, guid)
       }
     }
-    delete qsParams[guid]
-    delete cache[guid]
   }
 
   update(query = {}, pathname = this.ctx.pathname()) {
     const guid = this.ctx.config.depth + pathname
     utils.merge(qsParams, { [guid]: query }, false)
     trigger(!trigger())
+    // ko.tasks.runEarly()
   }
 
-  updateFromString(str) {
-    const queries = qs.parse(str)
-    utils.merge(qsParams, queries, false)
+  updateFromString(str, pathname) {
+    if (pathname) {
+      const guid = this.ctx.config.depth + pathname
+      utils.merge(qsParams, { [guid]: qs.parse(str)[guid] }, false)
+    } else {
+      utils.merge(qsParams, qs.parse(str), false)
+    }
     trigger(!trigger())
+    // ko.tasks.runEarly()
   }
 
   getNonDefaultParams() {

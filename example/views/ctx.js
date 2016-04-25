@@ -78,6 +78,20 @@ class ViewModel {
     // set 'foobar' to 'bar'
     this.foobar('bar')
 
+    this.foobar()
+    // 'bar'
+
+    // sets default values
+    ctx.query.setDefaults({
+      baz: 'quz'
+    })
+
+    ctx.query.getAll(asObservable)
+    // {
+    //   foobar: 'bar',
+    //   baz: 'quz'
+    // }
+
     // reset all params to their default values; triggers only
     // one update
     ctx.query.clear()
@@ -166,7 +180,8 @@ class ViewModel {
           <small class="text-muted">(url, state = {}, push = true, query = false) => {}</small>
         </h2>
         <p>
-          updates the context and trigger one update
+          updates the context and trigger one update; bubbles up to parent router(s)
+          if matching route is not found
         </p>
         <p>
           if <code>push === true</code>, use <code>pushState</code>, else <code>replaceState</code>
@@ -175,6 +190,27 @@ class ViewModel {
           if <code>query</code> is false (or unsupplied), get from parsed querystring from <code>url</code>
           <br>
           if <code>query</code> is an object, set this context's query to the contents
+        </p>
+        <div class="alert alert-info">
+         The top level router's <code>update</code> function is available at <code>ko.router.update()</code>
+        <div>
+      </section>
+
+      <section>
+        <h2 id="parent">
+          $parent
+        </h2>
+        <p>
+          parent router ctx accessor
+        </p>
+      </section>
+
+      <section>
+        <h2 id="child">
+          $child
+        </h2>
+        <p>
+          child router ctx accessor
         </p>
       </section>
 

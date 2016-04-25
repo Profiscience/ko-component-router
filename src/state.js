@@ -1,7 +1,6 @@
 'use strict'
 
 const ko = require('knockout')
-const utils = require('./utils')
 
 module.exports = {
   factory(ctx) {
@@ -14,36 +13,38 @@ module.exports = {
       },
       write(v) {
         if (v) {
-          const oldState = history.state || {}
+          const state = history.state || {}
           const key = ctx.config.depth + ctx.pathname()
-          delete oldState[key]
 
-          history.replaceState(
-            utils.merge(oldState, { [key]: v }, false),
-            document.title,
-            '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath())
+          if (state[key]) {
+            delete state[key]
+          }
 
+          state[key] = v
+          history.replaceState(state, document.title)
           trigger(!trigger())
+          ko.tasks.runEarly()
         }
       }
     })
 
     const _dispose = state.dispose
 
-    state.clear = function() {
-      if (history.state && history.state[ctx.config.depth + ctx.pathname()]) {
-        const newState = history.state
-        delete newState[ctx.config.depth + ctx.pathname()]
-        // history.replaceState(
-        //   newState,
-        //   document.title,
-        //   '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath()
-        // )
+    state.reload = function(force = false, guid = ctx.config.depth + ctx.pathname()) {
+      if (!ctx.config.persistState || force) {
+        if (history.state && history.state[guid]) {
+          const newState = history.state
+          delete newState[guid]
+        }
       }
     }
 
     state.dispose = function() {
-      state.clear()
+      for (const guid in history.state) {
+        if (guid.indexOf(ctx.config.depth) === 0) {
+          state.reload(true, guid)
+        }
+      }
       _dispose.apply(state, arguments)
     }
 

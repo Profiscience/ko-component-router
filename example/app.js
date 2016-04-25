@@ -47,7 +47,15 @@ ko.components.register('app', {
   template: `
     <div class="container">
       <div class="page-header">
-        <small class="text-muted pull-right">
+        <small class="text-muted text-right pull-right">
+          <p>
+            <img src="https://img.shields.io/npm/v/ko-component-router.svg" alt="NPM" title="" />
+            <img src="https://img.shields.io/bower/v/ko-component-router.svg" alt="Bower" title="" />
+            <img src="https://img.shields.io/npm/l/ko-component-router.svg" alt="MIT" title="" />
+            <a href="https://travis-ci.org/caseyWebb/ko-component-router"><img src="https://img.shields.io/travis/caseyWebb/ko-component-router.svg" alt="Travis" title="" /></a>
+            <a href="https://codeclimate.com/github/caseyWebb/ko-component-router"><img src="https://img.shields.io/codeclimate/github/caseyWebb/ko-component-router.svg" alt="CodeClimate" title="" /></a>
+            <a href="https://codeclimate.com/github/caseyWebb/ko-component-router/coverage"><img src="https://img.shields.io/codeclimate/coverage/github/caseyWebb/ko-component-router.svg" alt="Test Coverage" title="" /></a>
+          </p>
           pssst... this documentation is built using knockout + this router,
           <a href="https://github.com/caseyWebb/ko-component-router/tree/gh-pages/example">source</a>
         </small>
@@ -71,6 +79,8 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/config#routes'">routes</a></li>
                   <li><a data-bind="path: '/config#base'">base</a></li>
                   <li><a data-bind="path: '/config#hashbang'">hashbang</a></li>
+                  <li><a data-bind="path: '/config#persistQuery'">persistQuery</a></li>
+                  <li><a data-bind="path: '/config#persistState'">persistState</a></li>
                   <li><a data-bind="path: '/config#inTransition'">inTransition</a></li>
                   <li><a data-bind="path: '/config#outTransition'"">outTransition</a></li>
                 </ul>
@@ -87,6 +97,8 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/context#canonicalPath'">canonicalPath</a></li>
                   <li><a data-bind="path: '/context#hash'">hash</a></li>
                   <li><a data-bind="path: '/context#update'">update</a></li>
+                  <li><a data-bind="path: '/context#parent'">$parent</a></li>
+                  <li><a data-bind="path: '/context#child'">$child</a></li>
                 </ul>
               </li>
               <li>
@@ -97,7 +109,7 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/bindings#query'">query</a></li>
                 </ul>
               </li>
-              <li><a data-bind="path: '/nested-routing'">nested routing</a></li>
+              <li><a data-bind="path: '/nested-routing/foo'">nested routing</a></li>
             </ul>
             <hr>
             <div class="text-center">

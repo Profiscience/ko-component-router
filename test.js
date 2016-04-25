@@ -70,9 +70,24 @@ function runTests(t, config) {
     .step(() => {
       router.update('/nested/foo')
     })
+    // path binding is applied asynchronously
+    // this is by design, not a hack to get passing tests
+    .step((done) => window.requestAnimationFrame(done))
     .step(() => {
       const nestedRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
-      t.equal(nestedRouter.component(), 'foo', 'nested routing works')
+      const link = $('#nested-bar', dom).get(0)
+      t.equal(nestedRouter.component(), 'nested-foo', 'nested routing works')
+      link.click()
+    })
+    .step((done) => window.requestAnimationFrame(done))
+    .step(() => {
+      const nestedRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      const link = $('#parent-about', dom).get(0)
+      t.equal(nestedRouter.component(), 'nested-bar', 'path binding works in nested router within same context')
+      link.click()
+    })
+    .step(() => {
+      t.equal(router.component(), 'about', 'path binding traverses routers if not found')
     })
 
     // hash
@@ -91,14 +106,35 @@ function runTests(t, config) {
     .step(() => {
       const foo = router.query.get('foo', 'foo')
       const query = router.query.getAll()
+      const observableQuery = router.query.getAll(true)
+      router.query.setDefaults({
+        bar: 'bar'
+      })
       t.equal(foo(), 'foo', 'ctx.query.get works')
       t.deepEqual(query, { foo: 'foo' }, 'ctx.query.getAll works')
+      t.assert(ko.isObservable(observableQuery), 'ctx.query.getAll(true) returns as observable')
+      t.deepEqual(observableQuery(), { foo: 'foo' })
+      t.equal(router.query.get('bar')(), 'bar', 'ctx.query.setDefaults works')
+    })
+    .step((done) => {
+      const observableQuery = router.query.getAll(true)
+      const killMe = observableQuery.subscribe(() => {
+        killMe.dispose()
+        t.pass('ctx.query.getAll(true) is subscribable')
+        observableQuery({ bar: 'bar', baz: 'baz' })
+        done()
+      })
+      router.query.get('bar')('qux')
+    })
+    .step(() => {
+      const query = router.query.getAll()
+      t.deepEqual(query, { foo: 'foo', bar: 'bar', baz: 'baz' }, 'ctx.query.getAll(true) is writable')
       router.update('/about', {}, false, { foo: 'bar' })
     })
     .step((done) => {
       const foo = router.query.get('foo', 'foo')
       t.equal(foo(), 'bar', 'querystring param is writeable')
-      t.ok(window.location.href.indexOf('%5Bfoo%5D=bar') > -1, 'non-default params are written to the querystring')
+      t.ok(decodeURIComponent(window.location.href).indexOf('[foo]=bar') > -1, 'non-default params are written to the querystring')
 
       const killMe = foo.subscribe(() => {
         t.equal(router.query.get('foo')(), 'foo', 'ctx.query.clear sets the params to defaults')
@@ -113,7 +149,7 @@ function runTests(t, config) {
       const baz = router.query.get('baz')
 
       const killMe = baz.subscribe(() => {
-        t.deepEqual(router.query.getAll(), { foo: 'bar', baz: 'qux' }, 'ctx.query.update works')
+        t.deepEqual(router.query.getAll(), { foo: 'bar', bar: 'bar', baz: 'qux' }, 'ctx.query.update works')
         killMe.dispose()
         done()
       })
@@ -128,6 +164,10 @@ function runTests(t, config) {
     .step(() => {
       router.update('/bindings')
     })
+    // path binding is applied asynchronously so that links that occur before
+    // the router in the dom can use the bindings
+    //
+    // this is by design and not a hack to get passing tests
     .step((done) => window.requestAnimationFrame(done))
     .step(() => {
       const link = $('#all-bindings-anchor', dom).get(0)
@@ -147,9 +187,9 @@ function runTests(t, config) {
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'bindings', 'state binding preserves path when used alone')
+      t.equal(router.component(), 'bindings', 'state binding persistents path when used alone')
       t.deepEqual(router.state(), { foo: 'foo' }, 'state binding sets state when used alone')
-      t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'state binding preserves query when used alone')
+      t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'state binding persists query when used alone')
     })
     .step(() => {
       router.reload()
@@ -161,16 +201,73 @@ function runTests(t, config) {
       link.click()
     })
     .step(() => {
-      t.equal(router.component(), 'bindings', 'query binding preserves path when used alone')
-      t.deepEqual(router.state(), { bar: 'bar' }, 'query binding preserves state when used alone')
+      t.equal(router.component(), 'bindings', 'query binding persistents path when used alone')
+      t.deepEqual(router.state(), { bar: 'bar' }, 'query binding persists state when used alone')
       t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'query binding sets query when used alone')
     })
     .step(() => {
       const activeLink = $('#should-be-active', dom)
       t.ok(activeLink.hasClass('active-path'), 'path binding sets `active` class')
-      
-      resolve()
     })
+
+    // anchors
+    .step(() => {
+      router.update('/anchors')
+    })
+    .step(() => {
+      $('body').append($('#about-link', dom))
+      const aboutLink = $('#about-link').get(0)
+
+      aboutLink.click()
+    })
+    .step(() => {
+      const aboutLink = $('#about-link').get(0)
+      t.equal(ko.contextFor(aboutLink).$router.component(), 'about', 'clicking a link navigates')
+    })
+    .step(() => {
+      router.update('/anchors')
+    })
+    .step(() => {
+      $('body').append($('#ignored-links', dom))
+
+      let count = 0
+      $('body').on('click', (e) => {
+        count++
+        e.preventDefault()
+      })
+
+      $('#ignored-links *').each((i, el) => {
+        el.click()
+      })
+
+      t.equal(count, $('#ignored-links *').length, 'ignores appropriate links')
+    })
+
+    // persistQuery & persistState
+    .step(() => {
+      router.update('/persistent/foo')
+    })
+    .step(() => {
+      const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      persistentRouter.state({ foo: 'foo' })
+      persistentRouter.query.get('foo')('foo')
+      persistentRouter.update('/bar')
+    })
+    .step(() => {
+      const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      t.equals(persistentRouter.state(), undefined)
+      t.deepEquals(persistentRouter.query.getAll(), {})
+      t.equals(persistentRouter.component(), 'bar')
+      persistentRouter.update('/foo')
+    })
+    .step(() => {
+      const persistentRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
+      t.deepEqual(persistentRouter.state(), { foo: 'foo' }, 'persistState works')
+      t.equals(persistentRouter.query.get('foo')(), 'foo', 'persistQuery works')
+      t.equals(persistentRouter.component(), 'foo')
+    })
+
+    .step(() => resolve())
   })
 }
 
@@ -188,11 +285,15 @@ class RoutingTest {
       // route w/ nested router
       '/nested/!': 'nested',
 
-      // bindings test component
+      // various test components
       '/bindings': 'bindings',
+      '/anchors': 'anchors',
 
       // named wildcard segment
       '/file/:file(*)': 'file',
+
+      // persistQuery & persistState options
+      '/persistent/!': 'persistent-query-state',
 
       // wildcard segment
       '/*': '404'
@@ -204,18 +305,6 @@ ko.components.register('about',   { synchronous: true, template: 'ABOUT' })
 ko.components.register('user',    { synchronous: true, template: 'USER' })
 ko.components.register('404',     { synchronous: true, template: '404' })
 ko.components.register('file',    { synchronous: true, template: 'FILE' })
-ko.components.register('foo',     { synchronous: true, template: 'FOO' })
-ko.components.register('nested',  {
-  synchronous: true,
-  template: 'NESTED <ko-component-router params="routes: routes"></ko-component-router>',
-  viewModel: class Nested {
-    constructor() {
-      this.routes = {
-        '/foo': 'foo'
-      }
-    }
-  }
-})
 ko.components.register('bindings', {
   synchronous: true,
   template: `
@@ -227,9 +316,68 @@ ko.components.register('bindings', {
     <a id="query-binding-anchor" data-bind="query: { bar: 'bar' }"></a>
   `
 })
+ko.components.register('anchors', {
+  synchronous: true,
+  template: `
+    <a id="about-link" href="/about"></a>
+    <div id="ignored-links">
+      <button id="not-a-link"></button>
+      <a download="/foo"></a>
+      <a target="_blank"></a>
+      <a rel="external"></a>
+      <a href="mailto:foobar@example.com"></a>
+      <a href="http://example.com/"></a>
+      <a href="#"></a>
+    </div>
+  `
+})
+ko.components.register('nested-foo', {
+  synchronous: true,
+  template: `
+    <a id="nested-bar" data-bind="path: \'/bar\'"></a>
+  `
+})
+ko.components.register('nested-bar', {
+  synchronous: true,
+  template: `
+    <a id="parent-about" data-bind="path: \'/about\'"></a>
+  `
+})
+ko.components.register('nested',  {
+  synchronous: true,
+  template: 'NESTED <ko-component-router params="routes: routes"></ko-component-router>',
+  viewModel: class Nested {
+    constructor() {
+      this.routes = {
+        '/foo': 'nested-foo',
+        '/bar': 'nested-bar'
+      }
+    }
+  }
+})
+ko.components.register('foo', { synchronous: true, template: '<h1>foo</h1>' })
+ko.components.register('bar', { synchronous: true, template: '<h1>bar</h1>' })
+ko.components.register('persistent-query-state', {
+  synchronous: true,
+  template: `
+    <ko-component-router params="
+      routes: routes,
+      persistState: true,
+      persistQuery: true
+    "></ko-component-router>
+  `,
+  viewModel: class Tabs {
+    constructor() {
+      this.routes = {
+        '/foo': 'foo',
+        '/bar': 'bar'
+      }
+    }
+  }
+})
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 26 * 4 + 4
+  const NUM_TESTS = 41 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')

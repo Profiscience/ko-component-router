@@ -63,7 +63,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	ko.components.register('ko-component-router', {
 	  synchronous: true,
 	  viewModel: router,
-	  template: '<div data-bind=\'if: ctx.component\'>\n      <div data-bind=\'component: {\n        name: ctx.component,\n        params: ctx\n      }\'></div>\n    </div>'
+	  template: '<div data-bind=\'if: ctx.component\'>\n      <div class="component-wrapper" data-bind=\'component: {\n        name: ctx.component,\n        params: ctx\n      }\'></div>\n    </div>'
 	});
 
 /***/ },
@@ -78,7 +78,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -88,7 +88,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var clickEvent = 'undefined' !== typeof document && document.ontouchstart ? 'touchstart' : 'click';
 
-	var Router = (function () {
+	var Router = function () {
 	  function Router(el, bindingCtx, _ref) {
 	    var routes = _ref.routes;
 	    var _ref$base = _ref.base;
@@ -99,34 +99,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var inTransition = _ref$inTransition === undefined ? noop : _ref$inTransition;
 	    var _ref$outTransition = _ref.outTransition;
 	    var outTransition = _ref$outTransition === undefined ? noop : _ref$outTransition;
+	    var _ref$persistState = _ref.persistState;
+	    var persistState = _ref$persistState === undefined ? false : _ref$persistState;
+	    var _ref$persistQuery = _ref.persistQuery;
+	    var persistQuery = _ref$persistQuery === undefined ? false : _ref$persistQuery;
 
 	    _classCallCheck(this, Router);
-
-	    var parentRouterCtx = bindingCtx.$parentContext && bindingCtx.$parentContext.$router;
-	    var dispatch = true;
-	    if (parentRouterCtx) {
-	      base = parentRouterCtx.config.base + (parentRouterCtx.config.hashbang ? '/#!' : '') + parentRouterCtx.pathname();
-	      dispatch = parentRouterCtx.path() !== parentRouterCtx.canonicalPath();
-	      this.isRoot = false;
-	    } else {
-	      this.isRoot = true;
-	    }
-
-	    this.onpopstate = this.onpopstate.bind(this);
-	    this.onclick = this.onclick.bind(this);
-
-	    window.addEventListener('popstate', this.onpopstate, false);
-	    document.addEventListener(clickEvent, this.onclick, false);
 
 	    for (var route in routes) {
 	      routes[route] = new Route(route, routes[route]);
 	    }
 
-	    this.config = { el: el, base: base, hashbang: hashbang, routes: routes, inTransition: inTransition, outTransition: outTransition };
-	    this.ctx = bindingCtx.$router = new Context(this.config);
+	    this.config = {
+	      el: el,
+	      base: base,
+	      hashbang: hashbang,
+	      routes: routes,
+	      inTransition: inTransition,
+	      outTransition: outTransition,
+	      persistState: persistState,
+	      persistQuery: persistQuery
+	    };
 
-	    if (parentRouterCtx) {
-	      parentRouterCtx.config.childContext = this.ctx;
+	    this.ctx = new Context(bindingCtx, this.config);
+
+	    this.onpopstate = this.onpopstate.bind(this);
+	    this.onclick = this.onclick.bind(this);
+	    window.addEventListener('popstate', this.onpopstate, false);
+	    document.addEventListener(clickEvent, this.onclick, false);
+
+	    var dispatch = true;
+	    if (this.ctx.$parent) {
+	      dispatch = this.ctx.$parent.path() !== this.ctx.$parent.canonicalPath();
 	    }
 
 	    if (dispatch) {
@@ -140,28 +144,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'dispatch',
 	    value: function dispatch(path, state) {
 	      if (path.indexOf(this.config.base) === 0) {
-	        path = path.replace(this.config.base, '');
+	        path = path.replace(this.config.base, '') || '/';
 	      }
 
-	      if (this.ctx.update(path, state, false)) {
-	        return true;
-	      }
-
-	      if (this.isRoot) {
-	        location.href = this.ctx.canonicalPath();
-	      } else {
-	        this.ctx.component(null);
-	      }
-
-	      return false;
+	      return this.ctx.update(path, state, false, false);
 	    }
 	  }, {
 	    key: 'onpopstate',
-	    value: function onpopstate(_ref2) {
-	      var state = _ref2.state;
-
+	    value: function onpopstate(e) {
 	      var guid = this.ctx.config.depth + this.ctx.pathname();
-	      this.dispatch(location.pathname + location.search + location.hash, (state || {})[guid]);
+	      this.dispatch(location.pathname + location.search + location.hash, (e.state || {})[guid]);
 	    }
 	  }, {
 	    key: 'onclick',
@@ -179,31 +171,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 
-	      // Ignore if tag has
-	      // 1. "download" attribute
-	      // 2. rel="external" attribute
-	      if (el.hasAttribute('download') || el.getAttribute('rel') === 'external') {
-	        return;
-	      }
+	      var isDownload = el.hasAttribute('download');
+	      var hasOtherTarget = el.hasAttribute('target');
+	      var hasExternalRel = el.getAttribute('rel') === 'external';
+	      var isMailto = ~(el.getAttribute('href') || '').indexOf('mailto:');
+	      var isCrossOrigin = !sameOrigin(el.href);
+	      var isEmptyHash = el.getAttribute('href') === '#';
 
-	      // ensure non-hash for the same path
-	      var link = el.getAttribute('href');
-	      if (!this.config.hashbang && el.pathname === location.pathname && (el.hash || '#' === link)) {
-	        return;
-	      }
-
-	      // Check for mailto: in the href
-	      if (link && link.indexOf('mailto:') > -1) {
-	        return;
-	      }
-
-	      // check target
-	      if (el.target) {
-	        return;
-	      }
-
-	      // x-origin
-	      if (!sameOrigin(el.href)) {
+	      if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin || isEmptyHash) {
 	        return;
 	      }
 
@@ -225,26 +200,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 
-	      e.preventDefault();
-
-	      this.dispatch(path);
+	      if (this.dispatch(path)) {
+	        e.preventDefault();
+	        e.stopPropagation();
+	        e.stopImmediatePropagation();
+	      }
 	    }
 	  }, {
 	    key: 'dispose',
 	    value: function dispose() {
 	      document.removeEventListener(clickEvent, this.onclick, false);
 	      window.removeEventListener('popstate', this.onpopstate, false);
+	      this.ctx.destroy();
 	    }
 	  }]);
 
 	  return Router;
-	})();
+	}();
 
 	module.exports = {
 	  createViewModel: function createViewModel(routerParams, componentInfo) {
 	    var el = componentInfo.element;
 	    var bindingCtx = ko.contextFor(el);
-	    return new Router(el, bindingCtx, routerParams);
+	    return new Router(el, bindingCtx, ko.toJS(routerParams));
 	  }
 	};
 
@@ -267,9 +245,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -278,14 +256,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	var stateFactory = __webpack_require__(10).factory;
 	var utils = __webpack_require__(9);
 
-	var depth = 0;
-
-	var Context = (function () {
-	  function Context(config) {
+	var Context = function () {
+	  function Context(bindingCtx, config) {
 	    _classCallCheck(this, Context);
 
+	    bindingCtx.$router = this;
+
+	    var parentRouterBindingCtx = bindingCtx;
+	    var isRoot = true;
+	    while (parentRouterBindingCtx.$parentContext) {
+	      parentRouterBindingCtx = parentRouterBindingCtx.$parentContext;
+	      if (parentRouterBindingCtx.$router) {
+	        isRoot = false;
+	        break;
+	      } else {
+	        parentRouterBindingCtx.$router = this;
+	      }
+	    }
+
+	    if (isRoot) {
+	      ko.router = {
+	        update: this.update.bind(this)
+	      };
+	    } else {
+	      this.$parent = parentRouterBindingCtx.$router;
+	      this.$parent.$child = this;
+	      config.base = this.$parent.pathname();
+	    }
+
 	    this.config = config;
-	    this.config.depth = depth++;
+	    this.config.depth = Context.getDepth(this);
 
 	    this.route = ko.observable('');
 	    this.component = ko.observable();
@@ -300,18 +300,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  _createClass(Context, [{
 	    key: 'update',
-	    value: function update(url, state) {
+	    value: function update() {
+	      var origUrl = arguments.length <= 0 || arguments[0] === undefined ? this.canonicalPath() : arguments[0];
+	      var state = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	      url = url.replace(this.config.base, '').replace('/#!', '');
+	      var url = origUrl.replace('/#!', '');
+
+	      var p = this;
+	      while (p) {
+	        url = url.replace(p.config.base, '');
+	        p = p.$parent;
+	      }
 
 	      var route = this.getRouteForUrl(url);
-	      var sameRoute = route === this.route();
 	      var firstRun = this.route() === '';
 
 	      if (!route) {
-	        return false;
+	        var _$parent;
+
+	        return this.$parent ? (_$parent = this.$parent).update.apply(_$parent, arguments) : false;
 	      }
 
 	      var fromCtx = ko.toJS({
@@ -322,7 +331,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        hash: this.hash,
 	        state: this.state,
 	        params: this.params,
-	        query: this.query.getAll(this.pathname())
+	        query: this.query.getAll(false, this.pathname())
 	      });
 
 	      var _route$parse = route.parse(url);
@@ -338,17 +347,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (query) {
 	        this.query.update(query, pathname);
-	      } else {
-	        this.query.updateFromString(querystring);
+	      } else if (!this.config.persistQuery) {
+	        this.query.updateFromString(querystring, pathname);
 	      }
 
-	      query = this.query.getAll(pathname);
+	      query = this.query.getAll(false, pathname);
 
-	      if (!sameRoute && !firstRun) {
+	      var samePage = this.pathname() === pathname;
+	      if (!samePage && !firstRun) {
 	        this.reload();
 	      }
 
-	      var canonicalPath = this.getCanonicalPath(pathname, childPath, hash);
+	      var canonicalPath = Context.getCanonicalPath(Context.getBase(this).replace(/\/$/, ''), pathname, childPath, this.query.getFullQueryString(), hash);
 
 	      var toCtx = {
 	        route: route,
@@ -356,45 +366,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	        pathname: pathname,
 	        canonicalPath: canonicalPath,
 	        hash: hash,
-	        state: state,
 	        params: params,
 	        query: query
 	      };
 
+	      if (state === false && samePage) {
+	        utils.merge(toCtx, { state: fromCtx.state }, false);
+	      } else if (!this.config.persistState && state) {
+	        toCtx.state = {};
+	        utils.merge(toCtx.state, state, false, true);
+	      }
+
 	      utils.merge(this, toCtx, true);
 
-	      history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? this.config.base : canonicalPath);
+	      if (this.config.persistState) {
+	        toCtx.state = this.state();
+	      }
 
-	      if (!sameRoute) {
+	      history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? Context.getBase(this) : canonicalPath);
+
+	      if (firstRun) {
+	        complete.call(this);
+	      } else if (!samePage) {
 	        this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this));
 
 	        if (this.config.outTransition.length !== 4) {
 	          complete.call(this);
 	        }
+	      } else if (this.$child) {
+	        this.$child.update(childPath || '/', {}, false, {});
 	      }
 
 	      function complete() {
-	        var _this = this;
-
 	        this.component(route.component);
-	        window.requestAnimationFrame(function () {
-	          return _this.config.inTransition(_this.config.el, fromCtx, toCtx);
-	        });
+	        ko.tasks.runEarly();
+	        doInTransitionIfReady(this.config.el.getElementsByClassName('component-wrapper')[0], this.config.inTransition);
+
+	        function doInTransitionIfReady(el, transitionFn) {
+	          if (el.children.length > 0) {
+	            // two more for good measure w/ deferred updates.
+	            // this shit happens incredibly fast.
+	            transitionFn(el, fromCtx, toCtx);
+	          } else {
+	            window.requestAnimationFrame(function () {
+	              return doInTransitionIfReady(el, transitionFn);
+	            });
+	          }
+	        }
 	      }
 
 	      return true;
-	    }
-	  }, {
-	    key: 'getCanonicalPath',
-	    value: function getCanonicalPath(pathname) {
-	      var childPath = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-	      var hash = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
-
-	      var base = this.config.base;
-	      var hashbang = this.config.hashbang;
-	      var querystring = this.query.getFullQueryString();
-
-	      return '' + base + (hashbang ? '/#!' : '') + pathname + childPath + (querystring ? '?' + querystring : '') + (hash ? '#' + hash : '');
 	    }
 	  }, {
 	    key: 'getRouteForUrl',
@@ -409,11 +430,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (r.matches(pathname)) {
 	          if (r._keys.length === 0) {
 	            return r;
-	          } else if (r._keys.length < fewestMatchingSegments) {
+	          } else if (fewestMatchingSegments === Infinity || r._keys.length < fewestMatchingSegments && r._keys[0].pattern !== '.*') {
 	            fewestMatchingSegments = r._keys.length;
 	            matchingRouteWithFewestDynamicSegments = r;
 	          }
-	          return r;
 	        }
 	      }
 
@@ -422,31 +442,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'destroy',
 	    value: function destroy() {
-	      if (this.config.childContext) {
-	        this.config.childContext.destroy();
-	        delete this.config.childContext;
+	      if (this.$child) {
+	        this.$child.destroy();
+	        delete this.$child;
 	      }
 
-	      this.query.destroy();
+	      this.query.dispose();
 	      this.state.dispose();
-
-	      depth--;
 	    }
 	  }, {
 	    key: 'reload',
 	    value: function reload() {
-	      if (this.config.childContext) {
-	        this.config.childContext.destroy();
-	        delete this.config.childContext;
+	      if (this.$child) {
+	        this.$child.destroy();
+	        delete this.$child;
 	      }
 
-	      this.query.destroy();
-	      this.state.clear();
+	      this.query.reload();
+	      this.state.reload();
+	    }
+	  }], [{
+	    key: 'getBase',
+	    value: function getBase(ctx) {
+	      var base = '';
+	      var p = ctx;
+	      while (p) {
+	        base = p.config.base + (!p.config.hashbang || p.$parent ? '' : '/#!') + base;
+	        p = p.$parent;
+	      }
+	      return base;
+	    }
+	  }, {
+	    key: 'getCanonicalPath',
+	    value: function getCanonicalPath(base, pathname) {
+	      var childPath = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+	      var querystring = arguments[3];
+	      var hash = arguments.length <= 4 || arguments[4] === undefined ? '' : arguments[4];
+
+	      return '' + base + pathname + childPath + (querystring ? '?' + querystring : '') + (hash ? '#' + hash : '');
+	    }
+	  }, {
+	    key: 'getDepth',
+	    value: function getDepth(ctx) {
+	      var depth = 0;
+	      while (ctx.$parent) {
+	        ctx = ctx.$parent;
+	        depth++;
+	      }
+	      return depth;
 	    }
 	  }]);
 
 	  return Context;
-	})();
+	}();
 
 	module.exports = Context;
 
@@ -456,7 +504,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -469,14 +517,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	var qsParams = {};
 	var trigger = ko.observable(true);
 	var cache = {};
-	var pendingWriteOp = undefined;
 
-	var Query = (function () {
+	var Query = function () {
 	  function Query(ctx) {
 	    _classCallCheck(this, Query);
 
 	    this.ctx = ctx;
 
+	    if (!this.ctx.$parent) {
+	      var qsIndex = window.location.href.indexOf('?');
+	      if (~qsIndex) {
+	        this.updateFromString(window.location.href.split('?')[1]);
+	      }
+	    }
+
+	    // make work w/ click bindings w/o closure
 	    this.get = this.get.bind(this);
 	    this.clear = this.clear.bind(this);
 	    this.update = this.update.bind(this);
@@ -499,19 +554,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	          value: ko.pureComputed({
 	            read: function read() {
 	              trigger();
-	              return qsParams[guid][prop] || defaultVal;
-	            },
-	            write: function write(v) {
-	              utils.merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
 
-	              if (pendingWriteOp) {
-	                window.cancelAnimationFrame(pendingWriteOp);
+	              if (qsParams && qsParams[guid] && qsParams[guid][prop]) {
+	                return qsParams[guid][prop];
 	              }
 
-	              pendingWriteOp = window.requestAnimationFrame(function () {
-	                ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
-	                trigger(!trigger());
-	              });
+	              return defaultVal;
+	            },
+	            write: function write(v) {
+	              if (utils.deepEquals(v, this.prev)) {
+	                return;
+	              }
+	              this.prev = v;
+
+	              utils.merge(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
+
+	              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
+	              trigger(!trigger());
+	            },
+
+	            owner: {
+	              prev: null
 	            }
 	          })
 	        };
@@ -522,16 +585,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getAll',
 	    value: function getAll() {
-	      var pathname = arguments.length <= 0 || arguments[0] === undefined ? this.ctx.pathname() : arguments[0];
+	      var asObservable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
 
 	      var guid = this.ctx.config.depth + pathname;
-	      return ko.toJS(qsParams[guid]) || {};
+	      return asObservable ? ko.pureComputed({
+	        read: function read() {
+	          trigger();
+	          return this.getAll();
+	        },
+	        write: function write(q) {
+	          for (var pn in q) {
+	            this.get(pn)(q[pn]);
+	          }
+	        }
+	      }, this) : ko.toJS(qsParams[guid]) || {};
+	    }
+	  }, {
+	    key: 'setDefaults',
+	    value: function setDefaults(q) {
+	      for (var pn in q) {
+	        this.get(pn, q[pn]);
+	      }
 	    }
 	  }, {
 	    key: 'clear',
-	    value: function clear() {
-	      var pathname = arguments.length <= 0 || arguments[0] === undefined ? this.ctx.pathname() : arguments[0];
-
+	    value: function clear(pathname) {
+	      if (typeof pathname !== 'string') {
+	        pathname = this.ctx.pathname();
+	      }
 	      var guid = this.ctx.config.depth + pathname;
 	      for (var pn in cache[guid]) {
 	        var p = cache[guid][pn];
@@ -539,16 +621,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }, {
-	    key: 'destroy',
-	    value: function destroy() {
-	      var guid = this.ctx.config.depth + this.ctx.pathname();
-	      for (var p in qsParams[guid]) {
-	        if (cache[guid] && cache[guid][p]) {
-	          cache[guid][p].value.dispose();
+	    key: 'reload',
+	    value: function reload() {
+	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var guid = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.config.depth + this.ctx.pathname() : arguments[1];
+
+	      if (!this.ctx.config.persistQuery || force) {
+	        for (var p in qsParams[guid]) {
+	          if (cache[guid] && cache[guid][p]) {
+	            cache[guid][p].value.dispose();
+	          }
+	        }
+	        delete qsParams[guid];
+	        delete cache[guid];
+	      }
+	    }
+	  }, {
+	    key: 'dispose',
+	    value: function dispose() {
+	      for (var guid in qsParams) {
+	        if (guid.indexOf(this.ctx.config.depth) === 0) {
+	          this.reload(true, guid);
 	        }
 	      }
-	      delete qsParams[guid];
-	      delete cache[guid];
 	    }
 	  }, {
 	    key: 'update',
@@ -559,13 +654,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var guid = this.ctx.config.depth + pathname;
 	      utils.merge(qsParams, _defineProperty({}, guid, query), false);
 	      trigger(!trigger());
+	      // ko.tasks.runEarly()
 	    }
 	  }, {
 	    key: 'updateFromString',
-	    value: function updateFromString(str) {
-	      var queries = qs.parse(str);
-	      utils.merge(qsParams, queries, false);
+	    value: function updateFromString(str, pathname) {
+	      if (pathname) {
+	        var guid = this.ctx.config.depth + pathname;
+	        utils.merge(qsParams, _defineProperty({}, guid, qs.parse(str)[guid]), false);
+	      } else {
+	        utils.merge(qsParams, qs.parse(str), false);
+	      }
 	      trigger(!trigger());
+	      // ko.tasks.runEarly()
 	    }
 	  }, {
 	    key: 'getNonDefaultParams',
@@ -596,7 +697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }]);
 
 	  return Query;
-	})();
+	}();
 
 	module.exports = {
 	  factory: function factory(ctx) {
@@ -608,16 +709,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// Load modules
+	'use strict';
 
 	var Stringify = __webpack_require__(6);
 	var Parse = __webpack_require__(8);
-
-
-	// Declare internals
-
-	var internals = {};
-
 
 	module.exports = {
 	    stringify: Stringify,
@@ -629,57 +724,49 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// Load modules
+	'use strict';
 
 	var Utils = __webpack_require__(7);
-
-
-	// Declare internals
 
 	var internals = {
 	    delimiter: '&',
 	    arrayPrefixGenerators: {
-	        brackets: function (prefix, key) {
-
+	        brackets: function (prefix) {
 	            return prefix + '[]';
 	        },
 	        indices: function (prefix, key) {
-
 	            return prefix + '[' + key + ']';
 	        },
-	        repeat: function (prefix, key) {
-
+	        repeat: function (prefix) {
 	            return prefix;
 	        }
 	    },
-	    strictNullHandling: false
+	    strictNullHandling: false,
+	    skipNulls: false,
+	    encode: true
 	};
 
-
-	internals.stringify = function (obj, prefix, generateArrayPrefix, strictNullHandling, filter) {
-
+	internals.stringify = function (object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort) {
+	    var obj = object;
 	    if (typeof filter === 'function') {
 	        obj = filter(prefix, obj);
-	    }
-	    else if (Utils.isBuffer(obj)) {
-	        obj = obj.toString();
-	    }
-	    else if (obj instanceof Date) {
+	    } else if (Utils.isBuffer(obj)) {
+	        obj = String(obj);
+	    } else if (obj instanceof Date) {
 	        obj = obj.toISOString();
-	    }
-	    else if (obj === null) {
+	    } else if (obj === null) {
 	        if (strictNullHandling) {
-	            return Utils.encode(prefix);
+	            return encode ? Utils.encode(prefix) : prefix;
 	        }
 
 	        obj = '';
 	    }
 
-	    if (typeof obj === 'string' ||
-	        typeof obj === 'number' ||
-	        typeof obj === 'boolean') {
-
-	        return [Utils.encode(prefix) + '=' + Utils.encode(obj)];
+	    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
+	        if (encode) {
+	            return [Utils.encode(prefix) + '=' + Utils.encode(obj)];
+	        }
+	        return [prefix + '=' + obj];
 	    }
 
 	    var values = [];
@@ -688,53 +775,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return values;
 	    }
 
-	    var objKeys = Array.isArray(filter) ? filter : Object.keys(obj);
-	    for (var i = 0, il = objKeys.length; i < il; ++i) {
+	    var objKeys;
+	    if (Array.isArray(filter)) {
+	        objKeys = filter;
+	    } else {
+	        var keys = Object.keys(obj);
+	        objKeys = sort ? keys.sort(sort) : keys;
+	    }
+
+	    for (var i = 0; i < objKeys.length; ++i) {
 	        var key = objKeys[i];
 
-	        if (Array.isArray(obj)) {
-	            values = values.concat(internals.stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, filter));
+	        if (skipNulls && obj[key] === null) {
+	            continue;
 	        }
-	        else {
-	            values = values.concat(internals.stringify(obj[key], prefix + '[' + key + ']', generateArrayPrefix, strictNullHandling, filter));
+
+	        if (Array.isArray(obj)) {
+	            values = values.concat(internals.stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encode, filter));
+	        } else {
+	            values = values.concat(internals.stringify(obj[key], prefix + '[' + key + ']', generateArrayPrefix, strictNullHandling, skipNulls, encode, filter));
 	        }
 	    }
 
 	    return values;
 	};
 
-
-	module.exports = function (obj, options) {
-
-	    options = options || {};
+	module.exports = function (object, opts) {
+	    var obj = object;
+	    var options = opts || {};
 	    var delimiter = typeof options.delimiter === 'undefined' ? internals.delimiter : options.delimiter;
 	    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
+	    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : internals.skipNulls;
+	    var encode = typeof options.encode === 'boolean' ? options.encode : internals.encode;
+	    var sort = typeof options.sort === 'function' ? options.sort : null;
 	    var objKeys;
 	    var filter;
 	    if (typeof options.filter === 'function') {
 	        filter = options.filter;
 	        obj = filter('', obj);
-	    }
-	    else if (Array.isArray(options.filter)) {
+	    } else if (Array.isArray(options.filter)) {
 	        objKeys = filter = options.filter;
 	    }
 
 	    var keys = [];
 
-	    if (typeof obj !== 'object' ||
-	        obj === null) {
-
+	    if (typeof obj !== 'object' || obj === null) {
 	        return '';
 	    }
 
 	    var arrayFormat;
 	    if (options.arrayFormat in internals.arrayPrefixGenerators) {
 	        arrayFormat = options.arrayFormat;
-	    }
-	    else if ('indices' in options) {
+	    } else if ('indices' in options) {
 	        arrayFormat = options.indices ? 'indices' : 'repeat';
-	    }
-	    else {
+	    } else {
 	        arrayFormat = 'indices';
 	    }
 
@@ -743,9 +837,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!objKeys) {
 	        objKeys = Object.keys(obj);
 	    }
-	    for (var i = 0, il = objKeys.length; i < il; ++i) {
+
+	    if (sort) {
+	        objKeys.sort(sort);
+	    }
+
+	    for (var i = 0; i < objKeys.length; ++i) {
 	        var key = objKeys[i];
-	        keys = keys.concat(internals.stringify(obj[key], key, generateArrayPrefix, strictNullHandling, filter));
+
+	        if (skipNulls && obj[key] === null) {
+	            continue;
+	        }
+
+	        keys = keys.concat(internals.stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort));
 	    }
 
 	    return keys.join(delimiter);
@@ -756,24 +860,21 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 7 */
 /***/ function(module, exports) {
 
-	// Load modules
+	'use strict';
 
+	var hexTable = (function () {
+	    var array = new Array(256);
+	    for (var i = 0; i < 256; ++i) {
+	        array[i] = '%' + ((i < 16 ? '0' : '') + i.toString(16)).toUpperCase();
+	    }
 
-	// Declare internals
-
-	var internals = {};
-	internals.hexTable = new Array(256);
-	for (var h = 0; h < 256; ++h) {
-	    internals.hexTable[h] = '%' + ((h < 16 ? '0' : '') + h.toString(16)).toUpperCase();
-	}
-
+	    return array;
+	}());
 
 	exports.arrayToObject = function (source, options) {
-
 	    var obj = options.plainObjects ? Object.create(null) : {};
-	    for (var i = 0, il = source.length; i < il; ++i) {
+	    for (var i = 0; i < source.length; ++i) {
 	        if (typeof source[i] !== 'undefined') {
-
 	            obj[i] = source[i];
 	        }
 	    }
@@ -781,9 +882,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj;
 	};
 
-
 	exports.merge = function (target, source, options) {
-
 	    if (!source) {
 	        return target;
 	    }
@@ -791,47 +890,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (typeof source !== 'object') {
 	        if (Array.isArray(target)) {
 	            target.push(source);
-	        }
-	        else if (typeof target === 'object') {
+	        } else if (typeof target === 'object') {
 	            target[source] = true;
-	        }
-	        else {
-	            target = [target, source];
+	        } else {
+	            return [target, source];
 	        }
 
 	        return target;
 	    }
 
 	    if (typeof target !== 'object') {
-	        target = [target].concat(source);
-	        return target;
+	        return [target].concat(source);
 	    }
 
-	    if (Array.isArray(target) &&
-	        !Array.isArray(source)) {
-
-	        target = exports.arrayToObject(target, options);
+	    var mergeTarget = target;
+	    if (Array.isArray(target) && !Array.isArray(source)) {
+	        mergeTarget = exports.arrayToObject(target, options);
 	    }
 
-	    var keys = Object.keys(source);
-	    for (var k = 0, kl = keys.length; k < kl; ++k) {
-	        var key = keys[k];
+		return Object.keys(source).reduce(function (acc, key) {
 	        var value = source[key];
 
-	        if (!Object.prototype.hasOwnProperty.call(target, key)) {
-	            target[key] = value;
+	        if (Object.prototype.hasOwnProperty.call(acc, key)) {
+	            acc[key] = exports.merge(acc[key], value, options);
+	        } else {
+	            acc[key] = value;
 	        }
-	        else {
-	            target[key] = exports.merge(target[key], value, options);
-	        }
-	    }
-
-	    return target;
+			return acc;
+	    }, mergeTarget);
 	};
 
-
 	exports.decode = function (str) {
-
 	    try {
 	        return decodeURIComponent(str.replace(/\+/g, ' '));
 	    } catch (e) {
@@ -840,65 +929,60 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	exports.encode = function (str) {
-
 	    // This code was originally written by Brian White (mscdex) for the io.js core querystring library.
 	    // It has been adapted here for stricter adherence to RFC 3986
 	    if (str.length === 0) {
 	        return str;
 	    }
 
-	    if (typeof str !== 'string') {
-	        str = '' + str;
-	    }
+	    var string = typeof str === 'string' ? str : String(str);
 
 	    var out = '';
-	    for (var i = 0, il = str.length; i < il; ++i) {
-	        var c = str.charCodeAt(i);
+	    for (var i = 0; i < string.length; ++i) {
+	        var c = string.charCodeAt(i);
 
-	        if (c === 0x2D || // -
+	        if (
+	            c === 0x2D || // -
 	            c === 0x2E || // .
 	            c === 0x5F || // _
 	            c === 0x7E || // ~
 	            (c >= 0x30 && c <= 0x39) || // 0-9
 	            (c >= 0x41 && c <= 0x5A) || // a-z
-	            (c >= 0x61 && c <= 0x7A)) { // A-Z
-
-	            out += str[i];
+	            (c >= 0x61 && c <= 0x7A) // A-Z
+	        ) {
+	            out += string.charAt(i);
 	            continue;
 	        }
 
 	        if (c < 0x80) {
-	            out += internals.hexTable[c];
+	            out = out + hexTable[c];
 	            continue;
 	        }
 
 	        if (c < 0x800) {
-	            out += internals.hexTable[0xC0 | (c >> 6)] + internals.hexTable[0x80 | (c & 0x3F)];
+	            out = out + (hexTable[0xC0 | (c >> 6)] + hexTable[0x80 | (c & 0x3F)]);
 	            continue;
 	        }
 
 	        if (c < 0xD800 || c >= 0xE000) {
-	            out += internals.hexTable[0xE0 | (c >> 12)] + internals.hexTable[0x80 | ((c >> 6) & 0x3F)] + internals.hexTable[0x80 | (c & 0x3F)];
+	            out = out + (hexTable[0xE0 | (c >> 12)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)]);
 	            continue;
 	        }
 
-	        ++i;
-	        c = 0x10000 + (((c & 0x3FF) << 10) | (str.charCodeAt(i) & 0x3FF));
-	        out += internals.hexTable[0xF0 | (c >> 18)] + internals.hexTable[0x80 | ((c >> 12) & 0x3F)] + internals.hexTable[0x80 | ((c >> 6) & 0x3F)] + internals.hexTable[0x80 | (c & 0x3F)];
+	        i += 1;
+	        c = 0x10000 + (((c & 0x3FF) << 10) | (string.charCodeAt(i) & 0x3FF));
+	        out += (hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)]);
 	    }
 
 	    return out;
 	};
 
-	exports.compact = function (obj, refs) {
-
-	    if (typeof obj !== 'object' ||
-	        obj === null) {
-
+	exports.compact = function (obj, references) {
+	    if (typeof obj !== 'object' || obj === null) {
 	        return obj;
 	    }
 
-	    refs = refs || [];
+	    var refs = references || [];
 	    var lookup = refs.indexOf(obj);
 	    if (lookup !== -1) {
 	        return refs[lookup];
@@ -909,7 +993,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (Array.isArray(obj)) {
 	        var compacted = [];
 
-	        for (var i = 0, il = obj.length; i < il; ++i) {
+	        for (var i = 0; i < obj.length; ++i) {
 	            if (typeof obj[i] !== 'undefined') {
 	                compacted.push(obj[i]);
 	            }
@@ -919,32 +1003,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var keys = Object.keys(obj);
-	    for (i = 0, il = keys.length; i < il; ++i) {
-	        var key = keys[i];
+	    for (var j = 0; j < keys.length; ++j) {
+	        var key = keys[j];
 	        obj[key] = exports.compact(obj[key], refs);
 	    }
 
 	    return obj;
 	};
 
-
 	exports.isRegExp = function (obj) {
-
 	    return Object.prototype.toString.call(obj) === '[object RegExp]';
 	};
 
-
 	exports.isBuffer = function (obj) {
-
-	    if (obj === null ||
-	        typeof obj === 'undefined') {
-
+	    if (obj === null || typeof obj === 'undefined') {
 	        return false;
 	    }
 
-	    return !!(obj.constructor &&
-	              obj.constructor.isBuffer &&
-	              obj.constructor.isBuffer(obj));
+	    return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
 	};
 
 
@@ -952,12 +1028,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// Load modules
+	'use strict';
 
 	var Utils = __webpack_require__(7);
-
-
-	// Declare internals
 
 	var internals = {
 	    delimiter: '&',
@@ -966,16 +1039,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    parameterLimit: 1000,
 	    strictNullHandling: false,
 	    plainObjects: false,
-	    allowPrototypes: false
+	    allowPrototypes: false,
+	    allowDots: false
 	};
 
-
 	internals.parseValues = function (str, options) {
-
 	    var obj = {};
 	    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
 
-	    for (var i = 0, il = parts.length; i < il; ++i) {
+	    for (var i = 0; i < parts.length; ++i) {
 	        var part = parts[i];
 	        var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
 
@@ -985,16 +1057,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (options.strictNullHandling) {
 	                obj[Utils.decode(part)] = null;
 	            }
-	        }
-	        else {
+	        } else {
 	            var key = Utils.decode(part.slice(0, pos));
 	            var val = Utils.decode(part.slice(pos + 1));
 
-	            if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-	                obj[key] = val;
-	            }
-	            else {
+	            if (Object.prototype.hasOwnProperty.call(obj, key)) {
 	                obj[key] = [].concat(obj[key]).concat(val);
+	            } else {
+	                obj[key] = val;
 	            }
 	        }
 	    }
@@ -1002,9 +1072,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj;
 	};
 
-
 	internals.parseObject = function (chain, val, options) {
-
 	    if (!chain.length) {
 	        return val;
 	    }
@@ -1015,23 +1083,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (root === '[]') {
 	        obj = [];
 	        obj = obj.concat(internals.parseObject(chain, val, options));
-	    }
-	    else {
+	    } else {
 	        obj = options.plainObjects ? Object.create(null) : {};
 	        var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
 	        var index = parseInt(cleanRoot, 10);
-	        var indexString = '' + index;
-	        if (!isNaN(index) &&
+	        if (
+	            !isNaN(index) &&
 	            root !== cleanRoot &&
-	            indexString === cleanRoot &&
+	            String(index) === cleanRoot &&
 	            index >= 0 &&
-	            (options.parseArrays &&
-	             index <= options.arrayLimit)) {
-
+	            (options.parseArrays && index <= options.arrayLimit)
+	        ) {
 	            obj = [];
 	            obj[index] = internals.parseObject(chain, val, options);
-	        }
-	        else {
+	        } else {
 	            obj[cleanRoot] = internals.parseObject(chain, val, options);
 	        }
 	    }
@@ -1039,18 +1104,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj;
 	};
 
-
-	internals.parseKeys = function (key, val, options) {
-
-	    if (!key) {
+	internals.parseKeys = function (givenKey, val, options) {
+	    if (!givenKey) {
 	        return;
 	    }
 
 	    // Transform dot notation to bracket notation
-
-	    if (options.allowDots) {
-	        key = key.replace(/\.([^\.\[]+)/g, '[$1]');
-	    }
+	    var key = options.allowDots ? givenKey.replace(/\.([^\.\[]+)/g, '[$1]') : givenKey;
 
 	    // The regex chunks
 
@@ -1067,9 +1127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (segment[1]) {
 	        // If we aren't using plain objects, optionally prefix keys
 	        // that would overwrite object prototype properties
-	        if (!options.plainObjects &&
-	            Object.prototype.hasOwnProperty(segment[1])) {
-
+	        if (!options.plainObjects && Object.prototype.hasOwnProperty(segment[1])) {
 	            if (!options.allowPrototypes) {
 	                return;
 	            }
@@ -1082,11 +1140,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var i = 0;
 	    while ((segment = child.exec(key)) !== null && i < options.depth) {
-
-	        ++i;
-	        if (!options.plainObjects &&
-	            Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
-
+	        i += 1;
+	        if (!options.plainObjects && Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
 	            if (!options.allowPrototypes) {
 	                continue;
 	            }
@@ -1103,24 +1158,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return internals.parseObject(keys, val, options);
 	};
 
-
-	module.exports = function (str, options) {
-
-	    options = options || {};
+	module.exports = function (str, opts) {
+	    var options = opts || {};
 	    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
 	    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
 	    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
 	    options.parseArrays = options.parseArrays !== false;
-	    options.allowDots = options.allowDots !== false;
+	    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : internals.allowDots;
 	    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : internals.plainObjects;
 	    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : internals.allowPrototypes;
 	    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
 	    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
 
-	    if (str === '' ||
+	    if (
+	        str === '' ||
 	        str === null ||
-	        typeof str === 'undefined') {
-
+	        typeof str === 'undefined'
+	    ) {
 	        return options.plainObjects ? Object.create(null) : {};
 	    }
 
@@ -1130,7 +1184,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Iterate over the keys and setup the new object
 
 	    var keys = Object.keys(tempObj);
-	    for (var i = 0, il = keys.length; i < il; ++i) {
+	    for (var i = 0; i < keys.length; ++i) {
 	        var key = keys[i];
 	        var newObj = internals.parseKeys(key, tempObj[key], options);
 	        obj = Utils.merge(obj, newObj, options);
@@ -1146,6 +1200,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var ko = __webpack_require__(1);
 
 	function decodeURLEncodedURIComponent(val) {
@@ -1159,17 +1215,136 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var createAsObservable = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	  var prune = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	  for (var prop in src) {
-	    if (typeof dest[prop] === 'undefined') dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) dest[prop](src[prop]);else if (typeof src[prop] === 'undefined') dest[prop] = undefined;else if (src[prop].constructor === Object) {
-	      if (prune) {
-	        dest[prop] = {};
-	      }
+	  if (!src) {
+	    return prune ? undefined : dest;
+	  }
 
-	      merge(dest[prop], src[prop], createAsObservable);
-	    } else dest[prop] = src[prop];
+	  var props = Object.keys(src);
+
+	  if (prune) {
+	    for (var prop in dest) {
+	      if (props.indexOf(prop) < 0) {
+	        props.push(prop);
+	      }
+	    }
+	  }
+
+	  var _iteratorNormalCompletion = true;
+	  var _didIteratorError = false;
+	  var _iteratorError = undefined;
+
+	  try {
+	    for (var _iterator = props[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	      var prop = _step.value;
+
+	      if (typeof dest[prop] === 'undefined') dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];else if (ko.isWritableObservable(dest[prop])) {
+	        if (!deepEquals(dest[prop](), src[prop])) {
+	          dest[prop](src[prop]);
+	        }
+	      } else if (typeof src[prop] === 'undefined') dest[prop] = undefined;else if (src[prop].constructor === Object) {
+	        if (prune) {
+	          dest[prop] = {};
+	        }
+
+	        merge(dest[prop], src[prop], createAsObservable);
+	      } else dest[prop] = src[prop];
+	    }
+	  } catch (err) {
+	    _didIteratorError = true;
+	    _iteratorError = err;
+	  } finally {
+	    try {
+	      if (!_iteratorNormalCompletion && _iterator.return) {
+	        _iterator.return();
+	      }
+	    } finally {
+	      if (_didIteratorError) {
+	        throw _iteratorError;
+	      }
+	    }
 	  }
 
 	  return dest;
+	}
+
+	function deepEquals(foo, bar) {
+	  if (foo === null && bar !== null || foo !== null && bar === null) {
+	    return false;
+	  }
+	  if ((typeof foo === 'undefined' ? 'undefined' : _typeof(foo)) !== (typeof bar === 'undefined' ? 'undefined' : _typeof(bar))) {
+	    return false;
+	  }
+	  if (typeof foo === 'undefined') {
+	    return typeof bar === 'undefined';
+	  }
+
+	  if (foo.constructor === Object && bar.constructor === Object) {
+	    var fooProps = Object.keys(foo);
+	    var barProps = Object.keys(bar);
+	    if (fooProps.length !== barProps.length) {
+	      return false;
+	    }
+	    var _iteratorNormalCompletion2 = true;
+	    var _didIteratorError2 = false;
+	    var _iteratorError2 = undefined;
+
+	    try {
+	      for (var _iterator2 = fooProps[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	        var prop = _step2.value;
+
+	        if (!deepEquals(foo[prop], bar[prop])) {
+	          return false;
+	        }
+	      }
+	    } catch (err) {
+	      _didIteratorError2 = true;
+	      _iteratorError2 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	          _iterator2.return();
+	        }
+	      } finally {
+	        if (_didIteratorError2) {
+	          throw _iteratorError2;
+	        }
+	      }
+	    }
+
+	    return true;
+	  } else if (Array.isArray(foo) && Array.isArray(bar)) {
+	    if (foo.length !== bar.length) {
+	      return false;
+	    }
+	    var _iteratorNormalCompletion3 = true;
+	    var _didIteratorError3 = false;
+	    var _iteratorError3 = undefined;
+
+	    try {
+	      for (var _iterator3 = foo[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	        var el = _step3.value;
+
+	        if (bar.indexOf(el) < 0) {
+	          return false;
+	        }
+	      }
+	    } catch (err) {
+	      _didIteratorError3 = true;
+	      _iteratorError3 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	          _iterator3.return();
+	        }
+	      } finally {
+	        if (_didIteratorError3) {
+	          throw _iteratorError3;
+	        }
+	      }
+	    }
+	  } else {
+	    return foo === bar;
+	  }
 	}
 
 	function fromJS(obj, parentIsArray) {
@@ -1198,7 +1373,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 	  decodeURLEncodedURIComponent: decodeURLEncodedURIComponent,
-	  merge: merge
+	  merge: merge,
+	  deepEquals: deepEquals
 	};
 
 /***/ },
@@ -1207,10 +1383,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 	var ko = __webpack_require__(1);
-	var utils = __webpack_require__(9);
 
 	module.exports = {
 	  factory: function factory(ctx) {
@@ -1223,33 +1396,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	      },
 	      write: function write(v) {
 	        if (v) {
-	          var oldState = history.state || {};
+	          var _state = history.state || {};
 	          var key = ctx.config.depth + ctx.pathname();
-	          delete oldState[key];
 
-	          history.replaceState(utils.merge(oldState, _defineProperty({}, key, v), false), document.title, '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath());
+	          if (_state[key]) {
+	            delete _state[key];
+	          }
 
+	          _state[key] = v;
+	          history.replaceState(_state, document.title);
 	          trigger(!trigger());
+	          ko.tasks.runEarly();
 	        }
 	      }
 	    });
 
 	    var _dispose = state.dispose;
 
-	    state.clear = function () {
-	      if (history.state && history.state[ctx.config.depth + ctx.pathname()]) {
-	        var newState = history.state;
-	        delete newState[ctx.config.depth + ctx.pathname()];
-	        // history.replaceState(
-	        //   newState,
-	        //   document.title,
-	        //   '' === ctx.canonicalPath() ? ctx.config.base : ctx.canonicalPath()
-	        // )
+	    state.reload = function () {
+	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	      var guid = arguments.length <= 1 || arguments[1] === undefined ? ctx.config.depth + ctx.pathname() : arguments[1];
+
+	      if (!ctx.config.persistState || force) {
+	        if (history.state && history.state[guid]) {
+	          var newState = history.state;
+	          delete newState[guid];
+	        }
 	      }
 	    };
 
 	    state.dispose = function () {
-	      state.clear();
+	      for (var guid in history.state) {
+	        if (guid.indexOf(ctx.config.depth) === 0) {
+	          state.reload(true, guid);
+	        }
+	      }
 	      _dispose.apply(state, arguments);
 	    };
 
@@ -1263,16 +1444,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; })();
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var pathtoRegexp = __webpack_require__(12);
 	var utils = __webpack_require__(9);
 
-	var Route = (function () {
+	var Route = function () {
 	  function Route(path, component) {
 	    _classCallCheck(this, Route);
 
@@ -1347,7 +1528,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }]);
 
 	  return Route;
-	})();
+	}();
 
 	module.exports = Route;
 
@@ -1787,26 +1968,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bindingsToApply.click = function (data, e) {
 	    var router = getRouter(ctx);
 	    var url = bindings.has('path') ? bindings.get('path') : router.canonicalPath();
-	    var state = bindings.has('state') ? bindings.get('state') : router.state();
-	    var query = bindings.has('query') ? bindings.get('query') : router.query.getAll();
-	    router.update(url, state, true, query);
+	    var state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false;
+	    var query = bindings.has('query') ? bindings.get('query') : false;
 
-	    e.preventDefault();
-	    e.stopPropagation();
-	    e.stopImmediatePropagation();
+	    while (url.indexOf('/..') > -1) {
+	      router = router.$parent;
+	      url = url.replace('/..', '');
+	    }
+
+	    if (router.update(url, state, true, query)) {
+	      e.preventDefault();
+	      e.stopPropagation();
+	      e.stopImmediatePropagation();
+	    }
 	  };
+
+	  bindingsToApply.clickBubble = false;
 
 	  if (bindings.has('path')) {
 	    bindingsToApply.css = {
 	      'active-path': ko.pureComputed(function () {
-	        return ctx.$router.route() !== '' ? ctx.$router.route().matches(bindings.get('path')) : false;
+	        var router = getRouter(ctx);
+	        var path = ko.unwrap(bindings.get('path'));
+	        return router.route() !== '' && path ? router.route().matches(path) : false;
 	      })
 	    };
 	  }
 
 	  // allow adjacent routers to initialize
-	  window.requestAnimationFrame(function () {
-	    ko.applyBindingsToNode(el, bindingsToApply);
+	  ko.tasks.schedule(function () {
+	    return ko.applyBindingsToNode(el, bindingsToApply);
 	  });
 	}
 
@@ -1816,10 +2007,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return ctx.$router;
 	    }
 
-	    ctx = ctx.$parent;
+	    ctx = ctx.$parentContext;
 	  }
-
-	  throw new Error('ko-component-router bindings must be within a router');
 	}
 
 /***/ }

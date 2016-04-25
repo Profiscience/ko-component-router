@@ -14,33 +14,35 @@ class Router {
     base = '',
     hashbang = false,
     inTransition = noop,
-    outTransition = noop
+    outTransition = noop,
+    persistState = false,
+    persistQuery = false
   }) {
-    const parentRouterCtx = (bindingCtx.$parentContext && bindingCtx.$parentContext.$router)
-    let dispatch = true
-    if (parentRouterCtx) {
-      base = parentRouterCtx.config.base + (parentRouterCtx.config.hashbang ? '/#!' : '') + parentRouterCtx.pathname()
-      dispatch = parentRouterCtx.path() !== parentRouterCtx.canonicalPath()
-      this.isRoot = false
-    } else {
-      this.isRoot = true
-    }
-
-    this.onpopstate = this.onpopstate.bind(this)
-    this.onclick = this.onclick.bind(this)
-
-    window.addEventListener('popstate', this.onpopstate, false)
-    document.addEventListener(clickEvent, this.onclick, false)
-
     for (const route in routes) {
       routes[route] = new Route(route, routes[route])
     }
 
-    this.config = { el, base, hashbang, routes, inTransition, outTransition }
-    this.ctx = bindingCtx.$router = new Context(this.config)
+    this.config = {
+      el,
+      base,
+      hashbang,
+      routes,
+      inTransition,
+      outTransition,
+      persistState,
+      persistQuery
+    }
 
-    if (parentRouterCtx) {
-      parentRouterCtx.config.childContext = this.ctx
+    this.ctx = new Context(bindingCtx, this.config)
+
+    this.onpopstate = this.onpopstate.bind(this)
+    this.onclick = this.onclick.bind(this)
+    window.addEventListener('popstate', this.onpopstate, false)
+    document.addEventListener(clickEvent, this.onclick, false)
+
+    let dispatch = true
+    if (this.ctx.$parent) {
+      dispatch = this.ctx.$parent.path() !== this.ctx.$parent.canonicalPath()
     }
 
     if (dispatch) {
@@ -54,25 +56,15 @@ class Router {
 
   dispatch(path, state) {
     if (path.indexOf(this.config.base) === 0) {
-      path = path.replace(this.config.base, '')
+      path = path.replace(this.config.base, '') || '/'
     }
 
-    if (this.ctx.update(path, state, false)) {
-      return true
-    }
-
-    if (this.isRoot) {
-      location.href = this.ctx.canonicalPath()
-    } else {
-      this.ctx.component(null)
-    }
-
-    return false
+    return this.ctx.update(path, state, false, false)
   }
 
-  onpopstate({ state }) {
+  onpopstate(e) {
     const guid = this.ctx.config.depth + this.ctx.pathname()
-    this.dispatch(location.pathname + location.search + location.hash, (state || {})[guid])
+    this.dispatch(location.pathname + location.search + location.hash, (e.state || {})[guid])
   }
 
   onclick(e) {
@@ -89,31 +81,14 @@ class Router {
       return
     }
 
-    // Ignore if tag has
-    // 1. "download" attribute
-    // 2. rel="external" attribute
-    if (el.hasAttribute('download') || el.getAttribute('rel') === 'external') {
-      return
-    }
+    const isDownload = el.hasAttribute('download')
+    const hasOtherTarget = el.hasAttribute('target')
+    const hasExternalRel = el.getAttribute('rel') === 'external'
+    const isMailto = ~(el.getAttribute('href') || '').indexOf('mailto:')
+    const isCrossOrigin = !sameOrigin(el.href)
+    const isEmptyHash = el.getAttribute('href') === '#'
 
-    // ensure non-hash for the same path
-    const link = el.getAttribute('href')
-    if (!this.config.hashbang && el.pathname === location.pathname && (el.hash || '#' === link)) {
-      return
-    }
-
-    // Check for mailto: in the href
-    if (link && link.indexOf('mailto:') > -1) {
-      return
-    }
-
-    // check target
-    if (el.target) {
-      return
-    }
-
-    // x-origin
-    if (!sameOrigin(el.href)) {
+    if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin || isEmptyHash) {
       return
     }
 
@@ -135,14 +110,17 @@ class Router {
       return
     }
 
-    e.preventDefault()
-
-    this.dispatch(path)
+    if (this.dispatch(path)) {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+    }
   }
 
   dispose() {
     document.removeEventListener(clickEvent, this.onclick, false)
     window.removeEventListener('popstate', this.onpopstate, false)
+    this.ctx.destroy()
   }
 }
 
@@ -150,7 +128,7 @@ module.exports = {
   createViewModel(routerParams, componentInfo) {
     const el = componentInfo.element
     const bindingCtx = ko.contextFor(el)
-    return new Router(el, bindingCtx, routerParams)
+    return new Router(el, bindingCtx, ko.toJS(routerParams))
   }
 }
 

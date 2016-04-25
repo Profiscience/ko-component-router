@@ -25,10 +25,6 @@ module.exports = function(config) {
       node: {
         fs: 'empty'
       },
-      isparta: {
-        embedSource: true,
-        noAutoWrap: true
-      },
       module: {
         preLoaders: [
           {
@@ -39,7 +35,8 @@ module.exports = function(config) {
             loader: 'babel'
           }
         ]
-      }
+      },
+      devtool: 'eval-source-map'
     },
 
     webpackMiddleware: {

@@ -92,6 +92,30 @@ ${escape(`<!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/
       </section>
 
       <section>
+        <h2 id="persistQuery">
+          persistQuery
+        </h2>
+        <p>
+          whether or not to preserve the querystring when navigating between pages. defaults to <code>false</code>.
+        </p>
+        <p>
+          note, when the router is unmounted the queries will be disposed
+        </p>
+      </section>
+
+      <section>
+        <h2 id="persistState">
+          persistState
+        </h2>
+        <p>
+          whether or not to preserve the querystring when navigating between pages. defaults to <code>false</code>.
+        </p>
+        <p>
+          note, when the router is unmounted the states will be disposed
+        </p>
+      </section>
+
+      <section>
         <h2 id="inTransition">
           inTransition
           <small class="text-muted">(el, fromCtx, toCtx) => {}</small>
