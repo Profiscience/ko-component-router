@@ -2117,9 +2117,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    path = router.canonicalPath();
 	  }
 
-	  while (path && path.match(/\/?\.\./i) && router.$parent) {
-	    router = router.$parent;
-	    path = path.replace(/\/?\.\./i, '');
+	  if (path.indexOf('//') === 0) {
+	    while (router.$parent) {
+	      router = router.$parent;
+	    }
+	  } else {
+	    while (path && path.match(/\/?\.\./i) && router.$parent) {
+	      router = router.$parent;
+	      path = path.replace(/\/?\.\./i, '');
+	    }
 	  }
 
 	  return [router, path];

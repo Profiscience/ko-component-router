@@ -37,6 +37,9 @@ ko.components.register('bindings', {
         if you need to force the router to evaluate the route without bubbling,
         you can prepend <code>./</code>
         </p>
+        <p>
+        if you'd like to force the route to be evaluated top-down, prefix your route with <code>//</code>
+        </p>
         <div class="alert alert-info">
           the path binding also binds the class <code>active-path</code> when applicable.
           you can use this to easily style active links, such as those in navs
