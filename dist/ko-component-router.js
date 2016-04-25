@@ -2118,6 +2118,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  if (path.indexOf('//') === 0) {
+	    path.replace('//', '/');
+
 	    while (router.$parent) {
 	      router = router.$parent;
 	    }
