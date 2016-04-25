@@ -202,6 +202,16 @@ class ViewModel {
       </section>
 
       <section>
+        <h2 id="isNavigating">
+          hash
+          <small class="text-muted">read-only</small>
+        </h2>
+        <p>
+          <code>true</code> if the router is performing navigation
+        </p>
+      </section>
+
+      <section>
         <h2 id="update">
           update
           <small class="text-muted">(url, state = {}, push = true, query = false) => {}</small>

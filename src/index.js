@@ -8,9 +8,9 @@ ko.components.register('ko-component-router', {
   synchronous: true,
   viewModel: router,
   template:
-    `<div data-bind='if: ctx.component'>
+    `<div data-bind='if: ctx.route().component'>
       <div class="component-wrapper" data-bind='component: {
-        name: ctx.component,
+        name: ctx.route().component,
         params: ctx
       }'></div>
     </div>`

@@ -1,6 +1,7 @@
 'use strict'
 
 const ko = require('knockout')
+const qs = require('qs')
 const queryFactory = require('./query').factory
 const stateFactory = require('./state').factory
 const utils = require('./utils')
@@ -22,9 +23,7 @@ class Context {
     }
 
     if (isRoot) {
-      ko.router = {
-        update: this.update.bind(this)
-      }
+      ko.router = this
     } else {
       this.$parent = parentRouterBindingCtx.$router
       this.$parent.$child = this
@@ -34,8 +33,9 @@ class Context {
     this.config = config
     this.config.depth = Context.getDepth(this)
 
+    this.isNavigating = ko.observable(true)
+
     this.route = ko.observable('')
-    this.component = ko.observable()
     this.canonicalPath = ko.observable('')
     this.path = ko.observable('')
     this.pathname = ko.observable('')
@@ -55,7 +55,7 @@ class Context {
   }
 
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
-    let url = origUrl.replace('/#!', '')
+    let url = (origUrl + '').replace('/#!', '')
 
     let p = this
     while (p) {
@@ -83,17 +83,14 @@ class Context {
 
     const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
 
-    if (query) {
-      this.query.update(query, pathname)
-    } else if (!this.config.persistQuery) {
-      this.query.updateFromString(querystring, pathname)
-    }
-
-    query = this.query.getAll(false, pathname)
-
     const samePage = this.pathname() === pathname
     if (!samePage && !firstRun) {
+      this.isNavigating(true)
       this.reload()
+    }
+
+    if (!query && querystring) {
+      query = qs.parse(querystring)[this.config.depth + pathname]
     }
 
     const canonicalPath = Context
@@ -101,7 +98,7 @@ class Context {
         Context.getBase(this).replace(/\/$/, ''),
         pathname,
         childPath,
-        this.query.getFullQueryString(),
+        this.query.getFullQueryString(query, pathname),
         hash)
 
     const toCtx = {
@@ -121,8 +118,6 @@ class Context {
       utils.merge(toCtx.state, state, false, true)
     }
 
-    utils.merge(this, toCtx, true)
-
     if (this.config.persistState) {
       toCtx.state = this.state()
     }
@@ -133,30 +128,32 @@ class Context {
       '' === canonicalPath ? Context.getBase(this) : canonicalPath)
 
     if (firstRun) {
-      complete.call(this)
+      complete.call(this, true)
     } else if (!samePage) {
       this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this))
 
       if (this.config.outTransition.length !== 4) {
-        complete.call(this)
+        complete.call(this, true)
       }
     } else if (this.$child) {
       this.$child.update(childPath || '/', {}, false, {})
+      complete.call(this)
+    } else {
+      complete.call(this)
     }
 
-    function complete() {
-      this.component(route.component)
+    function complete(animate) {
+      const el = this.config.el.getElementsByClassName('component-wrapper')[0]
+      delete toCtx.query
+      utils.merge(this, toCtx)
+      if (query) {
+        this.query.update(query, pathname)
+      }
+      this.isNavigating(false)
       ko.tasks.runEarly()
-      doInTransitionIfReady(this.config.el.getElementsByClassName('component-wrapper')[0], this.config.inTransition)
 
-      function doInTransitionIfReady(el, transitionFn) {
-        if (el.children.length > 0) {
-          // two more for good measure w/ deferred updates.
-          // this shit happens incredibly fast.
-          transitionFn(el, fromCtx, toCtx)
-        } else {
-          window.requestAnimationFrame(() => doInTransitionIfReady(el, transitionFn))
-        }
+      if (animate) {
+        this.config.inTransition(el, fromCtx, toCtx)
       }
     }
 
@@ -183,7 +180,6 @@ class Context {
         }
       }
     }
-
     return matchingRouteWithFewestDynamicSegments
   }
 

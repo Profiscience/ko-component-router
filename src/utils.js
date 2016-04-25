@@ -51,8 +51,8 @@ function merge(dest, src, createAsObservable = true, prune = false) {
 }
 
 function deepEquals(foo, bar) {
-  if ((foo === null && bar !== null) || (foo !== null && bar === null)) {
-    return false
+  if (foo === null || bar === null) {
+    return foo === null && bar === null
   }
   if (typeof foo !== typeof bar) {
     return false
@@ -60,6 +60,10 @@ function deepEquals(foo, bar) {
   if (typeof foo === 'undefined') {
     return typeof bar === 'undefined'
   }
+  if (isPrimitiveOrDate(foo) && isPrimitiveOrDate(bar)) {
+    return foo === bar
+  }
+
 
   if (foo.constructor === Object && bar.constructor === Object) {
     const fooProps = Object.keys(foo)

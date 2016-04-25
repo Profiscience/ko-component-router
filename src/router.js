@@ -55,8 +55,8 @@ class Router {
   }
 
   dispatch(path, state) {
-    if (path.indexOf(this.config.base) === 0) {
-      path = path.replace(this.config.base, '') || '/'
+    if (path.toLowerCase().indexOf(this.config.base.toLowerCase()) === 0) {
+      path = path.substr(this.config.base.length) || '/'
     }
 
     return this.ctx.update(path, state, false, false)
@@ -98,12 +98,12 @@ class Router {
     // same page
     const orig = path
     const base = this.config.base.replace('/#!', '')
-    if (path.indexOf(base) === 0) {
+    if (path.toLowerCase().indexOf(base.toLowerCase()) === 0) {
       path = path.substr(base.length)
     }
 
     if (this.config.hashbang) {
-      path = path.replace('#!', '')
+      path = path.replace('/#!', '')
     }
 
     if (this.config.base && orig === path) {
@@ -112,8 +112,6 @@ class Router {
 
     if (this.dispatch(path)) {
       e.preventDefault()
-      e.stopPropagation()
-      e.stopImmediatePropagation()
     }
   }
 
