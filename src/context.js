@@ -45,6 +45,15 @@ class Context {
     this.state = stateFactory(this)
   }
 
+  applyDefaultRoute(defaultRoute) {
+    const canonicalPath = this.canonicalPath()
+    const componentIsMissingChildRoute =
+      canonicalPath.endsWith(this.path()) ||
+      canonicalPath.endsWith(this.path() + '/')
+    if (componentIsMissingChildRoute)
+      this.update(defaultRoute)
+  }
+
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
     let url = origUrl.replace('/#!', '')
 

@@ -92,6 +92,7 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/context#query'">query</a></li>
                   <li><a data-bind="path: '/context#state'">state</a></li>
                   <li><a data-bind="path: '/context#route'">route</a></li>
+                  <li><a data-bind="path: '/context#applyDefaultRoute'">applyDefaultRoute</a></li>
                   <li><a data-bind="path: '/context#path'">path</a></li>
                   <li><a data-bind="path: '/context#pathname'">pathname</a></li>
                   <li><a data-bind="path: '/context#canonicalPath'">canonicalPath</a></li>
