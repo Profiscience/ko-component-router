@@ -2032,8 +2032,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    applyBinding.call(this, e, b, c);
 	  }
 	};
+	module.exports = ko.bindingHandlers.path.utils = { resolveHref: resolveHref };
 
 	function applyBinding(el, bindings, ctx) {
+	  var path = bindings.has('path') ? bindings.get('path') : false;
+	  var query = bindings.has('query') ? bindings.get('query') : false;
+	  var state = bindings.has('state') ? bindings.get('state') : false;
+
 	  var bindingsToApply = {};
 	  el.href = '#';
 
@@ -2047,16 +2052,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return true;
 	    }
 
-	    var _getRoute = getRoute(ctx, bindings);
+	    var _getRoute = getRoute(ctx, path);
 
 	    var _getRoute2 = _slicedToArray(_getRoute, 2);
 
 	    var router = _getRoute2[0];
-	    var path = _getRoute2[1];
+	    var route = _getRoute2[1];
 
-	    var state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false;
-	    var query = bindings.has('query') ? bindings.get('query') : false;
-	    var handled = router.update(path, state, true, query);
+	    var handled = router.update(route, ko.toJS(state), true, ko.toJS(query));
 
 	    if (handled) {
 	      e.preventDefault();
@@ -2070,35 +2073,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  bindingsToApply.attr = {
 	    href: ko.pureComputed(function () {
-	      var _getRoute3 = getRoute(ctx, bindings);
-
-	      var _getRoute4 = _slicedToArray(_getRoute3, 2);
-
-	      var router = _getRoute4[0];
-	      var path = _getRoute4[1];
-
-	      var querystring = bindings.has('query') ? '?' + qs.stringify(bindings.get('query')) : '';
-
-	      while (router.$parent) {
-	        path = router.config.base + path;
-	        router = router.$parent;
-	      }
-
-	      return router ? router.config.base + (!router.config.hashbang || router.$parent ? '' : '/#!') + path + querystring : '#';
+	      return resolveHref(ctx, bindings.get('path'), query);
 	    })
 	  };
 
-	  if (bindings.has('path')) {
+	  if (path) {
 	    bindingsToApply.css = {
 	      'active-path': ko.pureComputed(function () {
-	        var _getRoute5 = getRoute(ctx, bindings);
+	        var _getRoute3 = getRoute(ctx, path);
 
-	        var _getRoute6 = _slicedToArray(_getRoute5, 2);
+	        var _getRoute4 = _slicedToArray(_getRoute3, 2);
 
-	        var router = _getRoute6[0];
-	        var path = _getRoute6[1];
+	        var router = _getRoute4[0];
+	        var route = _getRoute4[1];
 
-	        return !router.isNavigating() && router.route() !== '' && path ? router.route().matches(path) : false;
+	        return !router.isNavigating() && router.route() !== '' && route ? router.route().matches(route) : false;
 	      })
 	    };
 	  }
@@ -2109,28 +2098,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
-	function getRoute(ctx, bindings) {
+	function getRoute(ctx, path) {
 	  var router = getRouter(ctx);
-	  var path = bindings.has('path') ? ko.unwrap(bindings.get('path')) : false;
+	  var route = path ? ko.unwrap(path) : router.canonicalPath();
 
-	  if (path === false) {
-	    path = router.canonicalPath();
-	  }
-
-	  if (path.indexOf('//') === 0) {
-	    path = path.replace('//', '/');
+	  if (route.indexOf('//') === 0) {
+	    path = route.replace('//', '/');
 
 	    while (router.$parent) {
 	      router = router.$parent;
 	    }
 	  } else {
-	    while (path && path.match(/\/?\.\./i) && router.$parent) {
+	    while (route && route.match(/\/?\.\./i) && router.$parent) {
 	      router = router.$parent;
-	      path = path.replace(/\/?\.\./i, '');
+	      route = route.replace(/\/?\.\./i, '');
 	    }
 	  }
 
-	  return [router, path];
+	  return [router, route];
 	}
 
 	function getRouter(ctx) {
@@ -2141,6 +2126,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ctx = ctx.$parentContext;
 	  }
+	}
+
+	function resolveHref(ctx, path, query) {
+	  var _getRoute5 = getRoute(ctx, path);
+
+	  var _getRoute6 = _slicedToArray(_getRoute5, 2);
+
+	  var router = _getRoute6[0];
+	  var route = _getRoute6[1];
+
+	  var querystring = query ? '?' + qs.stringify(ko.toJS(query)) : '';
+
+	  while (router.$parent) {
+	    route = router.config.base + route;
+	    router = router.$parent;
+	  }
+
+	  return router ? router.config.base + (!router.config.hashbang || router.$parent ? '' : '/#!') + route + querystring : '#';
 	}
 
 	function which(e) {
