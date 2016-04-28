@@ -10,8 +10,8 @@
   "repository": "caseyWebb/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",
-    "watch": "webpack --watch",
+    "build": "babel src -d lib && webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",
+    "watch": "babel src -wd lib && webpack --watch",
     "example:build": "webpack -p --config webpack.config.example.js",
     "example:watch": "webpack --watch --config webpack.config.example.js",
     "example:serve": "webpack-dev-server --config webpack.config.example.js",
@@ -40,6 +40,7 @@
     "knockout": "^3.3.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.7.7",
     "babel-core": "^6.2.1",
     "babel-loader": "^6.2.0",
     "babel-polyfill": "^6.7.4",
