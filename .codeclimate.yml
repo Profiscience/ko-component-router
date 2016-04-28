@@ -8,6 +8,7 @@ ratings:
 
 exclude_paths:
   - "dist/*"
+  - "lib/*"
   - "example/*"
   - "karma.*"
   - "test.js"
