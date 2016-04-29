@@ -2,12 +2,12 @@
   "name": "ko-component-router",
   "version": "3.7.11",
   "description": "Component-based routing for KnockoutJS",
-  "homepage": "https://github.com/caseyWebb/ko-component-router",
+  "homepage": "https://github.com/Profiscience/ko-component-router",
   "bugs": {
-    "url": "https://github.com/casey/ko-component-router/issues",
+    "url": "https://github.com/Profiscience/ko-component-router/issues",
     "email": "notcaseywebb@gmail.com"
   },
-  "repository": "caseyWebb/ko-component-router",
+  "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
     "build": "babel src -d lib && webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",

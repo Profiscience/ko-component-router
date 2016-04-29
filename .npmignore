@@ -12,6 +12,7 @@ coverage/
 index.html
 README.md
 test.js
+karma.config.*
 webpack.config.*
 
 node_modules/
