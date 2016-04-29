@@ -146,6 +146,33 @@ class ViewModel {
       </section>
 
       <section>
+        <h2 id="applyDefaultRoute">
+          applyDefaultRoute
+          <small class="text-muted">(defaultRoute)</small>
+        </h2>
+        <p>
+          applies a default route to nested routers
+        </p>
+
+<pre><code data-bind="prism: 'javascript'">
+class ViewModel {
+  constructor(ctx) {
+    ko.components.register('event-list', eventList)
+    ko.components.register('event-calendar', eventCalendar)
+
+    this.routes = {
+      '/list': 'event-list',
+      '/calendar': 'event-calendar'
+    }
+
+    // if user navigates to '/events' redirect to '/events/list/all'
+    ctx.applyDefaultRoute('/events/list/all')
+  }
+}
+</code></pre>
+      </section>
+
+      <section>
         <h2 id="path">
           path
           <small class="text-muted">read-only</small>
