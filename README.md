@@ -3,8 +3,8 @@
 ![NPM](https://img.shields.io/npm/v/ko-component-router.svg)
 ![WTFPL](https://img.shields.io/npm/l/ko-component-router.svg)
 [![Travis](https://img.shields.io/travis/Profiscience/ko-component-router.svg)](https://travis-ci.org/Profiscience/ko-component-router)
-[![CodeClimate](https://img.shields.io/codeclimate/github/Profiscience/ko-component-router.svg)](https://codeclimate.com/github/Profiscience/ko-component-router)
-[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/Profiscience/ko-component-router.svg)](https://codeclimate.com/github/Profiscience/ko-component-router/coverage)
+[![Code Climate](https://codeclimate.com/repos/5722f93adb67c31131002768/badges/920f6b0d90c140394a52/gpa.svg)](https://codeclimate.com/repos/5722f93adb67c31131002768/feed)
+[![Test Coverage](https://codeclimate.com/repos/5722f93adb67c31131002768/badges/920f6b0d90c140394a52/coverage.svg)](https://codeclimate.com/repos/5722f93adb67c31131002768/coverage)
 [![Dependency Status](https://img.shields.io/david/Profiscience/ko-component-router.svg)](https://david-dm.org/Profiscience/ko-component-router)
 [![Join the chat at https://gitter.im/Profiscience/ko-component-router](https://badges.gitter.im/Profiscience/ko-component-router.svg)](https://gitter.im/Profiscience/ko-component-router?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
