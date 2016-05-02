@@ -85,7 +85,7 @@ function getRouter(ctx) {
       return ctx.$router
     }
 
-    ctx = ctx.$parent
+    ctx = ctx.$parentContext
   }
 }
 

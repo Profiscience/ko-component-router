@@ -2124,7 +2124,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return ctx.$router;
 	    }
 
-	    ctx = ctx.$parent;
+	    ctx = ctx.$parentContext;
 	  }
 	}
 
