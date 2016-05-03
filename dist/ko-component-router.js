@@ -318,7 +318,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        url = url.replace('./', '/');
 	      } else {
 	        var p = this;
-	        while (p) {
+	        while (p && url.indexOf(p.config.base) > -1) {
 	          url = url.replace(p.config.base, '');
 	          p = p.$parent;
 	        }
