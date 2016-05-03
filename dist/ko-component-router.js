@@ -2103,7 +2103,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var route = path ? ko.unwrap(path) : router.canonicalPath();
 
 	  if (route.indexOf('//') === 0) {
-	    path = route.replace('//', '/');
+	    route = route.replace('//', '/');
 
 	    while (router.$parent) {
 	      router = router.$parent;
