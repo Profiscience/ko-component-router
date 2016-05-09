@@ -7,8 +7,7 @@
 [![Test Coverage](https://codeclimate.com/repos/5722f93adb67c31131002768/badges/920f6b0d90c140394a52/coverage.svg)](https://codeclimate.com/repos/5722f93adb67c31131002768/coverage)
 [![Dependency Status](https://img.shields.io/david/Profiscience/ko-component-router.svg)](https://david-dm.org/Profiscience/ko-component-router)
 [![Peer Dependency Status](https://img.shields.io/david/peer/profiscience/ko-component-router.svg?maxAge=2592000)]()
-[![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)]()  
-
+[![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)]()
 [![Join the chat at https://gitter.im/Profiscience/ko-component-router](https://badges.gitter.im/Profiscience/ko-component-router.svg)](https://gitter.im/Profiscience/ko-component-router?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
