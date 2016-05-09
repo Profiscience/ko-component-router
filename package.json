@@ -3,10 +3,7 @@
   "version": "3.7.16",
   "description": "Component-based routing for KnockoutJS",
   "homepage": "https://github.com/Profiscience/ko-component-router",
-  "bugs": {
-    "url": "https://github.com/Profiscience/ko-component-router/issues",
-    "email": "notcaseywebb@gmail.com"
-  },
+  "bugs": "https://github.com/Profiscience/ko-component-router/issues",
   "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
