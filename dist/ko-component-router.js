@@ -540,45 +540,45 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Utils = __webpack_require__(6);
 
-	var internals = {
-	    delimiter: '&',
-	    arrayPrefixGenerators: {
-	        brackets: function (prefix) {
-	            return prefix + '[]';
-	        },
-	        indices: function (prefix, key) {
-	            return prefix + '[' + key + ']';
-	        },
-	        repeat: function (prefix) {
-	            return prefix;
-	        }
+	var arrayPrefixGenerators = {
+	    brackets: function brackets(prefix) {
+	        return prefix + '[]';
 	    },
-	    strictNullHandling: false,
-	    skipNulls: false,
-	    encode: true
+	    indices: function indices(prefix, key) {
+	        return prefix + '[' + key + ']';
+	    },
+	    repeat: function repeat(prefix) {
+	        return prefix;
+	    }
 	};
 
-	internals.stringify = function (object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots) {
+	var defaults = {
+	    delimiter: '&',
+	    strictNullHandling: false,
+	    skipNulls: false,
+	    encode: true,
+	    encoder: Utils.encode
+	};
+
+	var stringify = function stringify(object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots) {
 	    var obj = object;
 	    if (typeof filter === 'function') {
 	        obj = filter(prefix, obj);
-	    } else if (Utils.isBuffer(obj)) {
-	        obj = String(obj);
 	    } else if (obj instanceof Date) {
 	        obj = obj.toISOString();
 	    } else if (obj === null) {
 	        if (strictNullHandling) {
-	            return encode ? Utils.encode(prefix) : prefix;
+	            return encoder ? encoder(prefix) : prefix;
 	        }
 
 	        obj = '';
 	    }
 
-	    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
-	        if (encode) {
-	            return [Utils.encode(prefix) + '=' + Utils.encode(obj)];
+	    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean' || Utils.isBuffer(obj)) {
+	        if (encoder) {
+	            return [encoder(prefix) + '=' + encoder(obj)];
 	        }
-	        return [prefix + '=' + obj];
+	        return [prefix + '=' + String(obj)];
 	    }
 
 	    var values = [];
@@ -603,9 +603,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (Array.isArray(obj)) {
-	            values = values.concat(internals.stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
+	            values = values.concat(stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
 	        } else {
-	            values = values.concat(internals.stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
+	            values = values.concat(stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
 	        }
 	    }
 
@@ -615,14 +615,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function (object, opts) {
 	    var obj = object;
 	    var options = opts || {};
-	    var delimiter = typeof options.delimiter === 'undefined' ? internals.delimiter : options.delimiter;
-	    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
-	    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : internals.skipNulls;
-	    var encode = typeof options.encode === 'boolean' ? options.encode : internals.encode;
+	    var delimiter = typeof options.delimiter === 'undefined' ? defaults.delimiter : options.delimiter;
+	    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+	    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : defaults.skipNulls;
+	    var encode = typeof options.encode === 'boolean' ? options.encode : defaults.encode;
+	    var encoder = encode ? (typeof options.encoder === 'function' ? options.encoder : defaults.encoder) : null;
 	    var sort = typeof options.sort === 'function' ? options.sort : null;
 	    var allowDots = typeof options.allowDots === 'undefined' ? false : options.allowDots;
 	    var objKeys;
 	    var filter;
+
+	    if (options.encoder !== null && options.encoder !== undefined && typeof options.encoder !== 'function') {
+	        throw new TypeError('Encoder has to be a function.');
+	    }
+
 	    if (typeof options.filter === 'function') {
 	        filter = options.filter;
 	        obj = filter('', obj);
@@ -637,7 +643,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var arrayFormat;
-	    if (options.arrayFormat in internals.arrayPrefixGenerators) {
+	    if (options.arrayFormat in arrayPrefixGenerators) {
 	        arrayFormat = options.arrayFormat;
 	    } else if ('indices' in options) {
 	        arrayFormat = options.indices ? 'indices' : 'repeat';
@@ -645,7 +651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        arrayFormat = 'indices';
 	    }
 
-	    var generateArrayPrefix = internals.arrayPrefixGenerators[arrayFormat];
+	    var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
 
 	    if (!objKeys) {
 	        objKeys = Object.keys(obj);
@@ -662,7 +668,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            continue;
 	        }
 
-	        keys = keys.concat(internals.stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
+	        keys = keys.concat(stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
 	    }
 
 	    return keys.join(delimiter);
@@ -721,7 +727,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        mergeTarget = exports.arrayToObject(target, options);
 	    }
 
-		return Object.keys(source).reduce(function (acc, key) {
+	    return Object.keys(source).reduce(function (acc, key) {
 	        var value = source[key];
 
 	        if (Object.prototype.hasOwnProperty.call(acc, key)) {
@@ -729,7 +735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	            acc[key] = value;
 	        }
-			return acc;
+	        return acc;
 	    }, mergeTarget);
 	};
 
@@ -784,7 +790,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        i += 1;
 	        c = 0x10000 + (((c & 0x3FF) << 10) | (string.charCodeAt(i) & 0x3FF));
-	        out += (hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)]);
+	        out += hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)];
 	    }
 
 	    return out;
@@ -807,7 +813,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var compacted = [];
 
 	        for (var i = 0; i < obj.length; ++i) {
-	            if (typeof obj[i] !== 'undefined') {
+	            if (obj[i] && typeof obj[i] === 'object') {
+	                compacted.push(exports.compact(obj[i], refs));
+	            } else if (typeof obj[i] !== 'undefined') {
 	                compacted.push(obj[i]);
 	            }
 	        }
@@ -845,7 +853,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Utils = __webpack_require__(6);
 
-	var internals = {
+	var defaults = {
 	    delimiter: '&',
 	    depth: 5,
 	    arrayLimit: 20,
@@ -853,10 +861,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    strictNullHandling: false,
 	    plainObjects: false,
 	    allowPrototypes: false,
-	    allowDots: false
+	    allowDots: false,
+	    decoder: Utils.decode
 	};
 
-	internals.parseValues = function (str, options) {
+	var parseValues = function parseValues(str, options) {
 	    var obj = {};
 	    var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
 
@@ -865,14 +874,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
 
 	        if (pos === -1) {
-	            obj[Utils.decode(part)] = '';
+	            obj[options.decoder(part)] = '';
 
 	            if (options.strictNullHandling) {
-	                obj[Utils.decode(part)] = null;
+	                obj[options.decoder(part)] = null;
 	            }
 	        } else {
-	            var key = Utils.decode(part.slice(0, pos));
-	            var val = Utils.decode(part.slice(pos + 1));
+	            var key = options.decoder(part.slice(0, pos));
+	            var val = options.decoder(part.slice(pos + 1));
 
 	            if (Object.prototype.hasOwnProperty.call(obj, key)) {
 	                obj[key] = [].concat(obj[key]).concat(val);
@@ -885,7 +894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return obj;
 	};
 
-	internals.parseObject = function (chain, val, options) {
+	var parseObject = function parseObject(chain, val, options) {
 	    if (!chain.length) {
 	        return val;
 	    }
@@ -895,7 +904,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var obj;
 	    if (root === '[]') {
 	        obj = [];
-	        obj = obj.concat(internals.parseObject(chain, val, options));
+	        obj = obj.concat(parseObject(chain, val, options));
 	    } else {
 	        obj = options.plainObjects ? Object.create(null) : {};
 	        var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
@@ -908,16 +917,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            (options.parseArrays && index <= options.arrayLimit)
 	        ) {
 	            obj = [];
-	            obj[index] = internals.parseObject(chain, val, options);
+	            obj[index] = parseObject(chain, val, options);
 	        } else {
-	            obj[cleanRoot] = internals.parseObject(chain, val, options);
+	            obj[cleanRoot] = parseObject(chain, val, options);
 	        }
 	    }
 
 	    return obj;
 	};
 
-	internals.parseKeys = function (givenKey, val, options) {
+	var parseKeys = function parseKeys(givenKey, val, options) {
 	    if (!givenKey) {
 	        return;
 	    }
@@ -968,30 +977,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	        keys.push('[' + key.slice(segment.index) + ']');
 	    }
 
-	    return internals.parseObject(keys, val, options);
+	    return parseObject(keys, val, options);
 	};
 
 	module.exports = function (str, opts) {
 	    var options = opts || {};
-	    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
-	    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
-	    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
-	    options.parseArrays = options.parseArrays !== false;
-	    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : internals.allowDots;
-	    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : internals.plainObjects;
-	    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : internals.allowPrototypes;
-	    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
-	    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
 
-	    if (
-	        str === '' ||
-	        str === null ||
-	        typeof str === 'undefined'
-	    ) {
+	    if (options.decoder !== null && options.decoder !== undefined && typeof options.decoder !== 'function') {
+	        throw new TypeError('Decoder has to be a function.');
+	    }
+
+	    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : defaults.delimiter;
+	    options.depth = typeof options.depth === 'number' ? options.depth : defaults.depth;
+	    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : defaults.arrayLimit;
+	    options.parseArrays = options.parseArrays !== false;
+	    options.decoder = typeof options.decoder === 'function' ? options.decoder : defaults.decoder;
+	    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : defaults.allowDots;
+	    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : defaults.plainObjects;
+	    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : defaults.allowPrototypes;
+	    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : defaults.parameterLimit;
+	    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+
+	    if (str === '' || str === null || typeof str === 'undefined') {
 	        return options.plainObjects ? Object.create(null) : {};
 	    }
 
-	    var tempObj = typeof str === 'string' ? internals.parseValues(str, options) : str;
+	    var tempObj = typeof str === 'string' ? parseValues(str, options) : str;
 	    var obj = options.plainObjects ? Object.create(null) : {};
 
 	    // Iterate over the keys and setup the new object
@@ -999,7 +1010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var keys = Object.keys(tempObj);
 	    for (var i = 0; i < keys.length; ++i) {
 	        var key = keys[i];
-	        var newObj = internals.parseKeys(key, tempObj[key], options);
+	        var newObj = parseKeys(key, tempObj[key], options);
 	        obj = Utils.merge(obj, newObj, options);
 	    }
 
@@ -1640,8 +1651,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Parse a string for the raw tokens.
 	 *
-	 * @param  {String} str
-	 * @return {Array}
+	 * @param  {string} str
+	 * @return {!Array}
 	 */
 	function parse (str) {
 	  var tokens = []
@@ -1663,22 +1674,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	      continue
 	    }
 
+	    var next = str[index]
+	    var prefix = res[2]
+	    var name = res[3]
+	    var capture = res[4]
+	    var group = res[5]
+	    var modifier = res[6]
+	    var asterisk = res[7]
+
+	    // Only use the prefix when followed by another path segment.
+	    if (prefix != null && next != null && next !== prefix) {
+	      path += prefix
+	      prefix = null
+	    }
+
 	    // Push the current path onto the tokens.
 	    if (path) {
 	      tokens.push(path)
 	      path = ''
 	    }
 
-	    var prefix = res[2]
-	    var name = res[3]
-	    var capture = res[4]
-	    var group = res[5]
-	    var suffix = res[6]
-	    var asterisk = res[7]
-
-	    var repeat = suffix === '+' || suffix === '*'
-	    var optional = suffix === '?' || suffix === '*'
-	    var delimiter = prefix || '/'
+	    var repeat = modifier === '+' || modifier === '*'
+	    var optional = modifier === '?' || modifier === '*'
+	    var delimiter = res[2] || '/'
 	    var pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?')
 
 	    tokens.push({
@@ -1707,11 +1725,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Compile a string to a template function for the path.
 	 *
-	 * @param  {String}   str
-	 * @return {Function}
+	 * @param  {string}             str
+	 * @return {!function(Object=, Object=)}
 	 */
 	function compile (str) {
 	  return tokensToFunction(parse(str))
+	}
+
+	/**
+	 * Encode characters for segment that could cause trouble for parsing.
+	 *
+	 * @param  {string}
+	 * @return {string}
+	 */
+	function encodeURIComponentPretty (str) {
+	  return encodeURI(str).replace(/[/?#'"]/g, function (c) {
+	    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+	  })
 	}
 
 	/**
@@ -1728,9 +1758,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 
-	  return function (obj) {
+	  return function (obj, opts) {
 	    var path = ''
 	    var data = obj || {}
+	    var options = opts || {}
+	    var encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent
 
 	    for (var i = 0; i < tokens.length; i++) {
 	      var token = tokens[i]
@@ -1766,7 +1798,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        for (var j = 0; j < value.length; j++) {
-	          segment = encodeURIComponent(value[j])
+	          segment = encode(value[j])
 
 	          if (!matches[i].test(segment)) {
 	            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
@@ -1778,7 +1810,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        continue
 	      }
 
-	      segment = encodeURIComponent(value)
+	      segment = encode(value)
 
 	      if (!matches[i].test(segment)) {
 	        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
@@ -1794,8 +1826,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Escape a regular expression string.
 	 *
-	 * @param  {String} str
-	 * @return {String}
+	 * @param  {string} str
+	 * @return {string}
 	 */
 	function escapeString (str) {
 	  return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1')
@@ -1804,8 +1836,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Escape the capturing group by escaping special characters and meaning.
 	 *
-	 * @param  {String} group
-	 * @return {String}
+	 * @param  {string} group
+	 * @return {string}
 	 */
 	function escapeGroup (group) {
 	  return group.replace(/([=!:$\/()])/g, '\\$1')
@@ -1814,9 +1846,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Attach the keys as a property of the regexp.
 	 *
-	 * @param  {RegExp} re
-	 * @param  {Array}  keys
-	 * @return {RegExp}
+	 * @param  {!RegExp} re
+	 * @param  {Array}   keys
+	 * @return {!RegExp}
 	 */
 	function attachKeys (re, keys) {
 	  re.keys = keys
@@ -1827,7 +1859,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Get the flags for a regexp from the options.
 	 *
 	 * @param  {Object} options
-	 * @return {String}
+	 * @return {string}
 	 */
 	function flags (options) {
 	  return options.sensitive ? '' : 'i'
@@ -1836,9 +1868,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Pull out keys from a regexp.
 	 *
-	 * @param  {RegExp} path
-	 * @param  {Array}  keys
-	 * @return {RegExp}
+	 * @param  {!RegExp} path
+	 * @param  {!Array}  keys
+	 * @return {!RegExp}
 	 */
 	function regexpToRegexp (path, keys) {
 	  // Use a negative lookahead to match only capturing groups.
@@ -1863,10 +1895,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Transform an array into a regexp.
 	 *
-	 * @param  {Array}  path
-	 * @param  {Array}  keys
-	 * @param  {Object} options
-	 * @return {RegExp}
+	 * @param  {!Array}  path
+	 * @param  {Array}   keys
+	 * @param  {!Object} options
+	 * @return {!RegExp}
 	 */
 	function arrayToRegexp (path, keys, options) {
 	  var parts = []
@@ -1883,10 +1915,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Create a path regexp from string input.
 	 *
-	 * @param  {String} path
-	 * @param  {Array}  keys
-	 * @param  {Object} options
-	 * @return {RegExp}
+	 * @param  {string}  path
+	 * @param  {!Array}  keys
+	 * @param  {!Object} options
+	 * @return {!RegExp}
 	 */
 	function stringToRegexp (path, keys, options) {
 	  var tokens = parse(path)
@@ -1905,10 +1937,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Expose a function for taking tokens and returning a RegExp.
 	 *
-	 * @param  {Array}  tokens
-	 * @param  {Array}  keys
-	 * @param  {Object} options
-	 * @return {RegExp}
+	 * @param  {!Array}  tokens
+	 * @param  {Object=} options
+	 * @return {!RegExp}
 	 */
 	function tokensToRegExp (tokens, options) {
 	  options = options || {}
@@ -1973,30 +2004,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * placeholder key descriptions. For example, using `/user/:id`, `keys` will
 	 * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
 	 *
-	 * @param  {(String|RegExp|Array)} path
-	 * @param  {Array}                 [keys]
-	 * @param  {Object}                [options]
-	 * @return {RegExp}
+	 * @param  {(string|RegExp|Array)} path
+	 * @param  {(Array|Object)=}       keys
+	 * @param  {Object=}               options
+	 * @return {!RegExp}
 	 */
 	function pathToRegexp (path, keys, options) {
 	  keys = keys || []
 
 	  if (!isarray(keys)) {
-	    options = keys
+	    options = /** @type {!Object} */ (keys)
 	    keys = []
 	  } else if (!options) {
 	    options = {}
 	  }
 
 	  if (path instanceof RegExp) {
-	    return regexpToRegexp(path, keys, options)
+	    return regexpToRegexp(path, /** @type {!Array} */ (keys))
 	  }
 
 	  if (isarray(path)) {
-	    return arrayToRegexp(path, keys, options)
+	    return arrayToRegexp(/** @type {!Array} */ (path), /** @type {!Array} */ (keys), options)
 	  }
 
-	  return stringToRegexp(path, keys, options)
+	  return stringToRegexp(/** @type {string} */ (path), /** @type {!Array} */ (keys), options)
 	}
 
 
