@@ -139,26 +139,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    if (dispatch) {
-	      var url = this.config.hashbang && ~location.hash.indexOf('#!') ? location.hash.substr(2) + location.search : location.pathname + location.search + location.hash;
+	      var path = this.config.hashbang && ~location.hash.indexOf('#!') ? location.hash.substr(2) + location.search : location.pathname + location.search + location.hash;
 
-	      this.dispatch(url);
+	      this.dispatch({ path: path });
 	    }
 	  }
 
 	  _createClass(Router, [{
 	    key: 'dispatch',
-	    value: function dispatch(path, state) {
+	    value: function dispatch(_ref2) {
+	      var path = _ref2.path;
+	      var state = _ref2.state;
+	      var _ref2$pushState = _ref2.pushState;
+	      var pushState = _ref2$pushState === undefined ? false : _ref2$pushState;
+
 	      if (path.toLowerCase().indexOf(this.config.base.toLowerCase()) === 0) {
 	        path = path.substr(this.config.base.length) || '/';
 	      }
 
-	      return this.ctx.update(path, state, false, false);
+	      return this.ctx.update(path, state, pushState, false);
 	    }
 	  }, {
 	    key: 'onpopstate',
-	    value: function onpopstate(e) {
-	      var guid = this.ctx.config.depth + this.ctx.pathname();
-	      this.dispatch(location.pathname + location.search + location.hash, (e.state || {})[guid]);
+	    value: function onpopstate(_ref3) {
+	      var _ref3$state = _ref3.state;
+	      var state = _ref3$state === undefined ? {} : _ref3$state;
+
+	      this.dispatch({
+	        path: location.pathname + location.search + location.hash,
+	        state: state[this.ctx.config.depth + this.ctx.pathname()]
+	      });
 	    }
 	  }, {
 	    key: 'onclick',
@@ -205,7 +215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 
-	      if (this.dispatch(path)) {
+	      if (this.dispatch({ path: path, pushState: true })) {
 	        e.preventDefault();
 	      }
 	    }
@@ -1559,15 +1569,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      var qsIndex = path.indexOf('?');
-	      var pathname = void 0,
-	          querystring = void 0; // eslint-disable-line
 
 	      var _ref = ~qsIndex ? path.split('?') : [path];
 
 	      var _ref2 = _slicedToArray(_ref, 2);
 
-	      pathname = _ref2[0];
-	      querystring = _ref2[1];
+	      var pathname = _ref2[0];
+	      var querystring = _ref2[1]; // eslint-disable-line
 
 	      var matches = this._regexp.exec(decodeURIComponent(pathname));
 

@@ -40,8 +40,7 @@ class Route {
     }
 
     const qsIndex = path.indexOf('?')
-    let pathname, querystring // eslint-disable-line
-    [pathname, querystring] = ~qsIndex ? path.split('?') : [path]
+    let [pathname, querystring] = ~qsIndex ? path.split('?') : [path] // eslint-disable-line
     const matches = this._regexp.exec(decodeURIComponent(pathname))
 
     for (let i = 1, len = matches.length; i < len; ++i) {

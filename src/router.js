@@ -47,25 +47,27 @@ class Router {
     }
 
     if (dispatch) {
-      const url = (this.config.hashbang && ~location.hash.indexOf('#!'))
+      const path = (this.config.hashbang && ~location.hash.indexOf('#!'))
         ? location.hash.substr(2) + location.search
         : location.pathname + location.search + location.hash
 
-      this.dispatch(url)
+      this.dispatch({ path })
     }
   }
 
-  dispatch(path, state) {
+  dispatch({ path, state, pushState = false }) {
     if (path.toLowerCase().indexOf(this.config.base.toLowerCase()) === 0) {
       path = path.substr(this.config.base.length) || '/'
     }
 
-    return this.ctx.update(path, state, false, false)
+    return this.ctx.update(path, state, pushState, false)
   }
 
-  onpopstate(e) {
-    const guid = this.ctx.config.depth + this.ctx.pathname()
-    this.dispatch(location.pathname + location.search + location.hash, (e.state || {})[guid])
+  onpopstate({ state = {} }) {
+    this.dispatch({
+      path: location.pathname + location.search + location.hash,
+      state: state[this.ctx.config.depth + this.ctx.pathname()]
+    })
   }
 
   onclick(e) {
@@ -111,7 +113,7 @@ class Router {
       return
     }
 
-    if (this.dispatch(path)) {
+    if (this.dispatch({ path, pushState: true })) {
       e.preventDefault()
     }
   }
