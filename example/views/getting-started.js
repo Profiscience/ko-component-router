@@ -64,7 +64,7 @@ ko.components.register('app', {
   `)}\`
 })
 
-ko.component.register('home', {
+ko.components.register('home', {
   template: \`${escape(`<a href="/users/1234">Show user</a>`)}\`
 })
 
