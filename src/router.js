@@ -51,21 +51,24 @@ class Router {
         ? location.hash.substr(2) + location.search
         : location.pathname + location.search + location.hash
 
-      this.dispatch(url)
+      this.dispatch({path: url})
     }
   }
 
-  dispatch(path, state) {
+  dispatch({path, state, fromClick = false}) {
     if (path.toLowerCase().indexOf(this.config.base.toLowerCase()) === 0) {
       path = path.substr(this.config.base.length) || '/'
     }
 
-    return this.ctx.update(path, state, false, false)
+    return this.ctx.update(path, state, fromClick, false)
   }
 
   onpopstate(e) {
     const guid = this.ctx.config.depth + this.ctx.pathname()
-    this.dispatch(location.pathname + location.search + location.hash, (e.state || {})[guid])
+    this.dispatch({
+      path: location.pathname + location.search + location.hash,
+      state: (e.state || {})[guid]
+    })
   }
 
   onclick(e) {
@@ -111,7 +114,7 @@ class Router {
       return
     }
 
-    if (this.dispatch(path)) {
+    if (this.dispatch({path, fromClick: true})) {
       e.preventDefault()
     }
   }
