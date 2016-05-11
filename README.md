@@ -1,18 +1,19 @@
 # ko-component-router
 
-![NPM](https://img.shields.io/npm/v/ko-component-router.svg)
+![NPM Version](https://img.shields.io/npm/v/ko-component-router.svg)
+[![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)]()
 ![WTFPL](https://img.shields.io/npm/l/ko-component-router.svg)
-[![Travis](https://img.shields.io/travis/caseyWebb/ko-component-router.svg)](https://travis-ci.org/caseyWebb/ko-component-router)
-[![CodeClimate](https://img.shields.io/codeclimate/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router)
-[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/caseyWebb/ko-component-router.svg)](https://codeclimate.com/github/caseyWebb/ko-component-router/coverage)
-[![Dependency Status](https://img.shields.io/david/caseyWebb/ko-component-router.svg)](https://david-dm.org/caseyWebb/ko-component-router)
-[![Join the chat at https://gitter.im/caseyWebb/ko-component-router](https://badges.gitter.im/caseyWebb/ko-component-router.svg)](https://gitter.im/caseyWebb/ko-component-router?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Travis](https://img.shields.io/travis/Profiscience/ko-component-router.svg)](https://travis-ci.org/Profiscience/ko-component-router)
+[![Code Climate](https://codeclimate.com/repos/5722f93adb67c31131002768/badges/920f6b0d90c140394a52/gpa.svg)](https://codeclimate.com/repos/5722f93adb67c31131002768/feed)
+[![Test Coverage](https://codeclimate.com/repos/5722f93adb67c31131002768/badges/920f6b0d90c140394a52/coverage.svg)](https://codeclimate.com/repos/5722f93adb67c31131002768/coverage)
+[![Dependency Status](https://img.shields.io/david/Profiscience/ko-component-router.svg)](https://david-dm.org/Profiscience/ko-component-router)
+[![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)]()
 
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
 
 Supports nested routing, read/write querystring param observables, read/write state observables
 
-__[DOCS](https://caseyWebb.github.io/ko-component-router/)__
+__[DOCS](https://Profiscience.github.io/ko-component-router/)__
 
 ###### app.js ######
 ```javascript

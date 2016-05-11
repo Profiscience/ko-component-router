@@ -7,8 +7,13 @@ const { isUndefined } = require('./utils')
 ko.bindingHandlers.path = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
 ko.bindingHandlers.state = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
 ko.bindingHandlers.query = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
+module.exports = ko.bindingHandlers.path.utils = { resolveHref }
 
 function applyBinding(el, bindings, ctx) {
+  const path = bindings.has('path') ? bindings.get('path') : false
+  const query = bindings.has('query') ? bindings.get('query') : false
+  const state = bindings.has('state') ? bindings.get('state') : false
+
   const bindingsToApply = {}
   el.href = '#'
 
@@ -22,10 +27,8 @@ function applyBinding(el, bindings, ctx) {
       return true
     }
 
-    const [router, path] = getRoute(ctx, bindings)
-    const state = bindings.has('state') ? ko.toJS(bindings.get('state')) : false
-    const query = bindings.has('query') ? bindings.get('query') : false
-    const handled = router.update(path, state, true, query)
+    const [router, route] = getRoute(ctx, path)
+    const handled = router.update(route, ko.toJS(state), true, ko.toJS(query))
 
     if (handled) {
       e.preventDefault()
@@ -38,32 +41,15 @@ function applyBinding(el, bindings, ctx) {
   }
 
   bindingsToApply.attr = {
-    href: ko.pureComputed(() => {
-      let [router, path] = getRoute(ctx, bindings)
-      const querystring = bindings.has('query')
-        ? '?' + qs.stringify(bindings.get('query'))
-        : ''
-
-      while (router.$parent) {
-        path = router.config.base + path
-        router = router.$parent
-      }
-
-      return router
-        ? router.config.base
-          + (!router.config.hashbang || router.$parent ? '' : '/#!')
-          + path
-          + querystring
-        : '#'
-    })
+    href: ko.pureComputed(() => resolveHref(ctx, bindings.get('path'), query))
   }
 
-  if (bindings.has('path')) {
+  if (path) {
     bindingsToApply.css = {
       'active-path': ko.pureComputed(() => {
-        const [router, path] = getRoute(ctx, bindings)
-        return !router.isNavigating() && router.route() !== '' && path
-          ? router.route().matches(path)
+        const [router, route] = getRoute(ctx, path)
+        return !router.isNavigating() && router.route() !== '' && route
+          ? router.route().matches(route)
           : false
         })
     }
@@ -73,26 +59,24 @@ function applyBinding(el, bindings, ctx) {
   ko.tasks.schedule(() => ko.applyBindingsToNode(el, bindingsToApply))
 }
 
-function getRoute(ctx, bindings) {
+function getRoute(ctx, path) {
   let router = getRouter(ctx)
-  let path = bindings.has('path') ? ko.unwrap(bindings.get('path')) : false
+  let route = path ? ko.unwrap(path) : router.canonicalPath()
 
-  if (path === false) {
-    path = router.canonicalPath()
-  }
+  if (route.indexOf('//') === 0) {
+    route = route.replace('//', '/')
 
-  if (path.indexOf('//') === 0) {
     while (router.$parent) {
       router = router.$parent
     }
   } else {
-    while (path && path.match(/\/?\.\./i) && router.$parent) {
+    while (route && route.match(/\/?\.\./i) && router.$parent) {
       router = router.$parent
-      path = path.replace(/\/?\.\./i, '')
+      route = route.replace(/\/?\.\./i, '')
     }
   }
 
-  return [router, path]
+  return [router, route]
 }
 
 function getRouter(ctx) {
@@ -103,6 +87,25 @@ function getRouter(ctx) {
 
     ctx = ctx.$parentContext
   }
+}
+
+function resolveHref(ctx, path, query) {
+  let [router, route] = getRoute(ctx, path)
+  const querystring = query
+    ? '?' + qs.stringify(ko.toJS(query))
+    : ''
+
+  while (router.$parent) {
+    route = router.config.base + route
+    router = router.$parent
+  }
+
+  return router
+    ? router.config.base
+      + (!router.config.hashbang || router.$parent ? '' : '/#!')
+      + route
+      + querystring
+    : '#'
 }
 
 function which(e) {

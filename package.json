@@ -1,22 +1,19 @@
 {
   "name": "ko-component-router",
-  "version": "3.7.9",
+  "version": "3.7.16",
   "description": "Component-based routing for KnockoutJS",
-  "homepage": "https://github.com/caseyWebb/ko-component-router",
-  "bugs": {
-    "url": "https://github.com/casey/ko-component-router/issues",
-    "email": "notcaseywebb@gmail.com"
-  },
-  "repository": "caseyWebb/ko-component-router",
+  "homepage": "https://github.com/Profiscience/ko-component-router",
+  "bugs": "https://github.com/Profiscience/ko-component-router/issues",
+  "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",
-    "watch": "webpack --watch",
+    "build": "babel src -d lib && webpack && uglifyjs dist/ko-component-router.js -o dist/ko-component-router.min.js",
+    "watch": "babel src -wd lib && webpack --watch",
     "example:build": "webpack -p --config webpack.config.example.js",
     "example:watch": "webpack --watch --config webpack.config.example.js",
     "example:serve": "webpack-dev-server --config webpack.config.example.js",
     "prepublish": "npm run build && npm run example:build",
-    "stage-dist": "git add dist example/dist",
+    "stage-dist": "git add dist example/dist lib",
     "test": "karma start karma.travis.js",
     "test:watch": "karma start"
   },
@@ -40,6 +37,7 @@
     "knockout": "^3.3.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.7.7",
     "babel-core": "^6.2.1",
     "babel-loader": "^6.2.0",
     "babel-polyfill": "^6.7.4",
