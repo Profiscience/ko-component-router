@@ -76,9 +76,9 @@ ko.components.register('user', {
 
       // many are read/write observables,
       // see each section for more info
-    },
-    template: '${escape(`<!-- ctx is also available as $router in the binding context -->`)}'
-  }
+    }
+  },
+  template: '${escape(`<!-- ctx is also available as $router in the binding context -->`)}'
 })
 
 ko.applyBindings()
