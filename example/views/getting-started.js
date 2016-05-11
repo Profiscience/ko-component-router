@@ -65,7 +65,7 @@ ko.components.register('app', {
 })
 
 ko.components.register('home', {
-  template: \`${escape(`<a href="/users/1234">Show user</a>`)}\`
+  template: \`${escape(`<a href="/user/1234">Show user</a>`)}\`
 })
 
 ko.components.register('user', {
@@ -78,7 +78,7 @@ ko.components.register('user', {
       // see each section for more info
     }
   },
-  template: '${escape(`<!-- ctx is also available as $router in the binding context -->`)}'
+  template: '${escape(`User: <!-- ko text: $router.params.id  --><!-- /ko -->`)}'
 })
 
 ko.applyBindings()
