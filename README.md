@@ -1,12 +1,12 @@
 # ko-component-router
 
-![NPM Version](https://img.shields.io/npm/v/ko-component-router.svg)
+[![NPM Version](https://img.shields.io/npm/v/ko-component-router.svg)](https://www.npmjs.com/package/ko-component-router)
 ![WTFPL](https://img.shields.io/npm/l/ko-component-router.svg)
 [![Travis](https://img.shields.io/travis/Profiscience/ko-component-router.svg)](https://travis-ci.org/Profiscience/ko-component-router)
-[![Coveralls](https://img.shields.io/coveralls/Profiscience/ko-component-router.svg?maxAge=2592000)]()
+[![Coveralls](https://img.shields.io/coveralls/Profiscience/ko-component-router.svg?maxAge=2592000)](https://coveralls.io/github/Profiscience/ko-component-router)
 [![Dependency Status](https://img.shields.io/david/Profiscience/ko-component-router.svg)](https://david-dm.org/Profiscience/ko-component-router)
-[![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)]()
-[![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)]()
+[![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)](https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table)
+[![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
 
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
 
