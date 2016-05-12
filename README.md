@@ -49,9 +49,9 @@ ko.components.register('user', {
       // ctx.hash
       //
       // ...and more!
-    },
-    template: '<!-- ctx is also available as $router in the binding context -->'
-  }
+    }
+  },
+  template: '<!-- ctx is also available as $router in the binding context -->'
 })
 
 ko.applyBindings()
