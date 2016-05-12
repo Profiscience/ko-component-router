@@ -3,7 +3,6 @@
 const $ = require('jquery')
 const ko = require('knockout')
 const test = require('tape')
-let foo
 
 // polyfills
 require('es6-promise').polyfill()
