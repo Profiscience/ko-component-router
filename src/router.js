@@ -64,10 +64,9 @@ class Router {
   }
 
   onpopstate({ state }) {
-    state = state || {};
     this.dispatch({
       path: location.pathname + location.search + location.hash,
-      state: state[this.ctx.config.depth + this.ctx.pathname()]
+      state: (state || {})[this.ctx.config.depth + this.ctx.pathname()]
     })
   }
 

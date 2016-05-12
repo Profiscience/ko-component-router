@@ -3,6 +3,7 @@
 const $ = require('jquery')
 const ko = require('knockout')
 const test = require('tape')
+let foo
 
 // polyfills
 require('es6-promise').polyfill()
@@ -97,6 +98,14 @@ function runTests(t, config) {
       t.equal(router.hash(), 'foobar', 'hash is attached to ctx.hash()')
     })
 
+    // state
+    .step(() => {
+      router.update(undefined, { foo: 'foo' })
+    })
+    .step(() => {
+      t.deepEqual(router.state(), { foo: 'foo' }, 'router.update can set state')
+    })
+
     // query
     .step(() => {
       router.update('/about', {}, false, { foo: 'foo', bazs: ['1', '2', '3'], quxs: ['1', '2', '3'] })
@@ -116,7 +125,7 @@ function runTests(t, config) {
       t.equal(foo(), 'foo', 'ctx.query.get works')
       t.deepEqual(query, { foo: 'foo', bazs: [1, 2, 3], quxs: [1, 2, 3]  }, 'ctx.query.getAll works')
       t.assert(ko.isObservable(observableQuery), 'ctx.query.getAll(true) returns as observable')
-      t.deepEqual(observableQuery(), { bazs: [ 1, 2, 3 ], foo: 'foo', quxs: [ 1, 2, 3 ] })
+      t.deepEqual(observableQuery(), { bazs: [1, 2, 3], foo: 'foo', quxs: [1, 2, 3] })
       t.equal(router.query.get('bar')(), 'bar', 'ctx.query.setDefaults works')
       t.deepEqual(router.query.get('bazs')(), [1,2,3], 'ctx.query.get parsing works')
       t.deepEqual(router.query.get('quxs')(), [1,2,3], 'ctx.query.setDefaults parsing works')
@@ -388,7 +397,7 @@ ko.components.register('persistent-query-state', {
 })
 
 test('ko-component-router', (t) => {
-  const NUM_TESTS = 43 * 4 + 4
+  const NUM_TESTS = 44 * 4 + 4
   t.plan(NUM_TESTS)
 
   t.assert(ko.components.isRegistered('ko-component-router'), 'should register <ko-component-router />')
