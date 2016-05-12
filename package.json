@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "3.7.17",
+  "version": "3.7.18",
   "description": "Component-based routing for KnockoutJS",
   "homepage": "https://github.com/Profiscience/ko-component-router",
   "bugs": "https://github.com/Profiscience/ko-component-router/issues",
@@ -18,8 +18,14 @@
     "test:watch": "karma start"
   },
   "precommit": [
-    ["lint", "test"],
-    ["build", "example:build"],
+    [
+      "lint",
+      "test"
+    ],
+    [
+      "build",
+      "example:build"
+    ],
     "stage"
   ],
   "keywords": [
