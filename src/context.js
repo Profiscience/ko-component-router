@@ -4,7 +4,7 @@ const ko = require('knockout')
 const qs = require('qs')
 const queryFactory = require('./query').factory
 const stateFactory = require('./state').factory
-const { merge } = require('./utils')
+const { extend } = require('./utils')
 
 class Context {
   constructor(bindingCtx, config) {
@@ -107,10 +107,9 @@ class Context {
     }
 
     if (state === false && samePage) {
-      merge(toCtx, { state: fromCtx.state }, false)
+      extend(toCtx, { state: fromCtx.state }, false)
     } else if (!this.config.persistState && state) {
-      toCtx.state = {}
-      merge(toCtx.state, state, false, true)
+      toCtx.state = state
     }
 
     if (this.config.persistState) {
@@ -140,7 +139,7 @@ class Context {
     function complete(animate) {
       const el = this.config.el.getElementsByClassName('component-wrapper')[0]
       delete toCtx.query
-      merge(this, toCtx)
+      extend(this, toCtx)
       if (query) {
         this.query.update(query, pathname)
       }

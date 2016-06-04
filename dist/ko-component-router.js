@@ -270,7 +270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _require = __webpack_require__(9);
 
-	var merge = _require.merge;
+	var extend = _require.extend;
 
 	var Context = function () {
 	  function Context(bindingCtx, config) {
@@ -388,10 +388,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      };
 
 	      if (state === false && samePage) {
-	        merge(toCtx, { state: fromCtx.state }, false);
+	        extend(toCtx, { state: fromCtx.state }, false);
 	      } else if (!this.config.persistState && state) {
-	        toCtx.state = {};
-	        merge(toCtx.state, state, false, true);
+	        toCtx.state = state;
 	      }
 
 	      if (this.config.persistState) {
@@ -420,7 +419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var el = this.config.el.getElementsByClassName('component-wrapper')[0];
 	        delete toCtx.query;
-	        merge(this, toCtx);
+	        extend(this, toCtx);
 	        if (query) {
 	          this.query.update(query, pathname);
 	        }
@@ -1273,23 +1272,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return mappedObj;
 	}
 
-	function merge(dest, src) {
+	function extend(dest, src) {
 	  var createAsObservable = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
-	  var prune = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	  if (!src) {
-	    return prune ? undefined : dest;
-	  }
+	  var _shallow = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
 
 	  var props = Object.keys(src);
-
-	  if (prune) {
-	    for (var prop in dest) {
-	      if (props.indexOf(prop) < 0) {
-	        props.push(prop);
-	      }
-	    }
-	  }
 
 	  var _iteratorNormalCompletion = true;
 	  var _didIteratorError = false;
@@ -1297,19 +1285,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  try {
 	    for (var _iterator = props[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	      var _prop = _step.value;
+	      var prop = _step.value;
 
-	      if (isUndefined(dest[_prop])) dest[_prop] = createAsObservable ? fromJS(src[_prop]) : src[_prop];else if (ko.isWritableObservable(dest[_prop])) {
-	        if (!deepEquals(dest[_prop](), src[_prop])) {
-	          dest[_prop](src[_prop]);
+	      if (isUndefined(dest[prop])) {
+	        dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop];
+	      } else if (ko.isWritableObservable(dest[prop])) {
+	        if (!deepEquals(dest[prop](), src[prop])) {
+	          dest[prop](src[prop]);
 	        }
-	      } else if (isUndefined(src[_prop])) dest[_prop] = undefined;else if (src[_prop].constructor === Object) {
-	        if (prune) {
-	          dest[_prop] = {};
+	      } else if (isUndefined(src[prop])) {
+	        dest[prop] = undefined;
+	      } else if (src[prop].constructor === Object) {
+	        if (_shallow) {
+	          dest[prop] = {};
 	        }
-
-	        merge(dest[_prop], src[_prop], createAsObservable);
-	      } else dest[_prop] = src[_prop];
+	        extend(dest[prop], src[prop], createAsObservable);
+	      } else {
+	        dest[prop] = src[prop];
+	      }
 	    }
 	  } catch (err) {
 	    _didIteratorError = true;
@@ -1327,6 +1320,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  return dest;
+	}
+
+	function merge(dest, src) {
+	  var createAsObservable = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+	  extend(dest, src, createAsObservable, false);
 	}
 
 	function deepEquals(foo, bar) {
@@ -1447,6 +1446,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	  decodeURLEncodedURIComponent: decodeURLEncodedURIComponent,
 	  mapKeys: mapKeys,
+	  extend: extend,
 	  merge: merge,
 	  deepEquals: deepEquals,
 	  identity: identity,
