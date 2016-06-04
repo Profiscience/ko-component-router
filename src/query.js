@@ -1,8 +1,6 @@
-'use strict'
-
-const ko = require('knockout')
-const qs = require('qs')
-const { deepEquals, identity, isUndefined, mapKeys, merge } = require('./utils')
+import ko from 'knockout'
+import qs from 'qs'
+import { deepEquals, identity, isUndefined, mapKeys, merge } from './utils'
 
 const qsParams = {}
 const trigger = ko.observable(true)
@@ -182,8 +180,6 @@ class Query {
   }
 }
 
-module.exports = {
-  factory(ctx) {
-    return new Query(ctx)
-  }
+export function factory(ctx) {
+  return new Query(ctx)
 }

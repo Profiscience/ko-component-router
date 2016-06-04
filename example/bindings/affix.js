@@ -1,7 +1,5 @@
-'use strict'
-
-const $ = require('jquery')
-const ko = require('knockout')
+import $ from 'jquery'
+import ko from 'knockout'
 
 ko.bindingHandlers.affix = {
   init(el) {

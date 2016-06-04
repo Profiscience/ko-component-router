@@ -1,27 +1,23 @@
-'use strict'
-
-// polyfills
-require('es6-promise').polyfill()
-require('html5-history-api')
+import history from 'html5-history-api'
+import raf from 'raf'
 if (history.emulate) {
   history.redirect('!/', '')
 }
+if (!window.Promise) {
+  promise.polyfill()
+}
 if (!window.requestAnimationFrame) {
-  const raf = require('raf')
-  window.requestAnimationFrame = raf
-  window.cancelAnimationFrame = raf.cancel
+  raf.polyfill()
 }
 
-const $ = require('jquery')
-const ko = require('knockout')
-window.ko = ko // attach for debugging purposes
+import $ from 'jquery'
+import ko from 'knockout'
 
-require('../src')
-require('./views')
-require('./bindings')
-require('./styles')
-
-const { inTransition, outTransition } = require('./lib/animate')
+import '../src'
+import './views'
+import './bindings'
+import './styles'
+import { inTransition, outTransition } from './lib/animate'
 
 class App {
   constructor() {
@@ -144,6 +140,4 @@ ko.components.register('app', {
   `
 })
 
-$(() => {
-  ko.applyBindings()
-})
+$(() => ko.applyBindings())

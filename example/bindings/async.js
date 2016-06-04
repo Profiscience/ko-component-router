@@ -1,6 +1,4 @@
-'use strict'
-
-const ko = require('knockout')
+import ko from 'knockout'
 
 ko.bindingHandlers.async = {
   init(el, valueAccessor, bindings, viewModel, bindingCtx) {

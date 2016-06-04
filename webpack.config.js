@@ -1,35 +1,54 @@
-'use strict'
+'use strict' // eslint-disable-line
 
-module.exports = {
-  entry: './src/index.js',
+const webpack = require('webpack')
 
-  output: {
-    path: 'dist',
-    filename: 'ko-component-router.js',
-    library:  'ko-component-router',
-    libraryTarget: 'umd'
-  },
+module.exports = [
+  makeConfig(),
+  makeConfig({ minify: true })
+]
 
-  module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /(node_modules)/,
-        loader: 'babel',
-        query: {
-          cacheDirectory: true,
-          presets: ['es2015']
+function makeConfig({ minify } = {}) {
+  return {
+    entry: './src/index.js',
+
+    output: {
+      path: 'dist',
+      filename: minify ? 'ko-component-router.min.js' : 'ko-component-router.js',
+      library:  'ko-component-router',
+      libraryTarget: 'umd'
+    },
+
+    module: {
+      loaders: [
+        {
+          test: /\.js$/,
+          exclude: /(node_modules)/,
+          loader: 'babel',
+          query: {
+            cacheDirectory: true,
+            plugins: ['transform-es2015-modules-commonjs'],
+            presets: ['es2015']
+          }
         }
-      }
-    ]
-  },
+      ]
+    },
 
-  externals: {
-    'knockout': {
-      root: 'ko',
-      commonjs: 'knockout',
-      commonjs2: 'knockout',
-      amd: 'knockout'
-    }
+    externals: {
+      'knockout': {
+        root: 'ko',
+        commonjs: 'knockout',
+        commonjs2: 'knockout',
+        amd: 'knockout'
+      }
+    },
+
+    // devtool: 'source-map',
+
+    plugins: minify
+      ? [
+          new webpack.optimize.DedupePlugin(),
+          new webpack.optimize.UglifyJsPlugin()
+        ]
+      : []
   }
 }

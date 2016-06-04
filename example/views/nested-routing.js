@@ -1,8 +1,6 @@
-'use strict'
-
-const ko = require('knockout')
-const escape = require('escape-html')
-const lipsum = require('../lib/lipsum')
+import ko from 'knockout'
+import escape from 'escape-html'
+import lipsum from '../lib/lipsum'
 
 ko.components.register('nested-routing', {
   synchronous: true,

@@ -1,9 +1,7 @@
-'use strict'
+import pathtoRegexp from 'path-to-regexp'
+import { decodeURLEncodedURIComponent } from './utils'
 
-const pathtoRegexp = require('path-to-regexp')
-const { decodeURLEncodedURIComponent } = require('./utils')
-
-class Route {
+export default class Route {
   constructor(path, component) {
     if (path[path.length - 1] === '!') {
       path = path.replace('!', ':child_path(.*)?')
@@ -62,5 +60,3 @@ class Route {
     return [path, params, hash, pathname, querystring, childPath]
   }
 }
-
-module.exports = Route

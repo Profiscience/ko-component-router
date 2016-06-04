@@ -1,12 +1,10 @@
-'use strict'
+import ko from 'knockout'
+import qs from 'qs'
+import { factory as queryFactory } from './query'
+import { factory as stateFactory } from './state'
+import { extend } from './utils'
 
-const ko = require('knockout')
-const qs = require('qs')
-const queryFactory = require('./query').factory
-const stateFactory = require('./state').factory
-const { extend } = require('./utils')
-
-class Context {
+export default class Context {
   constructor(bindingCtx, config) {
     bindingCtx.$router = this
 
@@ -221,5 +219,3 @@ class Context {
     return depth
   }
 }
-
-module.exports = Context

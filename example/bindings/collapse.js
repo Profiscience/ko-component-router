@@ -1,7 +1,6 @@
-'use strict'
+import $ from 'jquery'
+import ko from 'knockout'
 
-const ko = require('knockout')
-const $ = require('jquery')
 const COLLAPSE_DURATION = 400
 
 ko.bindingHandlers.collapsed = {

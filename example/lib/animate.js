@@ -1,7 +1,5 @@
-'use strict'
-
-const $ = window.$ = window.jQuery = require('jquery')
-require('velocity-animate')
+import $ from 'jquery'
+import 'imports?jQuery=jquery!velocity-animate'
 
 const viewIndicies = {
   'getting-started': 1,
@@ -11,77 +9,74 @@ const viewIndicies = {
   'nested-routing': 5
 }
 
-module.exports = {
+export function inTransition(el, fromCtx, toCtx) {
+  const fromComp = fromCtx.route.component
+  const fromIndex = viewIndicies[fromComp]
+  const toComp = toCtx.route.component
+  const toIndex = viewIndicies[toComp]
+  const toHash = toCtx.hash
 
-  inTransition(el, fromCtx, toCtx) {
-    const fromComp = fromCtx.route.component
-    const fromIndex = viewIndicies[fromComp]
-    const toComp = toCtx.route.component
-    const toIndex = viewIndicies[toComp]
-    const toHash = toCtx.hash
+  if (!toHash) {
+    window.requestAnimationFrame(() => {
+      if ($(window).scrollTop() > 100) {
+        $(window).scrollTop(100)
+      }
+    })
+  }
 
-    if (!toHash) {
-      window.requestAnimationFrame(() => {
-        if ($(window).scrollTop() > 100) {
-          $(window).scrollTop(100)
+  if (!fromIndex) {
+    $('.component-container', el)
+      .velocity({ opacity: 1 }, {
+        duration: 125,
+        complete() {
+          if (toHash) {
+            $(`#${toHash}`).velocity('scroll')
+          }
         }
       })
-    }
-
-    if (!fromIndex) {
-      $('.component-container', el)
-        .velocity({ opacity: 1 }, {
-          duration: 125,
-          complete() {
-            if (toHash) {
-              $(`#${toHash}`).velocity('scroll')
-            }
-          }
-        })
-    } else {
-      const translate = fromIndex > toIndex
-        ? '-100px'
-        : '100px'
-
-      $('.component-container', el)
-        .css('transform', `translateX(${translate})`)
-        .velocity({
-          translateX: '0px',
-          opacity: 1
-        }, {
-          duration: 125,
-          complete() {
-            if (toHash) {
-              $(`#${toHash}`).velocity('scroll')
-            }
-          }
-        })
-    }
-  },
-
-  outTransition(el, fromCtx, toCtx, done) {
-    const fromComp = fromCtx.route.component
-    const toComp = toCtx.route.component
-
-    const fromIndex = viewIndicies[fromComp]
-    const toIndex = viewIndicies[toComp]
+  } else {
     const translate = fromIndex > toIndex
-      ? '100px'
-      : '-100px'
+      ? '-100px'
+      : '100px'
 
-    const $el = $('.component-container', el)
-
-    if ($el.length > 0) {
-      $el.velocity({
-        translateX: translate,
-        opacity: 0
+    $('.component-container', el)
+      .css('transform', `translateX(${translate})`)
+      .velocity({
+        translateX: '0px',
+        opacity: 1
       }, {
-        easing: 'linear',
         duration: 125,
-        complete: done
+        complete() {
+          if (toHash) {
+            $(`#${toHash}`).velocity('scroll')
+          }
+        }
       })
-    } else {
-      done()
-    }
+  }
+}
+
+export function outTransition(el, fromCtx, toCtx, done) {
+  const fromComp = fromCtx.route.component
+  const toComp = toCtx.route.component
+
+  const fromIndex = viewIndicies[fromComp]
+  const toIndex = viewIndicies[toComp]
+  const translate = fromIndex > toIndex
+    ? '100px'
+    : '-100px'
+
+  const $el = $('.component-container', el)
+
+  if ($el.length > 0) {
+    $el.velocity({
+      translateX: translate,
+      opacity: 0
+    }, {
+      easing: 'linear',
+      duration: 125,
+      complete: done
+    })
+  } else {
+    done()
   }
 }

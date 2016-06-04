@@ -1,9 +1,7 @@
-'use strict'
-
-const ko = require('knockout')
-const Context = require('./context')
-const Route = require('./route')
-const { isUndefined } = require('./utils')
+import ko from 'knockout'
+import Context from './context'
+import Route from './route'
+import { isUndefined } from './utils'
 
 const clickEvent = (!isUndefined(document)) && document.ontouchstart
   ? 'touchstart'
@@ -125,12 +123,10 @@ class Router {
   }
 }
 
-module.exports = {
-  createViewModel(routerParams, componentInfo) {
-    const el = componentInfo.element
-    const bindingCtx = ko.contextFor(el)
-    return new Router(el, bindingCtx, ko.toJS(routerParams))
-  }
+function createViewModel(routerParams, componentInfo) {
+  const el = componentInfo.element
+  const bindingCtx = ko.contextFor(el)
+  return new Router(el, bindingCtx, ko.toJS(routerParams))
 }
 
 function which(e) {
@@ -145,3 +141,5 @@ function sameOrigin(href) {
   if (location.port) origin += ':' + location.port
   return (href && (0 === href.indexOf(origin)))
 }
+
+export default { createViewModel }
