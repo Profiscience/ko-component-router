@@ -13,47 +13,33 @@ function mapKeys(obj, fn) {
   return mappedObj
 }
 
-function merge(dest, src, createAsObservable = true, prune = false) {
-  if (!src) {
-    return prune ? undefined : dest
-  }
-
+function extend(dest, src, createAsObservable = true, _shallow = true) {
   const props = Object.keys(src)
 
-  if (prune) {
-    for (const prop in dest) {
-      if (props.indexOf(prop) < 0) {
-        props.push(prop)
-      }
-    }
-  }
-
   for (const prop of props) {
-    if (isUndefined(dest[prop]))
+    if (isUndefined(dest[prop])) {
       dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop]
-
-    else if (ko.isWritableObservable(dest[prop])) {
+    } else if (ko.isWritableObservable(dest[prop])) {
       if (!deepEquals(dest[prop](), src[prop])) {
         dest[prop](src[prop])
       }
-    }
-
-    else if (isUndefined(src[prop]))
+    } else if (isUndefined(src[prop])) {
       dest[prop] = undefined
-
-    else if (src[prop].constructor === Object) {
-      if (prune) {
+    } else if (src[prop].constructor === Object) {
+      if (_shallow) {
         dest[prop] = {}
       }
-
-      merge(dest[prop], src[prop], createAsObservable)
-    }
-
-    else
+      extend(dest[prop], src[prop], createAsObservable)
+    } else {
       dest[prop] = src[prop]
+    }
   }
 
   return dest
+}
+
+function merge(dest, src, createAsObservable = true) {
+  extend(dest, src, createAsObservable, false)
 }
 
 function deepEquals(foo, bar) {
@@ -142,6 +128,7 @@ function isPrimitiveOrDate(obj) {
 module.exports = {
   decodeURLEncodedURIComponent,
   mapKeys,
+  extend,
   merge,
   deepEquals,
   identity,
