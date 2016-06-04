@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import 'imports?jQuery=jquery!velocity-animate'
+import 'velocity-animate'
 
 const viewIndicies = {
   'getting-started': 1,
