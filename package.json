@@ -13,7 +13,7 @@
     "watch": "babel src -wd lib & webpack --watch",
     "lint": "eslint --max-warnings=0 *.js",
     "format": "eslint --fix --max-warnings=0 *.js",
-    "stage-dist": "git add dist example/dist",
+    "stage": "git add lib dist example/dist",
     "test": "karma start",
     "test:watch": "karma start karma.watch.js",
     "example:build": "webpack -p --config webpack.config.example.js",
@@ -28,7 +28,7 @@
     [
       "build"
     ],
-    "stage-dist"
+    "stage"
   ],
   "keywords": [
     "knockoutjs",

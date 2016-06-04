@@ -69,7 +69,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	_knockout2.default.components.register('ko-component-router', {
-	  synchronous: true,
 	  viewModel: _router2.default,
 	  template: '<div data-bind=\'if: ctx.route().component\'>\n      <div class="component-wrapper" data-bind=\'component: {\n        name: ctx.route().component,\n        params: ctx\n      }\'></div>\n    </div>'
 	});
@@ -2225,7 +2224,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  // allow adjacent routers to initialize
-	  _knockout2.default.tasks.schedule(function () {
+	  (window.requestAnimationFrame || window.setTimeout)(function () {
 	    return _knockout2.default.applyBindingsToNode(el, bindingsToApply);
 	  });
 	}

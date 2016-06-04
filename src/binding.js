@@ -73,7 +73,7 @@ function applyBinding(el, bindings, ctx) {
   }
 
   // allow adjacent routers to initialize
-  ko.tasks.schedule(() => ko.applyBindingsToNode(el, bindingsToApply))
+  (window.requestAnimationFrame || window.setTimeout)(() => ko.applyBindingsToNode(el, bindingsToApply))
 }
 
 function getRoute(ctx, path) {

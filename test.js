@@ -78,7 +78,7 @@ function runTests(t, config) {
     })
     // path binding is applied asynchronously
     // this is by design, not a hack to get passing tests
-    .step((done) => ko.tasks.schedule(done))
+    .step((done) => setTimeout(done, 100))
     .step(() => {
       const nestedRouter = ko.contextFor($('ko-component-router', dom).get(0)).$router
       const link = $('#nested-bar', dom).get(0)
