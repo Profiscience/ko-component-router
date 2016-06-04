@@ -16,9 +16,8 @@ __[DOCS](https://Profiscience.github.io/ko-component-router/)__
 
 ###### app.js ######
 ```javascript
-'use strict'
-
-require('ko-component-router')
+import ko from 'knockout'
+import 'ko-component-router'
 
 ko.components.register('app', {
   viewModel: class App {
@@ -64,4 +63,4 @@ ko.applyBindings()
 </body>
 ```
 
-_Requires [babel-polyfill](https://babeljs.io/docs/usage/polyfill/) for IE support_
+_Requires Promise polyfill for IE support. [babel-polyfill](https://babeljs.io/docs/usage/polyfill/), [es6-promise](https://github.com/stefanpenner/es6-promise), etc._

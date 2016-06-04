@@ -1,7 +1,5 @@
-'use strict'
-
-require('./getting-started')
-require('./config')
-require('./ctx')
-require('./bindings')
-require('./nested-routing')
+import './getting-started'
+import './config'
+import './ctx'
+import './bindings'
+import './nested-routing'

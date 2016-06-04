@@ -1,8 +1,6 @@
-'use strict'
-
-const $ = require('jquery')
-const ko = require('knockout')
-const escape = require('escape-html')
+import $ from 'jquery'
+import ko from 'knockout'
+import escape from 'escape-html'
 
 ko.components.register('config', {
   synchronous: true,
@@ -152,4 +150,4 @@ ${escape(`<!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/
         <a data-bind="path: '/context'" class="btn btn-primary">context <i class="fa fa-arrow-right"></i></a>
       </span>
     </div>
-`})
+` })

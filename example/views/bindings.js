@@ -1,8 +1,6 @@
-'use strict'
-
-const $ = require('jquery')
-const ko = require('knockout')
-const escape = require('escape-html')
+import $ from 'jquery'
+import ko from 'knockout'
+import escape from 'escape-html'
 
 ko.components.register('bindings', {
   synchronous: true,
@@ -94,4 +92,4 @@ ko.components.register('bindings', {
         </span>
       </section>
     </div>
-`})
+` })

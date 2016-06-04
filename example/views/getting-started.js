@@ -1,7 +1,5 @@
-'use strict'
-
-const ko = require('knockout')
-const escape = require('escape-html')
+import ko from 'knockout'
+import escape from 'escape-html'
 
 ko.components.register('getting-started', {
   synchronous: true,

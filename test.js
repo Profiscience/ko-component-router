@@ -1,14 +1,21 @@
-'use strict'
+import history from 'html5-history-api'
+import promise from 'es6-promise'
+import raf from 'raf'
+if (history.emulate) {
+  history.redirect('!/', '')
+}
+if (!window.Promise) {
+  promise.polyfill()
+}
+if (!window.requestAnimationFrame) {
+  raf.polyfill()
+}
 
-const $ = require('jquery')
-const ko = require('knockout')
-const test = require('tape')
+import $ from 'jquery'; window.$ = window.jQuery = $
+import ko from 'knockout'
+import test from 'tape'
 
-// polyfills
-require('es6-promise').polyfill()
-require('raf').polyfill()
-
-require('./src')
+import './src'
 
 ko.options.deferUpdates = true
 

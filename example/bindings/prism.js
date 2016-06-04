@@ -1,8 +1,6 @@
-'use strict'
-
-const ko = require('knockout')
-const prism = require('prismjs')
-const escape = require('escape-html')
+import ko from 'knockout'
+import prism from 'prismjs'
+import escape from 'escape-html'
 
 ko.bindingHandlers.prism = {
   init(el, valueAccessor, allBindings) {

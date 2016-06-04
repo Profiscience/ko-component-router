@@ -14,46 +14,29 @@ module.exports = function(config) {
       'test.js': 'webpack'
     },
 
-    browsers: ['Firefox'],
+    // config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    logLevel: config.LOG_INFO,
 
-    singleRun: true,
+    autoWatch: true,
 
-    reporters: ['dots', 'coverage'],
-
-    coverageReporter: {
-      dir : 'coverage/',
-      reporters: [
-        { type: 'html', subdir: 'html' },
-        { type: 'lcovonly', subdir: '.', file: 'lcov.txt' }
-      ]
-    },
+    reporters: ['dots'],
 
     webpack: {
       node: {
         fs: 'empty'
-      },
-      isparta: {
-        embedSource: true,
-        noAutoWrap: true
       },
       module: {
         preLoaders: [
           {
             test: /\.js$/,
             exclude: [
-              path.resolve('src/!(utils)'),
               path.resolve('node_modules/')
             ],
             loader: 'babel'
-          },
-          {
-            test: /\.js$/,
-            include: path.resolve('src/'),
-            exclude: /utils/,
-            loader: 'isparta'
           }
         ]
-      }
+      },
+      devtool: 'eval-source-map'
     },
 
     webpackMiddleware: {

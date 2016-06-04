@@ -1,13 +1,30 @@
-'use strict'
-
-const ko = require('knockout')
-const qs = require('qs')
-const { isUndefined } = require('./utils')
+import ko from 'knockout'
+import qs from 'qs'
+import { isUndefined } from './utils'
 
 ko.bindingHandlers.path = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
 ko.bindingHandlers.state = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
 ko.bindingHandlers.query = { init(e, xx, b, x, c) { applyBinding.call(this, e, b, c) } }
-module.exports = ko.bindingHandlers.path.utils = { resolveHref }
+ko.bindingHandlers.path.utils = { resolveHref }
+
+export function resolveHref(ctx, path, query) {
+  let [router, route] = getRoute(ctx, path)
+  const querystring = query
+    ? '?' + qs.stringify(ko.toJS(query))
+    : ''
+
+  while (router.$parent) {
+    route = router.config.base + route
+    router = router.$parent
+  }
+
+  return router
+    ? router.config.base
+      + (!router.config.hashbang || router.$parent ? '' : '/#!')
+      + route
+      + querystring
+    : '#'
+}
 
 function applyBinding(el, bindings, ctx) {
   const path = bindings.has('path') ? bindings.get('path') : false
@@ -87,25 +104,6 @@ function getRouter(ctx) {
 
     ctx = ctx.$parentContext
   }
-}
-
-function resolveHref(ctx, path, query) {
-  let [router, route] = getRoute(ctx, path)
-  const querystring = query
-    ? '?' + qs.stringify(ko.toJS(query))
-    : ''
-
-  while (router.$parent) {
-    route = router.config.base + route
-    router = router.$parent
-  }
-
-  return router
-    ? router.config.base
-      + (!router.config.hashbang || router.$parent ? '' : '/#!')
-      + route
-      + querystring
-    : '#'
 }
 
 function which(e) {

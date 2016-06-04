@@ -1,7 +1,5 @@
-'use strict'
-
-const $ = require('jquery')
-const ko = require('knockout')
+import $ from 'jquery'
+import ko from 'knockout'
 
 ko.components.register('context', {
   synchronous: true,
@@ -240,4 +238,4 @@ class ViewModel {
         <a data-bind="path: '/bindings'" class="btn btn-primary">bindings <i class="fa fa-arrow-right"></i></a>
       </span>
     </div>
-`})
+` })

@@ -1,48 +1,11 @@
-'use strict'
+import ko from 'knockout'
 
-const ko = require('knockout')
-
-function decodeURLEncodedURIComponent(val) {
+export function decodeURLEncodedURIComponent(val) {
   if (typeof val !== 'string') { return val }
   return decodeURIComponent(val.replace(/\+/g, ' '))
 }
 
-function mapKeys(obj, fn) {
-  const mappedObj = {}
-  Object.keys(obj).forEach((k) => mappedObj[k] = fn(k))
-  return mappedObj
-}
-
-function extend(dest, src, createAsObservable = true, _shallow = true) {
-  const props = Object.keys(src)
-
-  for (const prop of props) {
-    if (isUndefined(dest[prop])) {
-      dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop]
-    } else if (ko.isWritableObservable(dest[prop])) {
-      if (!deepEquals(dest[prop](), src[prop])) {
-        dest[prop](src[prop])
-      }
-    } else if (isUndefined(src[prop])) {
-      dest[prop] = undefined
-    } else if (src[prop].constructor === Object) {
-      if (_shallow) {
-        dest[prop] = {}
-      }
-      extend(dest[prop], src[prop], createAsObservable)
-    } else {
-      dest[prop] = src[prop]
-    }
-  }
-
-  return dest
-}
-
-function merge(dest, src, createAsObservable = true) {
-  extend(dest, src, createAsObservable, false)
-}
-
-function deepEquals(foo, bar) {
+export function deepEquals(foo, bar) {
   if (foo === null || bar === null) {
     return foo === null && bar === null
   }
@@ -83,6 +46,49 @@ function deepEquals(foo, bar) {
   }
 }
 
+export function extend(dest, src, createAsObservable = true, _shallow = true) {
+  const props = Object.keys(src)
+
+  for (const prop of props) {
+    if (isUndefined(dest[prop])) {
+      dest[prop] = createAsObservable ? fromJS(src[prop]) : src[prop]
+    } else if (ko.isWritableObservable(dest[prop])) {
+      if (!deepEquals(dest[prop](), src[prop])) {
+        dest[prop](src[prop])
+      }
+    } else if (isUndefined(src[prop])) {
+      dest[prop] = undefined
+    } else if (src[prop].constructor === Object) {
+      if (_shallow) {
+        dest[prop] = {}
+      }
+      extend(dest[prop], src[prop], createAsObservable)
+    } else {
+      dest[prop] = src[prop]
+    }
+  }
+
+  return dest
+}
+
+export function identity(x) {
+  return x
+}
+
+export function isUndefined(x) {
+  return typeof x === 'undefined'
+}
+
+export function mapKeys(obj, fn) {
+  const mappedObj = {}
+  Object.keys(obj).forEach((k) => mappedObj[k] = fn(k))
+  return mappedObj
+}
+
+export function merge(dest, src, createAsObservable = true) {
+  extend(dest, src, createAsObservable, false)
+}
+
 function fromJS(obj, parentIsArray) {
   let obs
 
@@ -108,14 +114,6 @@ function fromJS(obj, parentIsArray) {
   return obs
 }
 
-function identity(x) {
-  return x
-}
-
-function isUndefined(x) {
-  return typeof x === 'undefined'
-}
-
 function isPrimitiveOrDate(obj) {
   return obj === null ||
          obj === undefined ||
@@ -123,14 +121,4 @@ function isPrimitiveOrDate(obj) {
          obj.constructor === Number ||
          obj.constructor === Boolean ||
          obj instanceof Date
-}
-
-module.exports = {
-  decodeURLEncodedURIComponent,
-  mapKeys,
-  extend,
-  merge,
-  deepEquals,
-  identity,
-  isUndefined
 }

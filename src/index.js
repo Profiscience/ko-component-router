@@ -1,8 +1,6 @@
-'use strict'
-
-const ko = require('knockout')
-const router = require('./router')
-require('./binding')
+import ko from 'knockout'
+import router from './router'
+import './binding'
 
 ko.components.register('ko-component-router', {
   synchronous: true,

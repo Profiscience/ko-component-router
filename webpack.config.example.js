@@ -1,8 +1,7 @@
-'use strict'
+'use strict' // eslint-disable-line
 
 module.exports = {
   entry: [
-    'babel-polyfill',
     './example/app.js'
   ],
 
@@ -20,6 +19,7 @@ module.exports = {
         loader: 'babel',
         query: {
           cacheDirectory: true,
+          plugins: ['transform-es2015-modules-commonjs'],
           presets: ['es2015']
         }
       },
