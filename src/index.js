@@ -3,7 +3,6 @@ import router from './router'
 import './binding'
 
 ko.components.register('ko-component-router', {
-  synchronous: true,
   viewModel: router,
   template:
     `<div data-bind='if: ctx.route().component'>

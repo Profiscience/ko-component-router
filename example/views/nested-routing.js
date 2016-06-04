@@ -104,6 +104,7 @@ ko.components.register('foo', {
 })
 
 ko.components.register('foo-router', {
+  synchronous: true,
   viewModel: class FooRouter {
     constructor(ctx) {
       this.qsParam = ctx.query.get('foo', 'foo')
@@ -178,6 +179,7 @@ ko.components.register('foo-router', {
 })
 
 ko.components.register('foo', {
+  synchronous: true,
   template: `
     <div class="alert alert-success">
       foo!
@@ -186,6 +188,7 @@ ko.components.register('foo', {
 })
 
 ko.components.register('bar', {
+  synchronous: true,
   template: `
     <div class="alert alert-danger">
       bar!
@@ -194,6 +197,7 @@ ko.components.register('bar', {
 })
 
 ko.components.register('baz', {
+  synchronous: true,
   template: `
     <div class="alert alert-info">
       baz!
@@ -202,6 +206,7 @@ ko.components.register('baz', {
 })
 
 ko.components.register('qux', {
+  synchronous: true,
   template: `
     <div class="alert alert-warning">
       qux!

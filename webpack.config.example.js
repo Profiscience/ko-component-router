@@ -1,5 +1,7 @@
 'use strict' // eslint-disable-line
 
+const webpack = require('webpack')
+
 module.exports = {
   entry: [
     './example/app.js'
@@ -41,5 +43,11 @@ module.exports = {
     ]
   },
 
-  devtool: 'source-map'
+  devtool: 'source-map',
+
+  plugins: [
+    new webpack.ProvidePlugin({
+      'window.jQuery': 'jquery'
+    })
+  ]
 }
