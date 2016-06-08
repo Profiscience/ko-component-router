@@ -340,6 +340,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.params = {};
 	    this.query = (0, _query.factory)(this);
 	    this.state = (0, _state.factory)(this);
+
+	    this._beforeNavigateCallbacks = [];
 	  }
 
 	  _createClass(Context, [{
@@ -347,21 +349,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function update() {
 	      var origUrl = arguments.length <= 0 || arguments[0] === undefined ? this.canonicalPath() : arguments[0];
 	      var state = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+	      var _this = this;
+
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	      var url = (origUrl + '').replace('/#!', '');
-
-	      if (url.indexOf('./') === 0) {
-	        url = url.replace('./', '/');
-	      } else {
-	        var p = this;
-	        while (p && url.indexOf(p.config.base) > -1) {
-	          url = url.replace(p.config.base, '');
-	          p = p.$parent;
-	        }
-	      }
-
+	      var url = this.resolveUrl(origUrl);
 	      var route = this.getRouteForUrl(url);
 	      var firstRun = this.route() === '';
 
@@ -371,16 +365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.$parent ? (_$parent = this.$parent).update.apply(_$parent, arguments) : false;
 	      }
 
-	      var fromCtx = _knockout2.default.toJS({
-	        route: this.route,
-	        path: this.path,
-	        pathname: this.pathname,
-	        canonicalPath: this.canonicalPath,
-	        hash: this.hash,
-	        state: this.state,
-	        params: this.params,
-	        query: this.query.getAll(false, this.pathname())
-	      });
+	      var fromCtx = this.toJS();
 
 	      var _route$parse = route.parse(url);
 
@@ -393,76 +378,127 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var querystring = _route$parse2[4];
 	      var childPath = _route$parse2[5];
 
-
 	      var samePage = this.pathname() === pathname;
+
+	      var shouldNavigatePromise = Promise.resolve(true);
 	      if (!samePage && !firstRun) {
+	        shouldNavigatePromise = this.runBeforeNavigateCallbacks();
 	        this.isNavigating(true);
 	        this.reload();
 	      }
 
-	      if (!query && querystring) {
-	        query = _qs2.default.parse(querystring)[this.config.depth + pathname];
-	      }
-
-	      var canonicalPath = Context.getCanonicalPath(Context.getBase(this).replace(/\/$/, ''), pathname, childPath, this.query.getFullQueryString(query, pathname), hash);
-
-	      var toCtx = {
-	        route: route,
-	        path: path,
-	        pathname: pathname,
-	        canonicalPath: canonicalPath,
-	        hash: hash,
-	        params: params,
-	        query: query
-	      };
-
-	      if (state === false && samePage) {
-	        (0, _utils.extend)(toCtx, { state: fromCtx.state }, false);
-	      } else if (!this.config.persistState && state) {
-	        toCtx.state = state;
-	      }
-
-	      if (this.config.persistState) {
-	        toCtx.state = this.state();
-	      }
-
-	      history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? Context.getBase(this) : canonicalPath);
-
-	      if (firstRun) {
-	        complete.call(this, true);
-	      } else if (!samePage) {
-	        this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this));
-
-	        if (this.config.outTransition.length !== 4) {
-	          complete.call(this, true);
+	      return shouldNavigatePromise.then(function (shouldNavigate) {
+	        if (!shouldNavigate) {
+	          return Promise.resolve(false);
 	        }
-	      } else if (this.$child) {
-	        this.$child.update(childPath || '/', {}, false, {});
-	        complete.call(this);
-	      } else {
-	        complete.call(this);
-	      }
 
-	      function complete(animate) {
-	        var _this = this;
+	        _this._beforeNavigateCallbacks = [];
 
-	        var el = this.config.el.getElementsByClassName('component-wrapper')[0];
-	        delete toCtx.query;
-	        (0, _utils.extend)(this, toCtx);
-	        if (query) {
-	          this.query.update(query, pathname);
+	        if (!query && querystring) {
+	          query = _qs2.default.parse(querystring)[_this.config.depth + pathname];
 	        }
-	        this.isNavigating(false);
-	        _knockout2.default.tasks.runEarly();
 
-	        if (animate) {
-	          _knockout2.default.tasks.schedule(function () {
-	            return _this.config.inTransition(el, fromCtx, toCtx);
-	          });
+	        var canonicalPath = Context.getCanonicalPath(_this.getBase().replace(/\/$/, ''), pathname, childPath, _this.query.getFullQueryString(query, pathname), hash);
+
+	        var toCtx = {
+	          route: route,
+	          path: path,
+	          pathname: pathname,
+	          canonicalPath: canonicalPath,
+	          hash: hash,
+	          params: params,
+	          query: query
+	        };
+
+	        if (state === false && samePage) {
+	          (0, _utils.extend)(toCtx, { state: fromCtx.state }, false);
+	        } else if (!_this.config.persistState && state) {
+	          toCtx.state = state;
 	        }
-	      }
 
-	      return true;
+	        if (_this.config.persistState) {
+	          toCtx.state = _this.state();
+	        }
+
+	        history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? _this.getBase() : canonicalPath);
+
+	        return new Promise(function (resolve) {
+	          if (firstRun) {
+	            complete.call(_this, true);
+	          } else if (!samePage) {
+	            _this.config.outTransition(_this.config.el, fromCtx, toCtx, complete.bind(_this));
+	            if (_this.config.outTransition.length !== 4) {
+	              complete.call(_this, true);
+	            }
+	          } else if (_this.$child) {
+	            _this.$child.update(childPath || '/', {}, false, {});
+	            complete.call(_this);
+	          } else {
+	            complete.call(_this);
+	          }
+
+	          function complete(animate) {
+	            var _this2 = this;
+
+	            var el = this.config.el.getElementsByClassName('component-wrapper')[0];
+	            delete toCtx.query;
+	            (0, _utils.extend)(this, toCtx);
+	            if (query) {
+	              this.query.update(query, pathname);
+	            }
+	            this.isNavigating(false);
+	            _knockout2.default.tasks.runEarly();
+	            resolve(true);
+
+	            if (animate) {
+	              _knockout2.default.tasks.schedule(function () {
+	                return _this2.config.inTransition(el, fromCtx, toCtx);
+	              });
+	            }
+	          }
+	        });
+	      });
+	    }
+	  }, {
+	    key: 'addBeforeNavigateCallback',
+	    value: function addBeforeNavigateCallback(cb) {
+	      this._beforeNavigateCallbacks.push(cb);
+	    }
+	  }, {
+	    key: 'runBeforeNavigateCallbacks',
+	    value: function runBeforeNavigateCallbacks() {
+	      var ctx = this;
+
+	      return run();
+
+	      function run() {
+	        var i = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
+	        return new Promise(function (resolve) {
+	          if (i === ctx._beforeNavigateCallbacks.length) {
+	            return resolve(true);
+	          }
+	          var cb = ctx._beforeNavigateCallbacks[i];
+	          if (cb.length === 1) {
+	            cb(function () {
+	              var shouldUpdate = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+	              return shouldUpdate ? run(++i).then(function (v) {
+	                resolve(v);
+	              }) : resolve(false);
+	            });
+	          } else {
+	            var v = cb();
+	            if ((0, _utils.isUndefined)(v) || typeof v.then !== 'function') {
+	              resolve(v !== false);
+	            } else {
+	              v.then(function () {
+	                var shouldUpdate = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+	                return shouldUpdate ? run(++i).then(resolve) : resolve(false);
+	              });
+	            }
+	          }
+	        });
+	      }
 	    }
 	  }, {
 	    key: 'getRouteForUrl',
@@ -507,18 +543,47 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.query.reload();
 	      this.state.reload();
 	    }
-	  }], [{
+	  }, {
+	    key: 'resolveUrl',
+	    value: function resolveUrl(origUrl) {
+	      var url = (origUrl + '').replace('/#!', '');
+	      if (url.indexOf('./') === 0) {
+	        url = url.replace('./', '/');
+	      } else {
+	        var p = this;
+	        while (p && url.indexOf(p.config.base) > -1) {
+	          url = url.replace(p.config.base, '');
+	          p = p.$parent;
+	        }
+	      }
+	      return url;
+	    }
+	  }, {
+	    key: 'toJS',
+	    value: function toJS() {
+	      return _knockout2.default.toJS({
+	        route: this.route,
+	        path: this.path,
+	        pathname: this.pathname,
+	        canonicalPath: this.canonicalPath,
+	        hash: this.hash,
+	        state: this.state,
+	        params: this.params,
+	        query: this.query.getAll(false, this.pathname())
+	      });
+	    }
+	  }, {
 	    key: 'getBase',
-	    value: function getBase(ctx) {
+	    value: function getBase() {
 	      var base = '';
-	      var p = ctx;
+	      var p = this;
 	      while (p) {
 	        base = p.config.base + (!p.config.hashbang || p.$parent ? '' : '/#!') + base;
 	        p = p.$parent;
 	      }
 	      return base;
 	    }
-	  }, {
+	  }], [{
 	    key: 'getCanonicalPath',
 	    value: function getCanonicalPath(base, pathname) {
 	      var childPath = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
@@ -1126,6 +1191,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	              return defaultVal;
 	            },
 	            write: function write(v) {
+	              var _location = location;
+	              var pathname = _location.pathname;
+	              var hash = _location.hash;
+
 	              if ((0, _utils.deepEquals)(v, this.prev)) {
 	                return;
 	              }
@@ -1133,8 +1202,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	              (0, _utils.merge)(qsParams, _defineProperty({}, guid, _defineProperty({}, prop, v)), false);
 
-	              ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid]);
-	              trigger(!trigger());
+	              ctx.update(pathname + hash, ctx.state(), false, query.getNonDefaultParams()[guid]).then(function () {
+	                return trigger(!trigger());
+	              });
 	            },
 
 	            owner: {
@@ -1256,7 +1326,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          nonDefaultParams[id] = {};
 	          for (var pn in workingParams[id]) {
 	            var p = workingParams[id][pn];
-	            var d = cache[id][pn].defaultVal;
+	            var c = cache[id][pn];
+	            var d = c && c.defaultVal;
 	            if (!(0, _utils.isUndefined)(p) && !(0, _utils.deepEquals)(p, d)) {
 	              nonDefaultParams[id][pn] = p;
 	            }
@@ -1641,9 +1712,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      for (var i = 1, len = matches.length; i < len; ++i) {
 	        var k = this._keys[i - 1];
 	        var v = (0, _utils.decodeURLEncodedURIComponent)(matches[i]);
-	        if (v !== undefined || !hasOwnProperty.call(params, k.name)) {
+	        if ((0, _utils.isUndefined)(v) || !hasOwnProperty.call(params, k.name)) {
 	          if (k.name === 'child_path') {
-	            if (v !== undefined) {
+	            if (!(0, _utils.isUndefined)(v)) {
 	              childPath = '/' + v;
 	              path = path.substring(0, path.lastIndexOf(childPath));
 	              pathname = pathname.substring(0, pathname.lastIndexOf(childPath));

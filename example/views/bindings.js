@@ -88,7 +88,7 @@ ko.components.register('bindings', {
       <section>
         <a data-bind="path: '/context'" class="btn btn-primary"><i class="fa fa-arrow-left"></i> context</a>
         <span class="pull-right">
-          <a data-bind="path: '/nested-routing'" class="btn btn-primary">nested routing <i class="fa fa-arrow-right"></i></a>
+          <a data-bind="path: '/nested-routing/foo'" class="btn btn-primary">nested routing <i class="fa fa-arrow-right"></i></a>
         </span>
       </section>
     </div>

@@ -21,7 +21,8 @@ import './src'
 ko.options.deferUpdates = true
 
 test('ko-component-router', async (t) => { // eslint-disable-line
-  const NUM_TESTS_PER_SUITE = 44
+  const NUM_TESTS_PER_SUITE = 57
+  // const NUM_TESTS_PER_SUITE = 44
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
   t.plan(NUM_TESTS)
@@ -72,6 +73,8 @@ async function runTests(t, config) {
 
           // persistQuery & persistState options
           '/persistent/!': 'persistent-query-state',
+
+          '/navigate-callback': 'navigate-callback',
 
           // wildcard segment
           '/*': '404'
@@ -335,6 +338,127 @@ async function runTests(t, config) {
     t.deepEqual(persistentRouter.state(), { foo: 'foo' }, 'persistState works')
     t.equals(persistentRouter.query.get('foo')(), 'foo', 'persistQuery works')
     t.equals(persistentRouter.route().component, 'foo')
+  })
+
+  // addBeforeNavigateCallback
+  await step(() => {
+    ko.components.register('navigate-callback', {
+      template: '<div></div>',
+      viewModel: class {
+        constructor(ctx) {
+          let isFirstTime = true
+          ctx.addBeforeNavigateCallback(() => {
+            if (isFirstTime) {
+              t.pass('functions registered with addBeforeNavigateCallback get called')
+              isFirstTime = false
+              return false
+            }
+          })
+        }
+      }
+    })
+    router.update('/navigate-callback')
+  })
+  await step((done) => {
+    const willUpdate = router.update('/about')
+    willUpdate.then((didUpdate) => {
+      t.false(didUpdate, 'addBeforeNavigateCallback prevents navigation when return === false')
+      done()
+    })
+  })
+  await step((done) => {
+    t.equal(router.route().component, 'navigate-callback')
+    const willUpdate = router.update('/about')
+    willUpdate.then((didUpdate) => {
+      t.true(didUpdate, 'addBeforeNavigateCallback does not prevent navigation when return !== false')
+      done()
+    })
+  })
+  await step(() => {
+    t.equal(router.route().component, 'about', 'addBeforeNavigateCallback does not prevent navigation when return !== false')
+    ko.components.unregister('navigate-callback')
+  })
+
+  // addBeforeNavigateCallback callback
+  await step(() => {
+    ko.components.register('navigate-callback', {
+      template: '<div></div>',
+      viewModel: class {
+        constructor(ctx) {
+          let isFirstTime = true
+          ctx.addBeforeNavigateCallback((done) => {
+            if (isFirstTime) {
+              isFirstTime = false
+              done(false)
+            } else {
+              done()
+            }
+          })
+        }
+      }
+    })
+    router.update('/navigate-callback')
+  })
+  await step((done) => {
+    const willUpdate = router.update('/about')
+    willUpdate.then((didUpdate) => {
+      t.false(didUpdate, 'addBeforeNavigateCallback prevents navigation when callback(false)')
+      done()
+    })
+  })
+  await step((done) => {
+    t.equal(router.route().component, 'navigate-callback', 'addBeforeNavigateCallback prevents navigation when callback(false)')
+    const willUpdate = router.update('/about')
+    willUpdate.then((didUpdate) => {
+      t.true(didUpdate, 'addBeforeNavigateCallback does not prevent navigation when callback(!false)')
+      done()
+    })
+  })
+  await step(() => {
+    t.equal(router.route().component, 'about', 'addBeforeNavigateCallback does not prevent navigation when callback(!false)')
+    ko.components.unregister('navigate-callback')
+  })
+
+  // addBeforeNavigateCallback promise
+  await step(() => {
+    ko.components.register('navigate-callback', {
+      template: '<div></div>',
+      viewModel: class {
+        constructor(ctx) {
+          let isFirstTime = true
+          ctx.addBeforeNavigateCallback(() => {
+            return new Promise((resolve) => {
+              if (isFirstTime) {
+                isFirstTime = false
+                resolve(false)
+              } else {
+                resolve()
+              }
+            })
+          })
+        }
+      }
+    })
+    router.update('/navigate-callback')
+  })
+  await step((done) => {
+    const willUpdate = router.update('/about')
+    willUpdate.then((didUpdate) => {
+      t.false(didUpdate)
+      done()
+    })
+  })
+  await step((done) => {
+    t.equal(router.route().component, 'navigate-callback', 'addBeforeNavigateCallback prevents navigation when Promise.resolve(false)')
+    const willNavigate = router.update('/about')
+    willNavigate.then((didNavigate) => {
+      t.true(didNavigate)
+      done()
+    })
+  })
+  await step(() => {
+    t.equal(router.route().component, 'about', 'addBeforeNavigateCallback does not prevent navigation when Promise.resolve(!false)')
+    ko.components.unregister('navigate-callback')
   })
 
   await step(() => {})
