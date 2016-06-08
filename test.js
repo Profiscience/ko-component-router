@@ -377,19 +377,16 @@ async function runTests(t, config) {
   await step(() => {
     t.equal(router.route().component, 'about', 'addBeforeNavigateCallback does not prevent navigation when return !== false')
     ko.components.unregister('navigate-callback')
-    debugger
   })
 
   // addBeforeNavigateCallback callback
   await step(() => {
-    debugger
     ko.components.register('navigate-callback', {
       template: '<div></div>',
       viewModel: class {
         constructor(ctx) {
           let isFirstTime = true
           ctx.addBeforeNavigateCallback((done) => {
-            debugger
             if (isFirstTime) {
               isFirstTime = false
               done(false)

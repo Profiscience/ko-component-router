@@ -47,6 +47,7 @@ class Query {
             return defaultVal
           },
           write(v) {
+            const { pathname, hash } = location
             if (deepEquals(v, this.prev)) {
               return
             }
@@ -56,8 +57,9 @@ class Query {
               [guid]: { [prop]: v }
             }, false)
 
-            ctx.update(location.pathname + location.hash, ctx.state(), false, query.getNonDefaultParams()[guid])
-            trigger(!trigger())
+            ctx
+              .update(pathname + hash, ctx.state(), false, query.getNonDefaultParams()[guid])
+              .then(() => trigger(!trigger()))
           },
           owner: {
             prev: null
@@ -164,7 +166,8 @@ class Query {
         nonDefaultParams[id] = {}
         for (const pn in workingParams[id]) {
           const p = workingParams[id][pn]
-          const d = cache[id][pn].defaultVal
+          const c = cache[id][pn]
+          const d = c && c.defaultVal
           if (!isUndefined(p) && !deepEquals(p, d)) {
             nonDefaultParams[id][pn] = p
           }

@@ -2,7 +2,7 @@ import ko from 'knockout'
 import qs from 'qs'
 import { factory as queryFactory } from './query'
 import { factory as stateFactory } from './state'
-import { extend } from './utils'
+import { extend, isUndefined } from './utils'
 
 export default class Context {
   constructor(bindingCtx, config) {
@@ -41,21 +41,12 @@ export default class Context {
     this.params = {}
     this.query = queryFactory(this)
     this.state = stateFactory(this)
+
+    this._beforeNavigateCallbacks = []
   }
 
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
-    let url = (origUrl + '').replace('/#!', '')
-
-    if (url.indexOf('./') === 0) {
-      url = url.replace('./', '/')
-    } else {
-      let p = this
-      while (p && url.indexOf(p.config.base) > -1) {
-        url = url.replace(p.config.base, '')
-        p = p.$parent
-      }
-    }
-
+    const url = this.resolveUrl(origUrl)
     const route = this.getRouteForUrl(url)
     const firstRun = this.route() === ''
 
@@ -63,94 +54,129 @@ export default class Context {
       return this.$parent ? this.$parent.update(...arguments) : false
     }
 
-    const fromCtx = ko.toJS({
-      route: this.route,
-      path: this.path,
-      pathname: this.pathname,
-      canonicalPath: this.canonicalPath,
-      hash: this.hash,
-      state: this.state,
-      params: this.params,
-      query: this.query.getAll(false, this.pathname())
-    })
-
+    const fromCtx = this.toJS()
     const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
-
     const samePage = this.pathname() === pathname
+
+    let shouldNavigatePromise = Promise.resolve(true)
     if (!samePage && !firstRun) {
+      shouldNavigatePromise = this.runBeforeNavigateCallbacks()
       this.isNavigating(true)
       this.reload()
     }
 
-    if (!query && querystring) {
-      query = qs.parse(querystring)[this.config.depth + pathname]
-    }
+    return shouldNavigatePromise.then((shouldNavigate) => {
+      if (!shouldNavigate) {
+        return Promise.resolve(false)
+      }
 
-    const canonicalPath = Context
-      .getCanonicalPath(
-        Context.getBase(this).replace(/\/$/, ''),
+      this._beforeNavigateCallbacks = []
+
+      if (!query && querystring) {
+        query = qs.parse(querystring)[this.config.depth + pathname]
+      }
+
+      const canonicalPath = Context
+        .getCanonicalPath(
+          this.getBase().replace(/\/$/, ''),
+          pathname,
+          childPath,
+          this.query.getFullQueryString(query, pathname),
+          hash)
+
+      const toCtx = {
+        route,
+        path,
         pathname,
-        childPath,
-        this.query.getFullQueryString(query, pathname),
-        hash)
-
-    const toCtx = {
-      route,
-      path,
-      pathname,
-      canonicalPath,
-      hash,
-      params,
-      query
-    }
-
-    if (state === false && samePage) {
-      extend(toCtx, { state: fromCtx.state }, false)
-    } else if (!this.config.persistState && state) {
-      toCtx.state = state
-    }
-
-    if (this.config.persistState) {
-      toCtx.state = this.state()
-    }
-
-    history[push ? 'pushState' : 'replaceState'](
-      history.state,
-      document.title,
-      '' === canonicalPath ? Context.getBase(this) : canonicalPath)
-
-    if (firstRun) {
-      complete.call(this, true)
-    } else if (!samePage) {
-      this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this))
-
-      if (this.config.outTransition.length !== 4) {
-        complete.call(this, true)
+        canonicalPath,
+        hash,
+        params,
+        query
       }
-    } else if (this.$child) {
-      this.$child.update(childPath || '/', {}, false, {})
-      complete.call(this)
-    } else {
-      complete.call(this)
-    }
 
-    function complete(animate) {
-      const el = this.config.el.getElementsByClassName('component-wrapper')[0]
-      delete toCtx.query
-      extend(this, toCtx)
-      if (query) {
-        this.query.update(query, pathname)
+      if (state === false && samePage) {
+        extend(toCtx, { state: fromCtx.state }, false)
+      } else if (!this.config.persistState && state) {
+        toCtx.state = state
       }
-      this.isNavigating(false)
-      ko.tasks.runEarly()
 
-      if (animate) {
-        ko.tasks.schedule(() =>
-          this.config.inTransition(el, fromCtx, toCtx))
+      if (this.config.persistState) {
+        toCtx.state = this.state()
       }
-    }
 
-    return true
+      history[push ? 'pushState' : 'replaceState'](
+        history.state,
+        document.title,
+        '' === canonicalPath ? this.getBase() : canonicalPath)
+
+      return new Promise((resolve) => {
+        if (firstRun) {
+          complete.call(this, true)
+        } else if (!samePage) {
+          this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this))
+          if (this.config.outTransition.length !== 4) {
+            complete.call(this, true)
+          }
+        } else if (this.$child) {
+          this.$child.update(childPath || '/', {}, false, {})
+          complete.call(this)
+        } else {
+          complete.call(this)
+        }
+
+        function complete(animate) {
+          const el = this.config.el.getElementsByClassName('component-wrapper')[0]
+          delete toCtx.query
+          extend(this, toCtx)
+          if (query) {
+            this.query.update(query, pathname)
+          }
+          this.isNavigating(false)
+          ko.tasks.runEarly()
+          resolve(true)
+
+          if (animate) {
+            ko.tasks.schedule(() =>
+              this.config.inTransition(el, fromCtx, toCtx))
+          }
+        }
+      })
+    })
+  }
+
+  addBeforeNavigateCallback(cb) {
+    this._beforeNavigateCallbacks.push(cb)
+  }
+
+  runBeforeNavigateCallbacks() {
+    const ctx = this
+
+    return run()
+
+    function run(i = 0) {
+      return new Promise((resolve) => {
+        if (i === ctx._beforeNavigateCallbacks.length) {
+          return resolve(true)
+        }
+        const cb = ctx._beforeNavigateCallbacks[i]
+        if (cb.length === 1) {
+          cb((shouldUpdate = true) => shouldUpdate
+            ? run(++i).then((v) => {
+              resolve(v)
+            })
+            : resolve(false))
+        } else {
+          const v = cb()
+          if (isUndefined(v) || typeof v.then !== 'function') {
+            resolve(v !== false)
+          } else {
+            v.then((shouldUpdate = true) => shouldUpdate
+              ? run(++i).then(resolve)
+              : resolve(false))
+          }
+        }
+      })
+    }
   }
 
   getRouteForUrl(url) {
@@ -196,9 +222,36 @@ export default class Context {
     this.state.reload()
   }
 
-  static getBase(ctx) {
+  resolveUrl(origUrl) {
+    let url = (origUrl + '').replace('/#!', '')
+    if (url.indexOf('./') === 0) {
+      url = url.replace('./', '/')
+    } else {
+      let p = this
+      while (p && url.indexOf(p.config.base) > -1) {
+        url = url.replace(p.config.base, '')
+        p = p.$parent
+      }
+    }
+    return url
+  }
+
+  toJS() {
+    return ko.toJS({
+      route: this.route,
+      path: this.path,
+      pathname: this.pathname,
+      canonicalPath: this.canonicalPath,
+      hash: this.hash,
+      state: this.state,
+      params: this.params,
+      query: this.query.getAll(false, this.pathname())
+    })
+  }
+
+  getBase() {
     let base = ''
-    let p = ctx
+    let p = this
     while (p) {
       base = p.config.base + (!p.config.hashbang || p.$parent ? '' : '/#!') + base
       p = p.$parent
