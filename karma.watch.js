@@ -32,7 +32,16 @@ module.exports = function(config) {
             exclude: [
               path.resolve('node_modules/')
             ],
-            loader: 'babel'
+            loader: 'babel',
+            query: {
+              'plugins': [
+                'transform-es2015-modules-commonjs',
+                'syntax-async-functions',
+                'transform-runtime',
+                'transform-regenerator'
+              ],
+              presets: ['es2015']
+            }
           }
         ]
       },
