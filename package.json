@@ -26,7 +26,8 @@
       "test"
     ],
     [
-      "build"
+      "build",
+      "example:build"
     ],
     "stage"
   ],
