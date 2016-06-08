@@ -74,7 +74,7 @@ class ViewModel {
           values will not pollute the querystring.
         </p>
         <p>
-          <em>See the page on <a data-bind="path: '/nested-routing'">nested routing</a> for an example</em>
+          <em>See the page on <a data-bind="path: '/nested-routing/foo'">nested routing</a> for an example</em>
         </p>
 
 <pre><code data-bind="prism: 'javascript'">
@@ -129,7 +129,7 @@ class ViewModel {
           scoped to local router, similarly to query params
         </p>
         <p>
-          <em>See the page on <a data-bind="path: '/nested-routing'">nested routing</a> for an example</em>
+          <em>See the page on <a data-bind="path: '/nested-routing/foo'">nested routing</a> for an example</em>
         </p>
       </section>
 
@@ -149,7 +149,7 @@ class ViewModel {
           <small class="text-muted">read-only</small>
         </h2>
         <p>
-          read-only observable containing path relevant to local router
+          read-only observable containing path with respect to local router
         </p>
       </section>
 
@@ -159,7 +159,7 @@ class ViewModel {
           <small class="text-muted">read-only</small>
         </h2>
         <p>
-          read-only observable containing pathname (path w/o querystring) relevant to local router
+          read-only observable containing pathname (path w/o querystring) with respect to local router
         </p>
       </section>
 
@@ -185,18 +185,15 @@ class ViewModel {
 
       <section>
         <h2 id="isNavigating">
-          hash
+          isNavigating
           <small class="text-muted">read-only</small>
         </h2>
-        <p>
-          <code>true</code> if the router is performing navigation
-        </p>
       </section>
 
       <section>
         <h2 id="update">
           update
-          <small class="text-muted">(url, state = {}, push = true, query = false) => {}</small>
+          <small class="text-muted">(url, state = {}, push = true, query = false) => Promise(didUpdate)</small>
         </h2>
         <p>
           updates the context and trigger one update; bubbles up to parent router(s)
@@ -210,9 +207,32 @@ class ViewModel {
           <br>
           if <code>query</code> is an object, set this context's query to the contents
         </p>
+        <p>
+          returns <code>false</code> if route is not matched, otherwise a promise that resolves
+          <code>true</code> if update occurred and <code>false</code> otherwise (if blocked by
+          an <code>addBeforeNavigateCallback</code> callback)
+        </p>
         <div class="alert alert-info">
          The top level router's <code>update</code> function is available at <code>ko.router.update()</code>
         <div>
+      </section>
+
+      <section>
+        <h2 id="addBeforeNavigateCallback">
+          addBeforeNavigateCallback
+          <small class="text-muted">(cb) => cb([done])</small>
+        </h2>
+        <p>
+          adds function to be called before navigating away from the current page. to perform async
+          actions before unmounting, you may use the optional done callback or return a promise.
+          additionally, returning <code>false</code>, a promise that resolves to <code>false</code>, or
+          supplying a value of <code>false</code> as the first argument to the optional done callback,
+          navigation will be prevented.
+        </p>
+        <p>
+          use this function to confirm navigation away, show unsaved change warnings, perform async cleanup,
+          etc.
+        </p>
       </section>
 
       <section>
