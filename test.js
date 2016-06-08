@@ -20,7 +20,7 @@ import './src'
 
 ko.options.deferUpdates = true
 
-test('ko-component-router', async (t) => {
+test('ko-component-router', async (t) => { // eslint-disable-line
   const NUM_TESTS_PER_SUITE = 44
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
@@ -288,13 +288,10 @@ async function runTests(t, config) {
     router.update('/anchors')
   })
   await step(() => {
-    // debugger
     const aboutLink = $('#about-link', $dom).get(0)
-    debugger
     aboutLink.click()
   })
   await step(() => {
-    debugger
     t.equal(router.route().component, 'about', 'clicking a link navigates')
   })
   await step(() => {

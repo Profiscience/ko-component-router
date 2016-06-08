@@ -343,9 +343,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  _createClass(Context, [{
-	    key: 'addTransitionCallback',
-	    value: function addTransitionCallback(d) {}
-	  }, {
 	    key: 'update',
 	    value: function update() {
 	      var origUrl = arguments.length <= 0 || arguments[0] === undefined ? this.canonicalPath() : arguments[0];
