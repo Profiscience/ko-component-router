@@ -46,7 +46,7 @@ ko.components.register('app', {
       <div class="page-header">
         <small class="text-muted text-right pull-right">
           pssst... this documentation is built using knockout + this router,
-          <a href="https://github.com/caseyWebb/ko-component-router/tree/gh-pages/example">source</a>
+          <a href="https://github.com/Profiscience/ko-component-router/tree/gh-pages/example">source</a>
         </small>
         <h1>
           ko-component-router
@@ -123,7 +123,7 @@ ko.components.register('app', {
             </ul>
             <hr>
             <div class="text-center">
-              <a href="https://github.com/caseyWebb/ko-component-router">
+              <a href="https://github.com/Profiscience/ko-component-router">
                 <i class="fa fa-github"></i> View on Github
               </a>
             </div>
