@@ -149,18 +149,24 @@ export default class Context {
   }
 
   runBeforeNavigateCallbacks() {
-    const ctx = this
+    let ctx = this
+    let callbacks = []
 
-    return run()
+    while (ctx) {
+      callbacks = ctx._beforeNavigateCallbacks.concat(callbacks)
+      ctx = ctx.$child
+    }
 
-    function run(i = 0) {
+    return run(callbacks)
+
+    function run(callbacks) {
       return new Promise((resolve) => {
-        if (i === ctx._beforeNavigateCallbacks.length) {
+        if (callbacks.length === 0) {
           return resolve(true)
         }
-        const cb = ctx._beforeNavigateCallbacks[i]
+        const cb = callbacks.shift()
         const recursiveResolve = (shouldUpdate = true) => shouldUpdate
-          ? run(++i).then(resolve)
+          ? run(callbacks).then(resolve)
           : resolve(false)
 
         if (cb.length === 1) {
@@ -168,7 +174,7 @@ export default class Context {
         } else {
           const v = cb()
           if (isUndefined(v) || typeof v.then !== 'function') {
-            resolve(v !== false)
+            recursiveResolve(v)
           } else {
             v.then(recursiveResolve)
           }

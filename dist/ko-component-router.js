@@ -468,20 +468,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'runBeforeNavigateCallbacks',
 	    value: function runBeforeNavigateCallbacks() {
 	      var ctx = this;
+	      var callbacks = [];
 
-	      return run();
+	      while (ctx) {
+	        callbacks = ctx._beforeNavigateCallbacks.concat(callbacks);
+	        ctx = ctx.$child;
+	      }
 
-	      function run() {
-	        var i = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+	      return run(callbacks);
 
+	      function run(callbacks) {
 	        return new Promise(function (resolve) {
-	          if (i === ctx._beforeNavigateCallbacks.length) {
+	          if (callbacks.length === 0) {
 	            return resolve(true);
 	          }
-	          var cb = ctx._beforeNavigateCallbacks[i];
+	          var cb = callbacks.shift();
 	          var recursiveResolve = function recursiveResolve() {
 	            var shouldUpdate = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
-	            return shouldUpdate ? run(++i).then(resolve) : resolve(false);
+	            return shouldUpdate ? run(callbacks).then(resolve) : resolve(false);
 	          };
 
 	          if (cb.length === 1) {
@@ -489,7 +493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          } else {
 	            var v = cb();
 	            if ((0, _utils.isUndefined)(v) || typeof v.then !== 'function') {
-	              resolve(v !== false);
+	              recursiveResolve(v);
 	            } else {
 	              v.then(recursiveResolve);
 	            }
