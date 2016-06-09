@@ -15,7 +15,7 @@
     "routing",
     "spa"
   ],
-  "homepage": "https://github.com/caseyWebb/ko-component-router",
+  "homepage": "https://github.com/Profiscience/ko-component-router",
   "moduleType": [
     "amd",
     "globals",
