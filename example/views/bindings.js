@@ -17,7 +17,7 @@ ko.components.register('bindings', {
   template: `
     <div class="component-container">
       <section>
-        <h2>
+        <h2 id="path">
           path
         </h2>
         <p>
@@ -44,7 +44,7 @@ ko.components.register('bindings', {
         </div>
       </section>
       <section>
-        <h2>
+        <h2 id="state">
           state
         </h2>
         <p>
@@ -52,7 +52,7 @@ ko.components.register('bindings', {
         </p>
       </section>
       <section>
-        <h2>
+        <h2 id="query">
           query
         </h2>
         <p>
