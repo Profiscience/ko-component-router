@@ -21,8 +21,7 @@ import './src'
 ko.options.deferUpdates = true
 
 test('ko-component-router', async (t) => { // eslint-disable-line
-  const NUM_TESTS_PER_SUITE = 57
-  // const NUM_TESTS_PER_SUITE = 44
+  const NUM_TESTS_PER_SUITE = 60
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
   t.plan(NUM_TESTS)
@@ -74,7 +73,7 @@ async function runTests(t, config) {
           // persistQuery & persistState options
           '/persistent/!': 'persistent-query-state',
 
-          '/navigate-callback': 'navigate-callback',
+          '/navigate-callback/!': 'navigate-callback',
 
           // wildcard segment
           '/*': '404'
@@ -341,13 +340,20 @@ async function runTests(t, config) {
   })
 
   // addBeforeNavigateCallback
+  let parentCallbackCalled
   await step(() => {
     ko.components.register('navigate-callback', {
-      template: '<div></div>',
+      template: '<ko-component-router params="routes: routes"></ko-component-router>',
       viewModel: class {
         constructor(ctx) {
+          this.routes = {
+            '/': 'empty-component',
+            '/nested-navigate-callback': 'nested-navigate-callback'
+          }
+
           let isFirstTime = true
           ctx.addBeforeNavigateCallback(() => {
+            parentCallbackCalled = true
             if (isFirstTime) {
               t.pass('functions registered with addBeforeNavigateCallback get called')
               isFirstTime = false
@@ -357,7 +363,27 @@ async function runTests(t, config) {
         }
       }
     })
-    router.update('/navigate-callback')
+    ko.components.register('nested-navigate-callback', {
+      template: '<div></div>',
+      viewModel: class {
+        constructor(ctx) {
+          let secondCallbackCalled
+          ctx.addBeforeNavigateCallback((done) => {
+            setTimeout(() => {
+              t.false(secondCallbackCalled, 'addBeforeNavigateCallbacks are ran FIFO and sequentially')
+              done()
+            }, 100)
+          })
+          ctx.addBeforeNavigateCallback(() => {
+            secondCallbackCalled = true
+            t.pass('functions registered with addBeforeNavigateCallback in child routers get called when the parent navigates')
+            t.false(parentCallbackCalled, 'addBeforeNavigateCallbacks in child routers get called first')
+          })
+        }
+      }
+    })
+    ko.components.register('empty-component', { template: '<span></span>' })
+    router.update('/navigate-callback/nested-navigate-callback')
   })
   await step((done) => {
     const willUpdate = router.update('/about')
@@ -377,6 +403,8 @@ async function runTests(t, config) {
   await step(() => {
     t.equal(router.route().component, 'about', 'addBeforeNavigateCallback does not prevent navigation when return !== false')
     ko.components.unregister('navigate-callback')
+    ko.components.unregister('nested-navigate-callback')
+    ko.components.unregister('empty-component')
   })
 
   // addBeforeNavigateCallback callback
