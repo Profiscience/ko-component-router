@@ -159,20 +159,18 @@ export default class Context {
           return resolve(true)
         }
         const cb = ctx._beforeNavigateCallbacks[i]
+        const recursiveResolve = (shouldUpdate = true) => shouldUpdate
+          ? run(++i).then(resolve)
+          : resolve(false)
+
         if (cb.length === 1) {
-          cb((shouldUpdate = true) => shouldUpdate
-            ? run(++i).then((v) => {
-              resolve(v)
-            })
-            : resolve(false))
+          cb(recursiveResolve)
         } else {
           const v = cb()
           if (isUndefined(v) || typeof v.then !== 'function') {
             resolve(v !== false)
           } else {
-            v.then((shouldUpdate = true) => shouldUpdate
-              ? run(++i).then(resolve)
-              : resolve(false))
+            v.then(recursiveResolve)
           }
         }
       })
