@@ -24,13 +24,6 @@ ko.components.register('nested-routing', {
 
           Reading the source for this page is also highly recommended.
         </p>
-
-        <h4>limitations</h4>
-        <p>
-          Components containing routers beyond the root level (i.e. any child routers)
-          can not be mounted synchronously and use the path binding.
-        </p>
-
       </section>
       <section>
 <pre><code data-bind="prism: 'javascript'">
@@ -111,6 +104,7 @@ ko.components.register('foo', {
 })
 
 ko.components.register('foo-router', {
+  synchronous: true,
   viewModel: class FooRouter {
     constructor(ctx) {
       this.qsParam = ctx.query.get('foo', 'foo')

@@ -85,13 +85,14 @@ export default class Context {
           hash)
 
       const toCtx = {
-        route,
         path,
         pathname,
         canonicalPath,
         hash,
         params,
-        query
+        query,
+        // route must come last
+        route
       }
 
       if (state === false && samePage) {

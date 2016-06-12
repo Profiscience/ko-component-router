@@ -402,13 +402,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var canonicalPath = Context.getCanonicalPath(_this.getBase().replace(/\/$/, ''), pathname, childPath, _this.query.getFullQueryString(query, pathname), hash);
 
 	        var toCtx = {
-	          route: route,
 	          path: path,
 	          pathname: pathname,
 	          canonicalPath: canonicalPath,
 	          hash: hash,
 	          params: params,
-	          query: query
+	          query: query,
+	          // route must come last
+	          route: route
 	        };
 
 	        if (state === false && samePage) {
