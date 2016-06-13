@@ -444,7 +444,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var el = this.config.el.getElementsByClassName('component-wrapper')[0];
 	            delete toCtx.query;
-	            (0, _utils.extend)(this, toCtx);
+	            if (fromCtx.route.component === toCtx.route.component) {
+	              (0, _utils.merge)(this, toCtx);
+	            } else {
+	              (0, _utils.extend)(this, toCtx);
+	            }
 	            if (query) {
 	              this.query.update(query, pathname);
 	            }
