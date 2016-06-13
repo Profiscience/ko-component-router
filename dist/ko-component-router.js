@@ -172,29 +172,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _ref2$pushState = _ref2.pushState;
 	      var pushState = _ref2$pushState === undefined ? false : _ref2$pushState;
 
-	      if (path.toLowerCase().indexOf(this.config.base.toLowerCase()) === 0) {
-	        path = path.substr(this.config.base.length) || '/';
+	      var ctx = this.ctx;
+	      while (ctx.$child) {
+	        ctx = ctx.$child;
 	      }
 
-	      return this.ctx.update(path, state, pushState, false);
+	      if (path.toLowerCase().indexOf(ctx.config.base.toLowerCase()) === 0) {
+	        path = path.substr(ctx.config.base.length) || '/';
+	      }
+
+	      return ctx.update(path, state, pushState, false);
 	    }
 	  }, {
 	    key: 'onpopstate',
-	    value: function onpopstate(_ref3) {
-	      var state = _ref3.state;
+	    value: function onpopstate(e) {
+	      if (e.defaultPrevented) {
+	        return;
+	      }
 
-	      this.dispatch({
-	        path: location.pathname + location.search + location.hash,
-	        state: (state || {})[this.ctx.config.depth + this.ctx.pathname()]
-	      });
+	      var path = location.pathname + location.search + location.hash;
+	      var state = (e.state || {})[this.ctx.config.depth + this.ctx.pathname()];
+
+	      if (this.dispatch({ path: path, state: state })) {
+	        e.preventDefault();
+	      }
 	    }
 	  }, {
 	    key: 'onclick',
 	    value: function onclick(e) {
-	      if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
-	        return;
-	      }
-
 	      // ensure link
 	      var el = e.target;
 	      while (el && 'A' !== el.nodeName) {
@@ -204,6 +209,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 
+	      var isDoubleClick = 1 !== which(e);
+	      var hasModifier = e.metaKey || e.ctrlKey || e.shiftKey;
 	      var isDownload = el.hasAttribute('download');
 	      var hasOtherTarget = el.hasAttribute('target');
 	      var hasExternalRel = el.getAttribute('rel') === 'external';
@@ -211,27 +218,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var isCrossOrigin = !sameOrigin(el.href);
 	      var isEmptyHash = el.getAttribute('href') === '#';
 
-	      if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin || isEmptyHash) {
+	      if (isCrossOrigin || isDoubleClick || isDownload || isEmptyHash || isMailto || hasExternalRel || hasModifier || hasOtherTarget) {
 	        return;
 	      }
 
-	      // rebuild path
 	      var path = el.pathname + el.search + (el.hash || '');
-
-	      // same page
-	      var orig = path;
-	      var base = this.config.base.replace('/#!', '');
-	      if (path.toLowerCase().indexOf(base.toLowerCase()) === 0) {
-	        path = path.substr(base.length);
-	      }
-
-	      if (this.config.hashbang) {
-	        path = path.replace('/#!', '');
-	      }
-
-	      if (this.config.base && orig === path) {
-	        return;
-	      }
 
 	      if (this.dispatch({ path: path, pushState: true })) {
 	        e.preventDefault();
