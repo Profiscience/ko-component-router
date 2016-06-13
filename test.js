@@ -21,7 +21,7 @@ import './src'
 ko.options.deferUpdates = true
 
 test('ko-component-router', async (t) => { // eslint-disable-line
-  const NUM_TESTS_PER_SUITE = 60
+  const NUM_TESTS_PER_SUITE = 62
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
   t.plan(NUM_TESTS)
@@ -102,14 +102,28 @@ async function runTests(t, config) {
     t.equal(router.route().component, 'about', 'explicit path (and initialization)')
     router.update('/user/casey/')
   })
-  await step(() => {
+  await step((done) => {
     t.equal(router.route().component, 'user', 'routes w/ missing optional parameter')
     t.equal(router.params.name(), 'casey', 'attaches required param to ctx.params[PARAM_NAME]')
     t.equal(router.params.operation(), undefined, 'optional param is `undefined` when missing')
+
+    const killMe = router.params.name.subscribe((n) => {
+      t.equal(n, 'barsh', 'ctx.params[PARAM_NAME] is subscribable')
+      killMe.dispose()
+      done()
+    })
+
+    router.update('/user/barsh/')
+  })
+  await step(() => {
     router.update('/user/casey/edit')
   })
   await step(() => {
     t.equal(router.params.operation(), 'edit', 'attaches optional param to ctx.params[PARAM_NAME]')
+    router.update('/user/barsh')
+  })
+  await step(() => {
+    t.equal(router.params.operation(), undefined, 'optional param on ctx.params[PARAM_NAME] gets set to undefined when navigated away from')
     router.update('/this/page/does/not/exist')
   })
   await step(() => {

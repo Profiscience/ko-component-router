@@ -2,7 +2,7 @@ import ko from 'knockout'
 import qs from 'qs'
 import { factory as queryFactory } from './query'
 import { factory as stateFactory } from './state'
-import { extend, isUndefined } from './utils'
+import { extend, isUndefined, merge } from './utils'
 
 export default class Context {
   constructor(bindingCtx, config) {
@@ -128,7 +128,11 @@ export default class Context {
         function complete(animate) {
           const el = this.config.el.getElementsByClassName('component-wrapper')[0]
           delete toCtx.query
-          extend(this, toCtx)
+          if (fromCtx.route.component === toCtx.route.component) {
+            merge(this, toCtx)
+          } else {
+            extend(this, toCtx)
+          }
           if (query) {
             this.query.update(query, pathname)
           }
