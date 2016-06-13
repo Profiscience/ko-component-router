@@ -54,25 +54,32 @@ class Router {
   }
 
   dispatch({ path, state, pushState = false }) {
-    if (path.toLowerCase().indexOf(this.config.base.toLowerCase()) === 0) {
-      path = path.substr(this.config.base.length) || '/'
+    let ctx = this.ctx
+    while (ctx.$child) {
+      ctx = ctx.$child
     }
 
-    return this.ctx.update(path, state, pushState, false)
+    if (path.toLowerCase().indexOf(ctx.config.base.toLowerCase()) === 0) {
+      path = path.substr(ctx.config.base.length) || '/'
+    }
+
+    return ctx.update(path, state, pushState, false)
   }
 
-  onpopstate({ state }) {
-    this.dispatch({
-      path: location.pathname + location.search + location.hash,
-      state: (state || {})[this.ctx.config.depth + this.ctx.pathname()]
-    })
-  }
-
-  onclick(e) {
-    if (1 !== which(e) || e.metaKey || e.ctrlKey || e.shiftKey) {
+  onpopstate(e) {
+    if (e.defaultPrevented) {
       return
     }
 
+    const path = location.pathname + location.search + location.hash
+    const state = (e.state || {})[this.ctx.config.depth + this.ctx.pathname()]
+
+    if (this.dispatch({ path, state })) {
+      e.preventDefault()
+    }
+  }
+
+  onclick(e) {
     // ensure link
     let el = e.target
     while (el && 'A' !== el.nodeName) {
@@ -82,6 +89,8 @@ class Router {
       return
     }
 
+    const isDoubleClick = 1 !== which(e)
+    const hasModifier = e.metaKey || e.ctrlKey || e.shiftKey
     const isDownload = el.hasAttribute('download')
     const hasOtherTarget = el.hasAttribute('target')
     const hasExternalRel = el.getAttribute('rel') === 'external'
@@ -89,27 +98,18 @@ class Router {
     const isCrossOrigin = !sameOrigin(el.href)
     const isEmptyHash = el.getAttribute('href') === '#'
 
-    if (isDownload || hasOtherTarget || hasExternalRel || isMailto || isCrossOrigin || isEmptyHash) {
+    if (isCrossOrigin ||
+        isDoubleClick ||
+        isDownload ||
+        isEmptyHash ||
+        isMailto ||
+        hasExternalRel ||
+        hasModifier ||
+        hasOtherTarget) {
       return
     }
 
-    // rebuild path
-    let path = el.pathname + el.search + (el.hash || '')
-
-    // same page
-    const orig = path
-    const base = this.config.base.replace('/#!', '')
-    if (path.toLowerCase().indexOf(base.toLowerCase()) === 0) {
-      path = path.substr(base.length)
-    }
-
-    if (this.config.hashbang) {
-      path = path.replace('/#!', '')
-    }
-
-    if (this.config.base && orig === path) {
-      return
-    }
+    const path = el.pathname + el.search + (el.hash || '')
 
     if (this.dispatch({ path, pushState: true })) {
       e.preventDefault()
