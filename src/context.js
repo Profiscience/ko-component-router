@@ -96,7 +96,7 @@ export default class Context {
       }
 
       if (state === false && samePage) {
-        extend(toCtx, { state: fromCtx.state }, false)
+        toCtx.state = fromCtx.state
       } else if (!this.config.persistState && state) {
         toCtx.state = state
       }
@@ -119,7 +119,7 @@ export default class Context {
             complete.call(this, true)
           }
         } else if (this.$child) {
-          this.$child.update(childPath || '/', {}, false, {})
+          this.$child.update(childPath || '/', false, false, false)
           complete.call(this)
         } else {
           complete.call(this)

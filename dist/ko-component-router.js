@@ -413,7 +413,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 
 	        if (state === false && samePage) {
-	          (0, _utils.extend)(toCtx, { state: fromCtx.state }, false);
+	          toCtx.state = fromCtx.state;
 	        } else if (!_this.config.persistState && state) {
 	          toCtx.state = state;
 	        }
@@ -433,7 +433,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              complete.call(_this, true);
 	            }
 	          } else if (_this.$child) {
-	            _this.$child.update(childPath || '/', {}, false, {});
+	            _this.$child.update(childPath || '/', false, false, false);
 	            complete.call(_this);
 	          } else {
 	            complete.call(_this);
