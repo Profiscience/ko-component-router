@@ -236,6 +236,20 @@ class ViewModel {
       </section>
 
       <section>
+        <h2 id="forceReloadOnParamChange">
+          forceReloadOnParamChange
+          <small class="text-muted">() => {}</small>
+        </h2>
+        <p>
+          tells the router to reload the current route component when params change rather than allowing
+          the component to subscribe to <code>ctx.params[PARAM_NAME]</code> or wrap it in a computed.
+        </p>
+        <p>
+          this is particularly useful when using route callbacks to initalize data or set components dynamically
+        </p>
+      </section>
+
+      <section>
         <h2 id="parent">
           $parent
         </h2>

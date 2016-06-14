@@ -33,8 +33,15 @@ ko.components.register('config', {
           routes
         </h2>
         <p>
-          routes should be passed into the router as an object where
-          key === express-style route and value === component
+          <code>routes</code> is an object where the keys are <a href="https://github.com/pillarjs/path-to-regexp">express style</a>
+          routes and values are the array <code>[...callbacks, 'component-name']</code> or just <code>component-name</code> for shorthand
+        </p>
+        <p>
+          <code>...callbacks</code> are functions that are called with the router context and an optional <code>done</code> callback and
+          will be called sequentially before setting the router's view to <code>'component-name'</code>
+        </p>
+        <p>
+          if callbacks aren't your style, you can also use promises
         </p>
 
 <pre><code data-bind="prism: 'javascript'">
@@ -44,13 +51,47 @@ const routes = {
 
   // one required param (\`name\`)
   // one optional param (\`operation\`)
-  '/user/:name/:operation?': 'user',
+  '/user/:name/:operation?': [
+    getUser,
+    'user'
+  ],
 
   // wildcard segment
   '/*': '404',
 
   // named wildcard segment
   '/file/:file(*)': 'file'
+}
+
+function getUser(ctx /*, done */) {
+  return new Promise((resolve) => {
+    $.get(\`/API/Users/\${ctx.params.name}\`).then((u) => {
+      ctx.state.user = u
+      resolve()
+    })
+  })
+}
+</code></pre>
+
+<br/>
+
+<p>
+  the callbacks can also be used for dynamic routing by setting <code>ctx.route.component</code>
+</p>
+
+<br/>
+
+<pre><code data-bind="prism: 'javascript'">
+const routes = {
+  '/user/:name/:operation?': [getComponent]
+}
+
+function getComponent(ctx) {
+  if (ctx.params.operation === 'edit') {
+    ctx.route.component = 'user-edit'
+  } else {
+    ctx.route.component = 'user-show'
+  }
 }
 </code></pre>
       </section>
