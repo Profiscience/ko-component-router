@@ -1,15 +1,23 @@
 import pathtoRegexp from 'path-to-regexp'
-import { decodeURLEncodedURIComponent, isUndefined } from './utils'
+import { cascade, decodeURLEncodedURIComponent, isUndefined } from './utils'
 
 export default class Route {
-  constructor(path, component) {
+  constructor(path, pipeline) {
     if (path[path.length - 1] === '!') {
       path = path.replace('!', ':child_path(.*)?')
     } else {
       path = path.replace(/\(?\*\)?/, '(.*)')
     }
 
-    this.component = component
+    if (typeof pipeline === 'string') {
+      this.component = pipeline
+      this.pipeline = []
+    } else if (typeof pipeline[pipeline.length - 1] === 'string'){
+      this.component = pipeline.pop()
+      this.pipeline = pipeline
+    } else {
+      this.pipeline = pipeline
+    }
 
     this._keys = []
     this._regexp = pathtoRegexp(path, this._keys)
@@ -58,5 +66,9 @@ export default class Route {
     }
 
     return [path, params, hash, pathname, querystring, childPath]
+  }
+
+  runPipeline(ctx) {
+    return cascade(this.pipeline, ctx)
   }
 }

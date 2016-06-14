@@ -1,5 +1,28 @@
 import ko from 'knockout'
 
+export function cascade(callbacks, ...args) {
+  return new Promise((resolve) => {
+    if (callbacks.length === 0) {
+      return resolve(true)
+    }
+    const cb = callbacks.shift()
+    const recursiveResolve = (shouldUpdate = true) => shouldUpdate
+      ? cascade(callbacks, ...args).then(resolve)
+      : resolve(false)
+
+    if (cb.length === args.length + 1) {
+      cb(...args, recursiveResolve)
+    } else {
+      const v = cb(...args)
+      if (isUndefined(v) || typeof v.then !== 'function') {
+        recursiveResolve(v)
+      } else {
+        v.then(recursiveResolve)
+      }
+    }
+  })
+}
+
 export function decodeURLEncodedURIComponent(val) {
   if (typeof val !== 'string') { return val }
   return decodeURIComponent(val.replace(/\+/g, ' '))

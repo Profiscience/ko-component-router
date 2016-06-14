@@ -2,7 +2,7 @@ import ko from 'knockout'
 import qs from 'qs'
 import { factory as queryFactory } from './query'
 import { factory as stateFactory } from './state'
-import { deepEquals, extend, isUndefined, merge } from './utils'
+import { cascade, deepEquals, extend, merge } from './utils'
 
 export default class Context {
   constructor(bindingCtx, config) {
@@ -130,22 +130,25 @@ export default class Context {
         function complete(animate) {
           const el = this.config.el.getElementsByClassName('component-wrapper')[0]
           delete toCtx.query
-          if (fromCtx.route.component === toCtx.route.component) {
-            merge(this, toCtx)
-          } else {
-            extend(this, toCtx)
-          }
-          if (query) {
-            this.query.update(query, pathname)
-          }
-          this.isNavigating(false)
-          ko.tasks.runEarly()
-          resolve(true)
+          toCtx.route.runPipeline(toCtx)
+            .then(() => {
+              if (fromCtx.route.component === toCtx.route.component) {
+                merge(this, toCtx)
+              } else {
+                extend(this, toCtx)
+              }
+              if (query) {
+                this.query.update(query, pathname)
+              }
+              this.isNavigating(false)
+              ko.tasks.runEarly()
+              resolve(true)
 
-          if (animate) {
-            ko.tasks.schedule(() =>
-              this.config.inTransition(el, fromCtx, toCtx))
-          }
+              if (animate) {
+                ko.tasks.schedule(() =>
+                  this.config.inTransition(el, fromCtx, toCtx))
+              }
+            })
         }
       })
     })
@@ -164,30 +167,7 @@ export default class Context {
       ctx = ctx.$child
     }
 
-    return run(callbacks)
-
-    function run(callbacks) {
-      return new Promise((resolve) => {
-        if (callbacks.length === 0) {
-          return resolve(true)
-        }
-        const cb = callbacks.shift()
-        const recursiveResolve = (shouldUpdate = true) => shouldUpdate
-          ? run(callbacks).then(resolve)
-          : resolve(false)
-
-        if (cb.length === 1) {
-          cb(recursiveResolve)
-        } else {
-          const v = cb()
-          if (isUndefined(v) || typeof v.then !== 'function') {
-            recursiveResolve(v)
-          } else {
-            v.then(recursiveResolve)
-          }
-        }
-      })
-    }
+    return cascade(callbacks)
   }
 
   getRouteForUrl(url) {

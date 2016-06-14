@@ -21,7 +21,7 @@ import './src'
 ko.options.deferUpdates = true
 
 test('ko-component-router', async (t) => { // eslint-disable-line
-  const NUM_TESTS_PER_SUITE = 62
+  const NUM_TESTS_PER_SUITE = 69
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
   t.plan(NUM_TESTS)
@@ -74,6 +74,29 @@ async function runTests(t, config) {
           '/persistent/!': 'persistent-query-state',
 
           '/navigate-callback/!': 'navigate-callback',
+
+          '/route-pipeline': [
+            (ctx) => {
+              ctx.syncCalled = true
+            },
+            (ctx, done) => {
+              setTimeout(() => {
+                ctx.callbackCalled = true
+                t.false(ctx.promiseCalled)
+                done()
+              }, 300)
+            },
+            (ctx) => new Promise((resolve) => {
+              setTimeout(() => {
+                ctx.promiseCalled = true
+                t.true(ctx.callbackCalled)
+                resolve()
+              }, 200)
+            }),
+            'route-pipeline'
+          ],
+
+          '/meta': [(ctx) => ctx.route.component = 'meta'],
 
           // wildcard segment
           '/*': '404'
@@ -503,7 +526,48 @@ async function runTests(t, config) {
     ko.components.unregister('navigate-callback')
   })
 
-  await step(() => {})
+  // route pipeline
+  await step((done) => {
+    ko.components.register('route-pipeline', {
+      template: '<div></div>',
+      viewModel: class {
+        constructor(ctx) {
+          t.true(ctx.syncCalled)
+          t.true(ctx.callbackCalled)
+          t.true(ctx.promiseCalled)
+        }
+      }
+    })
+    router.update('/route-pipeline')
+    const killMe = router.route.subscribe(() => {
+      killMe.dispose()
+      t.equal(router.route().component, 'route-pipeline')
+      router.update('/about')
+      done()
+    })
+  })
+  await step(() => {
+    ko.components.unregister('route-pipeline')
+  })
+
+  // route pipeline meta programability
+  await step(() => {
+    ko.components.register('meta', {
+      template: '<div></div>',
+      viewModel: class {
+        constructor() {
+          t.pass('meta programability with route callbacks works')
+        }
+      }
+    })
+    router.update('/meta')
+  })
+  await step(() => {
+    router.update('/about')
+  })
+  await step(() => {
+    ko.components.unregister('meta')
+  })
 }
 
 ko.components.register('about',   { synchronous: true, template: 'ABOUT' })

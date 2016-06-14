@@ -437,23 +437,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var el = this.config.el.getElementsByClassName('component-wrapper')[0];
 	            delete toCtx.query;
-	            if (fromCtx.route.component === toCtx.route.component) {
-	              (0, _utils.merge)(this, toCtx);
-	            } else {
-	              (0, _utils.extend)(this, toCtx);
-	            }
-	            if (query) {
-	              this.query.update(query, pathname);
-	            }
-	            this.isNavigating(false);
-	            _knockout2.default.tasks.runEarly();
-	            resolve(true);
+	            toCtx.route.runPipeline(toCtx).then(function () {
+	              if (fromCtx.route.component === toCtx.route.component) {
+	                (0, _utils.merge)(_this2, toCtx);
+	              } else {
+	                (0, _utils.extend)(_this2, toCtx);
+	              }
+	              if (query) {
+	                _this2.query.update(query, pathname);
+	              }
+	              _this2.isNavigating(false);
+	              _knockout2.default.tasks.runEarly();
+	              resolve(true);
 
-	            if (animate) {
-	              _knockout2.default.tasks.schedule(function () {
-	                return _this2.config.inTransition(el, fromCtx, toCtx);
-	              });
-	            }
+	              if (animate) {
+	                _knockout2.default.tasks.schedule(function () {
+	                  return _this2.config.inTransition(el, fromCtx, toCtx);
+	                });
+	              }
+	            });
 	          }
 	        });
 	      });
@@ -474,31 +476,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ctx = ctx.$child;
 	      }
 
-	      return run(callbacks);
-
-	      function run(callbacks) {
-	        return new Promise(function (resolve) {
-	          if (callbacks.length === 0) {
-	            return resolve(true);
-	          }
-	          var cb = callbacks.shift();
-	          var recursiveResolve = function recursiveResolve() {
-	            var shouldUpdate = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
-	            return shouldUpdate ? run(callbacks).then(resolve) : resolve(false);
-	          };
-
-	          if (cb.length === 1) {
-	            cb(recursiveResolve);
-	          } else {
-	            var v = cb();
-	            if ((0, _utils.isUndefined)(v) || typeof v.then !== 'function') {
-	              recursiveResolve(v);
-	            } else {
-	              v.then(recursiveResolve);
-	            }
-	          }
-	        });
-	      }
+	      return (0, _utils.cascade)(callbacks);
 	    }
 	  }, {
 	    key: 'getRouteForUrl',
@@ -1363,6 +1341,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
+	exports.cascade = cascade;
 	exports.decodeURLEncodedURIComponent = decodeURLEncodedURIComponent;
 	exports.deepEquals = deepEquals;
 	exports.extend = extend;
@@ -1376,6 +1355,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _knockout2 = _interopRequireDefault(_knockout);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function cascade(callbacks) {
+	  for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	    args[_key - 1] = arguments[_key];
+	  }
+
+	  return new Promise(function (resolve) {
+	    if (callbacks.length === 0) {
+	      return resolve(true);
+	    }
+	    var cb = callbacks.shift();
+	    var recursiveResolve = function recursiveResolve() {
+	      var shouldUpdate = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+	      return shouldUpdate ? cascade.apply(undefined, [callbacks].concat(args)).then(resolve) : resolve(false);
+	    };
+
+	    if (cb.length === args.length + 1) {
+	      cb.apply(undefined, args.concat([recursiveResolve]));
+	    } else {
+	      var v = cb.apply(undefined, args);
+	      if (isUndefined(v) || typeof v.then !== 'function') {
+	        recursiveResolve(v);
+	      } else {
+	        v.then(recursiveResolve);
+	      }
+	    }
+	  });
+	}
 
 	function decodeURLEncodedURIComponent(val) {
 	  if (typeof val !== 'string') {
@@ -1658,7 +1665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Route = function () {
-	  function Route(path, component) {
+	  function Route(path, pipeline) {
 	    _classCallCheck(this, Route);
 
 	    if (path[path.length - 1] === '!') {
@@ -1667,7 +1674,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      path = path.replace(/\(?\*\)?/, '(.*)');
 	    }
 
-	    this.component = component;
+	    if (typeof pipeline === 'string') {
+	      this.component = pipeline;
+	      this.pipeline = [];
+	    } else if (typeof pipeline[pipeline.length - 1] === 'string') {
+	      this.component = pipeline.pop();
+	      this.pipeline = pipeline;
+	    } else {
+	      this.pipeline = pipeline;
+	    }
 
 	    this._keys = [];
 	    this._regexp = (0, _pathToRegexp2.default)(path, this._keys);
@@ -1726,6 +1741,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      return [path, params, hash, pathname, querystring, childPath];
+	    }
+	  }, {
+	    key: 'runPipeline',
+	    value: function runPipeline(ctx) {
+	      return (0, _utils.cascade)(this.pipeline, ctx);
 	    }
 	  }]);
 
