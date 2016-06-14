@@ -21,7 +21,7 @@ import './src'
 ko.options.deferUpdates = true
 
 test('ko-component-router', async (t) => { // eslint-disable-line
-  const NUM_TESTS_PER_SUITE = 69
+  const NUM_TESTS_PER_SUITE = 70
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
   t.plan(NUM_TESTS)
@@ -96,7 +96,7 @@ async function runTests(t, config) {
             'route-pipeline'
           ],
 
-          '/meta': [(ctx) => ctx.route.component = 'meta'],
+          '/meta/:id': [(ctx) => ctx.route.component = 'meta'],
 
           // wildcard segment
           '/*': '404'
@@ -555,12 +555,21 @@ async function runTests(t, config) {
     ko.components.register('meta', {
       template: '<div></div>',
       viewModel: class {
-        constructor() {
-          t.pass('meta programability with route callbacks works')
+        constructor(ctx) {
+          ctx.forceReloadOnParamChange()
+
+          if (ctx.params.id() === '1') {
+            t.pass('meta programability with route callbacks works')
+          } else if (ctx.params.id() === '2') {
+            t.pass('ctx.forceReloadOnParamChange works')
+          }
         }
       }
     })
-    router.update('/meta')
+    router.update('/meta/1')
+  })
+  await step(() => {
+    router.update('/meta/2')
   })
   await step(() => {
     router.update('/about')

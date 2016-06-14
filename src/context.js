@@ -133,7 +133,18 @@ export default class Context {
           toCtx.route.runPipeline(toCtx)
             .then(() => {
               if (fromCtx.route.component === toCtx.route.component) {
-                merge(this, toCtx)
+                if (this.config._forceReload) {
+                  this.config._forceReload = false
+                  const r = toCtx.route
+                  toCtx.route = { component: '__KO_ROUTER_EMPTY_COMPONENT__' }
+                  ko.components.register('__KO_ROUTER_EMPTY_COMPONENT__', { template: '<span></span>' })
+                  extend(this, toCtx)
+                  ko.tasks.runEarly()
+                  this.route(r)
+                  ko.components.unregister('__KO_ROUTER_EMPTY_COMPONENT__')
+                } else {
+                  merge(this, toCtx)
+                }
               } else {
                 extend(this, toCtx)
               }
@@ -168,6 +179,10 @@ export default class Context {
     }
 
     return cascade(callbacks)
+  }
+
+  forceReloadOnParamChange() {
+    this.config._forceReload = true
   }
 
   getRouteForUrl(url) {
