@@ -58,16 +58,21 @@ export default class Context {
     const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
     const samePage = this.pathname() === pathname
 
-    let shouldNavigatePromise = Promise.resolve(true)
-    if (!samePage && !firstRun) {
-      shouldNavigatePromise = this.runBeforeNavigateCallbacks()
-      this.isNavigating(true)
-      this.reload()
-    }
+    const shouldNavigatePromise =
+      samePage
+        ? this.$child
+          ? this.$child.update(childPath || '/', false, false, false)
+          : Promise.resolve(true)
+        : this.runBeforeNavigateCallbacks()
 
     return shouldNavigatePromise.then((shouldNavigate) => {
       if (!shouldNavigate) {
         return Promise.resolve(false)
+      }
+
+      if (!samePage && !firstRun) {
+        this.isNavigating(true)
+        this.reload()
       }
 
       this._beforeNavigateCallbacks = []
@@ -113,21 +118,7 @@ export default class Context {
       }
 
       return new Promise((resolve) => {
-        if (firstRun) {
-          complete.call(this, true)
-        } else if (!samePage) {
-          this.config.outTransition(this.config.el, fromCtx, toCtx, complete.bind(this))
-          if (this.config.outTransition.length !== 4) {
-            complete.call(this, true)
-          }
-        } else if (this.$child) {
-          this.$child.update(childPath || '/', false, false, false)
-          complete.call(this)
-        } else {
-          complete.call(this)
-        }
-
-        function complete(animate) {
+        const complete = (animate) => {
           const el = this.config.el.getElementsByClassName('component-wrapper')[0]
           delete toCtx.query
           toCtx.route.runPipeline(toCtx)
@@ -161,6 +152,15 @@ export default class Context {
               }
             })
         }
+
+        if (firstRun || samePage) {
+          complete(firstRun)
+        } else if (!samePage) {
+          this.config.outTransition(this.config.el, fromCtx, toCtx, complete)
+          if (this.config.outTransition.length !== 4) {
+            complete(true)
+          }
+        }
       })
     })
   }
@@ -177,7 +177,6 @@ export default class Context {
       callbacks = ctx._beforeNavigateCallbacks.concat(callbacks)
       ctx = ctx.$child
     }
-
     return cascade(callbacks)
   }
 

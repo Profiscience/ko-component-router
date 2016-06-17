@@ -378,6 +378,7 @@ async function runTests(t, config) {
 
   // addBeforeNavigateCallback
   let parentCallbackCalled
+  let isFirstTime = true
   await step(() => {
     ko.components.register('navigate-callback', {
       template: '<ko-component-router params="routes: routes"></ko-component-router>',
@@ -388,7 +389,6 @@ async function runTests(t, config) {
             '/nested-navigate-callback': 'nested-navigate-callback'
           }
 
-          let isFirstTime = true
           ctx.addBeforeNavigateCallback(() => {
             parentCallbackCalled = true
             if (isFirstTime) {
@@ -406,15 +406,21 @@ async function runTests(t, config) {
         constructor(ctx) {
           let secondCallbackCalled
           ctx.addBeforeNavigateCallback((done) => {
-            setTimeout(() => {
-              t.false(secondCallbackCalled, 'addBeforeNavigateCallbacks are ran FIFO and sequentially')
+            if (isFirstTime) {
+              setTimeout(() => {
+                t.false(secondCallbackCalled, 'addBeforeNavigateCallbacks are ran FIFO and sequentially')
+                done()
+              }, 100)
+            } else {
               done()
-            }, 100)
+            }
           })
           ctx.addBeforeNavigateCallback(() => {
             secondCallbackCalled = true
-            t.pass('functions registered with addBeforeNavigateCallback in child routers get called when the parent navigates')
-            t.false(parentCallbackCalled, 'addBeforeNavigateCallbacks in child routers get called first')
+            if (isFirstTime) {
+              t.pass('functions registered with addBeforeNavigateCallback in child routers get called when the parent navigates')
+              t.false(parentCallbackCalled, 'addBeforeNavigateCallbacks in child routers get called first')
+            }
           })
         }
       }
