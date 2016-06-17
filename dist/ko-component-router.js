@@ -1792,7 +1792,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
 	  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
 	  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
-	  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
+	  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))'
 	].join('|'), 'g')
 
 	/**
@@ -1991,7 +1991,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {string}
 	 */
 	function escapeString (str) {
-	  return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1')
+	  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1')
 	}
 
 	/**
