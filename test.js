@@ -670,7 +670,7 @@ ko.components.register('persistent-query-state', {
   }
 })
 
-async function step(fn) {
+async function step(fn) { // eslint-disable-line require-yield
   return new Promise((resolve) => {
     ko.tasks.schedule(() => {
       if (fn.length === 1) {
