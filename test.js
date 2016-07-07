@@ -21,7 +21,7 @@ import './src'
 ko.options.deferUpdates = true
 
 test('ko-component-router', async (t) => { // eslint-disable-line
-  const NUM_TESTS_PER_SUITE = 70
+  const NUM_TESTS_PER_SUITE = 72
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
   t.plan(NUM_TESTS)
@@ -62,6 +62,7 @@ async function runTests(t, config) {
 
           // route w/ nested router
           '/nested/!': 'nested',
+          '/another-nested/!': 'nested',
 
           // various test components
           '/bindings': 'bindings',
@@ -174,8 +175,16 @@ async function runTests(t, config) {
   await step((done) => window.requestAnimationFrame(done))
   await step(() => {
     const nestedRouter = ko.contextFor($('ko-component-router', $dom).get(0)).$router
-    const link = $('#parent-about', $dom).get(0)
+    const link = $('#another-nested-foo', $dom).get(0)
     t.equal(nestedRouter.route().component, 'nested-bar', 'path binding works in nested router within same context')
+    link.click()
+  })
+  await step((done) => ko.tasks.schedule(done))
+  await step(() => {
+    const nestedRouter = ko.contextFor($('ko-component-router', $dom).get(0)).$router
+    const link = $('#parent-about', $dom).get(0)
+    t.deepEquals(nestedRouter.query.getAll(), { fromBar: true }, 'query binding passes query down nested routers')
+    t.deepEquals(nestedRouter.state(), { fromBar: true }, 'state binding passes state down nested routers')
     link.click()
   })
   await step(() => {
@@ -619,12 +628,13 @@ ko.components.register('nested-foo', {
   synchronous: true,
   template: `
     <a id="nested-bar" data-bind="path: \'/bar\'"></a>
+    <a id="parent-about" data-bind="path: \'/about\'"></a>
   `
 })
 ko.components.register('nested-bar', {
   synchronous: true,
   template: `
-    <a id="parent-about" data-bind="path: \'/about\'"></a>
+    <a id="another-nested-foo" data-bind="path: \'/another-nested/foo\', query: { fromBar: true }, state: { fromBar: true }"></a>
   `
 })
 ko.components.register('nested',  {

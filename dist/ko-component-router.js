@@ -444,11 +444,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	              _this.isNavigating(false);
 	              _knockout2.default.tasks.runEarly();
 	              resolve(true);
-
 	              if (animate) {
 	                _knockout2.default.tasks.schedule(function () {
 	                  return _this.config.inTransition(el, fromCtx, toCtx);
 	                });
+	              }
+	              if (_this.$child) {
+	                _this.$child.update(childPath || '/', state, false, query);
 	              }
 	            });
 	          };

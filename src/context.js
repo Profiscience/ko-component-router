@@ -145,10 +145,11 @@ export default class Context {
               this.isNavigating(false)
               ko.tasks.runEarly()
               resolve(true)
-
               if (animate) {
-                ko.tasks.schedule(() =>
-                  this.config.inTransition(el, fromCtx, toCtx))
+                ko.tasks.schedule(() => this.config.inTransition(el, fromCtx, toCtx))
+              }
+              if (this.$child) {
+                this.$child.update(childPath || '/', state, false, query)
               }
             })
         }
