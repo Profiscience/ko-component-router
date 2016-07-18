@@ -46,6 +46,7 @@ export default class Context {
   }
 
   update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
+    // debugger
     const url = this.resolveUrl(origUrl)
     const route = this.getRouteForUrl(url)
     const firstRun = this.route() === ''

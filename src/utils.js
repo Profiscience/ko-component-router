@@ -81,11 +81,13 @@ export function extend(dest, src, createAsObservable = true, _shallow = true) {
       }
     } else if (isUndefined(src[prop])) {
       dest[prop] = undefined
-    } else if (src[prop].constructor === Object) {
+    } else if (isPlainObject(src[prop])) {
       if (_shallow) {
         dest[prop] = {}
       }
       extend(dest[prop], src[prop], createAsObservable)
+    } else if (isArray(src[prop])) {
+      dest[prop] = src[prop].slice(0)
     } else {
       dest[prop] = src[prop]
     }
@@ -100,6 +102,18 @@ export function identity(x) {
 
 export function isUndefined(x) {
   return typeof x === 'undefined'
+}
+
+export function isFunction(x) {
+  return typeof x === 'function'
+}
+
+export function isPlainObject(x) {
+  return x.constructor === Object
+}
+
+export function isArray(x) {
+  return isFunction(x.splice)
 }
 
 export function mapKeys(obj, fn) {

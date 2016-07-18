@@ -1,6 +1,6 @@
 import ko from 'knockout'
 import qs from 'qs'
-import { deepEquals, identity, isUndefined, mapKeys, merge } from './utils'
+import { deepEquals, extend, identity, isArray, isPlainObject, isUndefined, mapKeys, merge } from './utils'
 
 const qsParams = {}
 const trigger = ko.observable(true)
@@ -34,7 +34,6 @@ class Query {
 
     if (!cache[guid][prop]) {
       cache[guid][prop] = {
-        defaultVal,
         parser,
         value: ko.pureComputed({
           read() {
@@ -67,6 +66,18 @@ class Query {
         })
       }
     }
+
+    if (defaultVal) {
+      // clone to prevent defaultVal from being changed by reference
+      if (isArray(defaultVal)) {
+        cache[guid][prop].defaultVal = defaultVal.slice(0)
+      } else if (isPlainObject(defaultVal)) {
+        cache[guid][prop].defaultVal = extend({}, defaultVal, false)
+      } else {
+        cache[guid][prop].defaultVal = defaultVal
+      }
+    }
+
     return cache[guid][prop].value
   }
 
@@ -105,7 +116,7 @@ class Query {
     const guid = this.ctx.config.depth + pathname
     for (const pn in cache[guid]) {
       const p = cache[guid][pn]
-      p.value(p.defaultVal)
+      this.get(pn)(p.defaultVal)
     }
   }
 
