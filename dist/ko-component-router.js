@@ -347,6 +347,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
+	      // debugger
 	      var url = this.resolveUrl(origUrl);
 	      var route = this.getRouteForUrl(url);
 	      var firstRun = this.route() === '';
@@ -1166,7 +1167,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (!cache[guid][prop]) {
 	        cache[guid][prop] = {
-	          defaultVal: defaultVal,
 	          parser: parser,
 	          value: _knockout2.default.pureComputed({
 	            read: function read() {
@@ -1201,6 +1201,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	          })
 	        };
 	      }
+
+	      if (defaultVal) {
+	        // clone to prevent defaultVal from being changed by reference
+	        if ((0, _utils.isArray)(defaultVal)) {
+	          cache[guid][prop].defaultVal = defaultVal.slice(0);
+	        } else if ((0, _utils.isPlainObject)(defaultVal)) {
+	          cache[guid][prop].defaultVal = (0, _utils.extend)({}, defaultVal, false);
+	        } else {
+	          cache[guid][prop].defaultVal = defaultVal;
+	        }
+	      }
+
 	      return cache[guid][prop].value;
 	    }
 	  }, {
@@ -1242,7 +1254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var guid = this.ctx.config.depth + pathname;
 	      for (var pn in cache[guid]) {
 	        var p = cache[guid][pn];
-	        p.value(p.defaultVal);
+	        this.get(pn)(p.defaultVal);
 	      }
 	    }
 	  }, {
@@ -1357,6 +1369,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.extend = extend;
 	exports.identity = identity;
 	exports.isUndefined = isUndefined;
+	exports.isFunction = isFunction;
+	exports.isPlainObject = isPlainObject;
+	exports.isArray = isArray;
 	exports.mapKeys = mapKeys;
 	exports.merge = merge;
 
@@ -1507,11 +1522,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      } else if (isUndefined(src[prop])) {
 	        dest[prop] = undefined;
-	      } else if (src[prop].constructor === Object) {
+	      } else if (isPlainObject(src[prop])) {
 	        if (_shallow) {
 	          dest[prop] = {};
 	        }
 	        extend(dest[prop], src[prop], createAsObservable);
+	      } else if (isArray(src[prop])) {
+	        dest[prop] = src[prop].slice(0);
 	      } else {
 	        dest[prop] = src[prop];
 	      }
@@ -1540,6 +1557,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function isUndefined(x) {
 	  return typeof x === 'undefined';
+	}
+
+	function isFunction(x) {
+	  return typeof x === 'function';
+	}
+
+	function isPlainObject(x) {
+	  return x.constructor === Object;
+	}
+
+	function isArray(x) {
+	  return isFunction(x.splice);
 	}
 
 	function mapKeys(obj, fn) {
