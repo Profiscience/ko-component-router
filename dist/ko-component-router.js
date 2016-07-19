@@ -347,7 +347,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-	      // debugger
 	      var url = this.resolveUrl(origUrl);
 	      var route = this.getRouteForUrl(url);
 	      var firstRun = this.route() === '';
@@ -373,7 +372,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var samePage = this.pathname() === pathname;
 
-	      var shouldNavigatePromise = samePage ? this.$child ? this.$child.update(childPath || '/', false, false, false) : Promise.resolve(true) : this.runBeforeNavigateCallbacks();
+	      var shouldNavigatePromise = samePage ? this.$child ? this.$child.update(childPath || '/', state, false, query) : Promise.resolve(true) : this.runBeforeNavigateCallbacks();
 
 	      return shouldNavigatePromise.then(function (shouldNavigate) {
 	        if (!shouldNavigate) {
