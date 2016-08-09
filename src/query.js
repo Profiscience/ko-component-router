@@ -1,6 +1,6 @@
 import ko from 'knockout'
 import qs from 'qs'
-import { deepEquals, extend, identity, isArray, isPlainObject, isUndefined, mapKeys, merge } from './utils'
+import { clone, deepEquals, identity, isUndefined, mapKeys, merge } from './utils'
 
 const qsParams = {}
 const trigger = ko.observable(true)
@@ -69,13 +69,7 @@ class Query {
 
     if (defaultVal) {
       // clone to prevent defaultVal from being changed by reference
-      if (isArray(defaultVal)) {
-        cache[guid][prop].defaultVal = defaultVal.slice(0)
-      } else if (isPlainObject(defaultVal)) {
-        cache[guid][prop].defaultVal = extend({}, defaultVal, false)
-      } else {
-        cache[guid][prop].defaultVal = defaultVal
-      }
+      cache[guid][prop].defaultVal = clone(defaultVal)
     }
 
     return cache[guid][prop].value

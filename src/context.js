@@ -45,7 +45,7 @@ export default class Context {
     this._beforeNavigateCallbacks = []
   }
 
-  update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
+  update(origUrl = this.canonicalPath(), state = false, push = true, query = false, viaPathBinding = false) {
     const url = this.resolveUrl(origUrl)
     const route = this.getRouteForUrl(url)
     const firstRun = this.route() === ''
@@ -61,7 +61,7 @@ export default class Context {
     const shouldNavigatePromise =
       samePage
         ? this.$child
-          ? this.$child.update(childPath || '/', state, false, query)
+          ? this.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
           : Promise.resolve(true)
         : this.runBeforeNavigateCallbacks()
 
@@ -149,7 +149,7 @@ export default class Context {
                 ko.tasks.schedule(() => this.config.inTransition(el, fromCtx, toCtx))
               }
               if (this.$child) {
-                this.$child.update(childPath || '/', state, false, query)
+                this.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
               }
             })
         }

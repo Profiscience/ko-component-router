@@ -341,11 +341,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function update() {
 	      var origUrl = arguments.length <= 0 || arguments[0] === undefined ? this.canonicalPath() : arguments[0];
 	      var state = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 
 	      var _this = this;
 
-	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
 	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+	      var viaPathBinding = arguments.length <= 4 || arguments[4] === undefined ? false : arguments[4];
 
 	      var url = this.resolveUrl(origUrl);
 	      var route = this.getRouteForUrl(url);
@@ -372,7 +373,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var samePage = this.pathname() === pathname;
 
-	      var shouldNavigatePromise = samePage ? this.$child ? this.$child.update(childPath || '/', state, false, query) : Promise.resolve(true) : this.runBeforeNavigateCallbacks();
+	      var shouldNavigatePromise = samePage ? this.$child ? this.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false) : Promise.resolve(true) : this.runBeforeNavigateCallbacks();
 
 	      return shouldNavigatePromise.then(function (shouldNavigate) {
 	        if (!shouldNavigate) {
@@ -450,7 +451,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	              }
 	              if (_this.$child) {
-	                _this.$child.update(childPath || '/', state, false, query);
+	                _this.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false);
 	              }
 	            });
 	          };
@@ -1203,13 +1204,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      if (defaultVal) {
 	        // clone to prevent defaultVal from being changed by reference
-	        if ((0, _utils.isArray)(defaultVal)) {
-	          cache[guid][prop].defaultVal = defaultVal.slice(0);
-	        } else if ((0, _utils.isPlainObject)(defaultVal)) {
-	          cache[guid][prop].defaultVal = (0, _utils.extend)({}, defaultVal, false);
-	        } else {
-	          cache[guid][prop].defaultVal = defaultVal;
-	        }
+	        cache[guid][prop].defaultVal = (0, _utils.clone)(defaultVal);
 	      }
 
 	      return cache[guid][prop].value;
@@ -1363,6 +1358,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	exports.cascade = cascade;
+	exports.clone = clone;
 	exports.decodeURLEncodedURIComponent = decodeURLEncodedURIComponent;
 	exports.deepEquals = deepEquals;
 	exports.extend = extend;
@@ -1406,6 +1402,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  });
+	}
+
+	function clone(obj) {
+	  if (isArray(obj)) {
+	    return obj.slice(0);
+	  } else if (isPlainObject(obj)) {
+	    return extend({}, obj, false);
+	  } else {
+	    return obj;
+	  }
 	}
 
 	function decodeURLEncodedURIComponent(val) {
@@ -2319,7 +2325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var router = _getRoute4[0];
 	    var route = _getRoute4[1];
 
-	    var handled = router.update(route, _knockout2.default.toJS(state), true, _knockout2.default.toJS(query));
+	    var handled = router.update(route, _knockout2.default.toJS(state), true, _knockout2.default.toJS(query), true);
 
 	    if (handled) {
 	      e.preventDefault();

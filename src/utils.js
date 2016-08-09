@@ -23,6 +23,16 @@ export function cascade(callbacks, ...args) {
   })
 }
 
+export function clone(obj) {
+  if (isArray(obj)) {
+    return obj.slice(0)
+  } else if (isPlainObject(obj)) {
+    return extend({}, obj, false)
+  } else {
+    return obj
+  }
+}
+
 export function decodeURLEncodedURIComponent(val) {
   if (typeof val !== 'string') { return val }
   return decodeURIComponent(val.replace(/\+/g, ' '))
