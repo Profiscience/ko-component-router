@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "3.10.4",
+  "version": "3.10.5",
   "description": "Component-based routing for KnockoutJS",
   "homepage": "https://github.com/Profiscience/ko-component-router",
   "bugs": "https://github.com/Profiscience/ko-component-router/issues",
