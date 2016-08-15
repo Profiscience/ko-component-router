@@ -70,6 +70,9 @@ class Query {
     if (defaultVal) {
       // clone to prevent defaultVal from being changed by reference
       cache[guid][prop].defaultVal = clone(defaultVal)
+      if (qsParams && qsParams[guid] && isUndefined(qsParams[guid][prop])) {
+        this.get(prop)(defaultVal)
+      }
     }
 
     return cache[guid][prop].value

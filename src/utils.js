@@ -52,7 +52,6 @@ export function deepEquals(foo, bar) {
     return foo === bar
   }
 
-
   if (foo.constructor === Object && bar.constructor === Object) {
     const fooProps = Object.keys(foo)
     const barProps = Object.keys(bar)
@@ -74,6 +73,7 @@ export function deepEquals(foo, bar) {
         return false
       }
     }
+    return true
   } else {
     return foo === bar
   }

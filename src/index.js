@@ -2,6 +2,8 @@ import ko from 'knockout'
 import router from './router'
 import './binding'
 
+ko.components.register('__KO_ROUTER_EMPTY_COMPONENT__', { template: '<span></span>' })
+
 ko.components.register('ko-component-router', {
   synchronous: true,
   viewModel: router,

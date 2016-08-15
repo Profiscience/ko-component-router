@@ -45,7 +45,28 @@ export default class Context {
     this._beforeNavigateCallbacks = []
   }
 
-  update(origUrl = this.canonicalPath(), state = false, push = true, query = false, viaPathBinding = false) {
+  update(_, __, push) {
+    if (this._queuedArgs) {
+      const [,,p] = this._queuedArgs
+      arguments[2] = p || push
+    }
+    this._queuedArgs = arguments
+
+    if (this._queuedUpdate) {
+      return this._queuedUpdate
+    }
+
+    return this._queuedUpdate = new Promise((resolve) => {
+      ko.tasks.schedule(() => {
+        this._update
+          .apply(this, this._queuedArgs)
+          .then(resolve)
+        this._queuedUpdate = false
+      })
+    })
+  }
+
+  _update(origUrl = this.canonicalPath(), state = false, push = true, query = false, viaPathBinding = false) {
     const url = this.resolveUrl(origUrl)
     const route = this.getRouteForUrl(url)
     const firstRun = this.route() === ''
@@ -70,12 +91,11 @@ export default class Context {
         return Promise.resolve(false)
       }
 
-      if (!samePage && !firstRun) {
+      if ((!samePage && !firstRun) || this.config._forceReload) {
         this.isNavigating(true)
         this.reload()
+        this._beforeNavigateCallbacks = []
       }
-
-      this._beforeNavigateCallbacks = []
 
       if (!query && querystring) {
         query = qs.parse(querystring)[this.config.depth + pathname]
@@ -125,20 +145,19 @@ export default class Context {
             .then(() => {
               if (fromCtx.route.component === toCtx.route.component) {
                 if (this.config._forceReload) {
-                  this.config._forceReload = false
                   const r = toCtx.route
+                  this.config._forceReload = false
                   toCtx.route = { component: '__KO_ROUTER_EMPTY_COMPONENT__' }
-                  ko.components.register('__KO_ROUTER_EMPTY_COMPONENT__', { template: '<span></span>' })
                   extend(this, toCtx)
                   ko.tasks.runEarly()
                   this.route(r)
-                  ko.components.unregister('__KO_ROUTER_EMPTY_COMPONENT__')
                 } else {
                   merge(this, toCtx)
                 }
               } else {
                 extend(this, toCtx)
               }
+
               if (query) {
                 this.query.update(query, pathname)
               }
