@@ -70,7 +70,7 @@
     "karma": "^1.1.0",
     "karma-coverage": "^1.0.0",
     "karma-firefox-launcher": "^1.0.0",
-    "karma-tap": "^2.0.1",
+    "karma-tap": "^2.1.2",
     "karma-webpack": "^1.7.0",
     "knockout": "^3.3.0",
     "ko-component-tester": "^3.1.0",
