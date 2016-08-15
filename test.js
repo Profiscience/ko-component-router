@@ -212,10 +212,9 @@ async function runTests(t, config) {
     router.update('/about', {}, false, { foo: 'foo', bazs: ['1', '2', '3'], quxs: ['1', '2', '3'] })
     router.query.get('foo', 'foo')
   })
+
   await step(() => {
-    router.query.setDefaults({
-      bar: 'bar'
-    })
+    router.query.setDefaults({ bar: 'bar' })
     router.query.setDefaults({ bazs: [] }, (vs) => vs.map((v) => parseInt(v)))
     router.query.get('quxs', [], (vs) => vs.map((v) => parseInt(v)))
 
@@ -224,9 +223,9 @@ async function runTests(t, config) {
     const observableQuery = router.query.getAll(true)
 
     t.equal(foo(), 'foo', 'ctx.query.get works')
-    t.deepEqual(query, { foo: 'foo', bazs: [1, 2, 3], quxs: [1, 2, 3]  }, 'ctx.query.getAll works')
+    t.deepEqual(query, { foo: 'foo', bar: 'bar', bazs: [1, 2, 3], quxs: [1, 2, 3]  }, 'ctx.query.getAll works')
     t.assert(ko.isObservable(observableQuery), 'ctx.query.getAll(true) returns as observable')
-    t.deepEqual(observableQuery(), { bazs: [1, 2, 3], foo: 'foo', quxs: [1, 2, 3] })
+    t.deepEqual(observableQuery(), { foo: 'foo', bar: 'bar', bazs: [1, 2, 3], quxs: [1, 2, 3] })
     t.equal(router.query.get('bar')(), 'bar', 'ctx.query.setDefaults works')
     t.deepEqual(router.query.get('bazs')(), [1,2,3], 'ctx.query.get parsing works')
     t.deepEqual(router.query.get('quxs')(), [1,2,3], 'ctx.query.setDefaults parsing works')
@@ -572,7 +571,6 @@ async function runTests(t, config) {
       viewModel: class {
         constructor(ctx) {
           ctx.forceReloadOnParamChange()
-
           if (ctx.params.id() === '1') {
             t.pass('meta programability with route callbacks works')
           } else if (ctx.params.id() === '2') {
@@ -583,12 +581,9 @@ async function runTests(t, config) {
     })
     router.update('/meta/1')
   })
-  await step(() => {
+  await step(() =>
     router.update('/meta/2')
-  })
-  await step(() => {
-    router.update('/about')
-  })
+  )
   await step(() => {
     ko.components.unregister('meta')
   })
