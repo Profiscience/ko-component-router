@@ -72,7 +72,7 @@ export default class Context {
     const firstRun = this.route() === ''
 
     if (!route) {
-      return this.$parent ? this.$parent.update(...arguments) : false
+      return this.$parent ? this.$parent.update(...arguments) : Promise.resolve(false)
     }
 
     const fromCtx = this.toJS()
