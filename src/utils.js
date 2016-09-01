@@ -5,9 +5,9 @@ export function cascade(callbacks, ...args) {
     if (callbacks.length === 0) {
       return resolve(true)
     }
-    const cb = callbacks.shift()
+    const [cb, ...restCallbacks] = callbacks
     const recursiveResolve = (shouldUpdate = true) => shouldUpdate
-      ? cascade(callbacks, ...args).then(resolve)
+      ? cascade(restCallbacks, ...args).then(resolve)
       : resolve(false)
 
     if (cb.length === args.length + 1) {
