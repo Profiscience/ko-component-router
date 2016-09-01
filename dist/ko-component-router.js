@@ -382,7 +382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!route) {
 	        var _$parent;
 
-	        return this.$parent ? (_$parent = this.$parent).update.apply(_$parent, arguments) : false;
+	        return this.$parent ? (_$parent = this.$parent).update.apply(_$parent, arguments) : Promise.resolve(false);
 	      }
 
 	      var fromCtx = this.toJS();
