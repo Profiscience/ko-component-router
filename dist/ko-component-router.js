@@ -1403,6 +1403,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
 	function cascade(callbacks) {
 	  for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
 	    args[_key - 1] = arguments[_key];
@@ -1412,10 +1414,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (callbacks.length === 0) {
 	      return resolve(true);
 	    }
-	    var cb = callbacks.shift();
+
+	    var _callbacks = _toArray(callbacks);
+
+	    var cb = _callbacks[0];
+
+	    var restCallbacks = _callbacks.slice(1);
+
 	    var recursiveResolve = function recursiveResolve() {
 	      var shouldUpdate = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
-	      return shouldUpdate ? cascade.apply(undefined, [callbacks].concat(args)).then(resolve) : resolve(false);
+	      return shouldUpdate ? cascade.apply(undefined, [restCallbacks].concat(args)).then(resolve) : resolve(false);
 	    };
 
 	    if (cb.length === args.length + 1) {
