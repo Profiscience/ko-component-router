@@ -21,7 +21,7 @@ import './src'
 ko.options.deferUpdates = true
 
 test('ko-component-router', async (t) => { // eslint-disable-line
-  const NUM_TESTS_PER_SUITE = 72
+  const NUM_TESTS_PER_SUITE = 76
   const NUM_CONFIGS = 4
   const NUM_TESTS = NUM_TESTS_PER_SUITE * NUM_CONFIGS + 4
   t.plan(NUM_TESTS)
@@ -95,6 +95,13 @@ async function runTests(t, config) {
               }, 200)
             }),
             'route-pipeline'
+          ],
+
+          '/route-pipeline-twice': [
+            (ctx) => {
+              ctx.state.stateUpdated = true
+            },
+            'route-pipeline-twice'
           ],
 
           '/meta/:id': [(ctx) => ctx.route.component = 'meta'],
@@ -562,6 +569,38 @@ async function runTests(t, config) {
   })
   await step(() => {
     ko.components.unregister('route-pipeline')
+  })
+
+  // route pipeline twice
+  await step((done) => {
+    let callNum = 0
+    ko.components.register('route-pipeline-twice', {
+      template: '<div></div>',
+      viewModel: class {
+        constructor(ctx) {
+          t.equal(ctx.state().stateUpdated, true, `Callback updates state on each dispatch (dispatch # ${++callNum})`)
+        }
+      }
+    })
+    router.update('/route-pipeline-twice', { stateUpdated: false }, false)
+    const killMe = router.route.subscribe(() => {
+      killMe.dispose()
+      t.equal(router.route().component, 'route-pipeline-twice')
+      router.update('/about')
+      done()
+    })
+  })
+  await step((done) => {
+    router.update('/route-pipeline-twice', { stateUpdated: false }, false)
+    const killMe = router.route.subscribe(() => {
+      killMe.dispose()
+      t.equal(router.route().component, 'route-pipeline-twice')
+      router.update('/about')
+      done()
+    })
+  })
+  await step(() => {
+    ko.components.unregister('route-pipeline-twice')
   })
 
   // route pipeline meta programability
