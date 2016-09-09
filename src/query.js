@@ -1,6 +1,6 @@
 import ko from 'knockout'
 import qs from 'qs'
-import { clone, deepEquals, identity, isUndefined, mapKeys, merge } from './utils'
+import { clone, deepEquals, identity, isUndefined, mapKeys, merge, normalizePath } from './utils'
 
 const qsParams = {}
 const trigger = ko.observable(true)
@@ -26,7 +26,7 @@ class Query {
   get(prop, defaultVal, parser = identity) {
     const query = this
     const ctx = this.ctx
-    const guid = this.ctx.config.depth + ctx.pathname()
+    const guid = normalizePath(ctx.config.depth + ctx.pathname())
 
     if (!cache[guid]) {
       cache[guid] = {}
@@ -79,7 +79,7 @@ class Query {
   }
 
   getAll(asObservable = false, pathname = this.ctx.pathname()) {
-    const guid = this.ctx.config.depth + pathname
+    const guid = normalizePath(this.ctx.config.depth + pathname)
     return asObservable
       ? ko.pureComputed({
           read() {
@@ -110,14 +110,14 @@ class Query {
     if (typeof pathname !== 'string') {
       pathname = this.ctx.pathname()
     }
-    const guid = this.ctx.config.depth + pathname
+    const guid = normalizePath(this.ctx.config.depth + pathname)
     for (const pn in cache[guid]) {
       const p = cache[guid][pn]
       this.get(pn)(p.defaultVal)
     }
   }
 
-  reload(force = false, guid = this.ctx.config.depth + this.ctx.pathname()) {
+  reload(force = false, guid = normalizePath(this.ctx.config.depth + this.ctx.pathname())) {
     if (!this.ctx.config.persistQuery || force) {
       for (const p in qsParams[guid]) {
         if (cache[guid] && cache[guid][p]) {
@@ -139,7 +139,7 @@ class Query {
   }
 
   update(query = {}, pathname = this.ctx.pathname()) {
-    const guid = this.ctx.config.depth + pathname
+    const guid = normalizePath(this.ctx.config.depth + pathname)
 
     if (deepEquals(qsParams[guid], query)) {
       return
@@ -151,7 +151,7 @@ class Query {
 
   updateFromString(str, pathname) {
     if (pathname) {
-      const guid = this.ctx.config.depth + pathname
+      const guid = normalizePath(this.ctx.config.depth + pathname)
       merge(qsParams, { [guid]: qs.parse(str)[guid] }, false)
     } else {
       merge(qsParams, qs.parse(str), false)
@@ -164,7 +164,7 @@ class Query {
     const workingParams = qsParams
 
     if (query) {
-      merge(workingParams, { [this.ctx.config.depth + pathname]: query }, false)
+      merge(workingParams, { [normalizePath(this.ctx.config.depth + pathname)]: query }, false)
     }
 
     for (const id in workingParams) {

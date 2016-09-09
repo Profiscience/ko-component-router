@@ -1,7 +1,7 @@
 import ko from 'knockout'
 import Context from './context'
 import Route from './route'
-import { isUndefined } from './utils'
+import { isUndefined, normalizePath } from './utils'
 
 const clickEvent = (!isUndefined(document)) && document.ontouchstart
   ? 'touchstart'
@@ -72,7 +72,7 @@ class Router {
     }
 
     const path = location.pathname + location.search + location.hash
-    const state = (e.state || {})[this.ctx.config.depth + this.ctx.pathname()]
+    const state = (e.state || {})[normalizePath(this.ctx.config.depth + this.ctx.pathname())]
 
     if (this.dispatch({ path, state })) {
       e.preventDefault()

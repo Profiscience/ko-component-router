@@ -1,24 +1,25 @@
 import ko from 'knockout'
-import { deepEquals } from './utils'
+import { deepEquals, normalizePath } from './utils'
 
 export function factory(ctx) {
   const trigger = ko.observable(false)
 
   const state = ko.pureComputed({
     read() {
+      const guid = normalizePath(ctx.config.depth + ctx.pathname())
       trigger()
-      return history.state ? history.state[ctx.config.depth + ctx.pathname()] : {}
+      return history.state ? history.state[guid] : {}
     },
     write(v) {
       if (v) {
         const s = history.state || {}
-        const key = ctx.config.depth + ctx.pathname()
+        const guid = normalizePath(ctx.config.depth + ctx.pathname())
 
-        if (!deepEquals(v, history.state ? history.state[ctx.config.depth + ctx.pathname()] : {})) {
-          if (s[key]) {
-            delete s[key]
+        if (!deepEquals(v, history.state ? history.state[guid] : {})) {
+          if (s[guid]) {
+            delete s[guid]
           }
-          s[key] = v
+          s[guid] = v
           history.replaceState(s, document.title)
           trigger(!trigger())
         }
@@ -28,7 +29,7 @@ export function factory(ctx) {
 
   const _dispose = state.dispose
 
-  state.reload = function(force = false, guid = ctx.config.depth + ctx.pathname()) {
+  state.reload = function(force = false, guid = normalizePath(ctx.config.depth + ctx.pathname())) {
     if (!ctx.config.persistState || force) {
       if (history.state && history.state[guid]) {
         const newState = history.state

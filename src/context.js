@@ -2,7 +2,7 @@ import ko from 'knockout'
 import qs from 'qs'
 import { factory as queryFactory } from './query'
 import { factory as stateFactory } from './state'
-import { cascade, deepEquals, extend, merge } from './utils'
+import { cascade, deepEquals, extend, merge, normalizePath } from './utils'
 
 export default class Context {
   constructor(bindingCtx, config) {
@@ -98,7 +98,7 @@ export default class Context {
       }
 
       if (!query && querystring) {
-        query = qs.parse(querystring)[this.config.depth + pathname]
+        query = qs.parse(querystring)[normalizePath(this.config.depth + pathname)]
       }
 
       const canonicalPath = Context
