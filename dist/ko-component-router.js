@@ -193,7 +193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      var path = location.pathname + location.search + location.hash;
-	      var state = (e.state || {})[this.ctx.config.depth + this.ctx.pathname()];
+	      var state = (e.state || {})[(0, _utils.normalizePath)(this.ctx.config.depth + this.ctx.pathname())];
 
 	      if (this.dispatch({ path: path, state: state })) {
 	        e.preventDefault();
@@ -414,7 +414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (!query && querystring) {
-	          query = _qs2.default.parse(querystring)[_this2.config.depth + pathname];
+	          query = _qs2.default.parse(querystring)[(0, _utils.normalizePath)(_this2.config.depth + pathname)];
 	        }
 
 	        var canonicalPath = Context.getCanonicalPath(_this2.getBase().replace(/\/$/, ''), pathname, childPath, _this2.query.getFullQueryString(query, pathname), hash);
@@ -1183,7 +1183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var query = this;
 	      var ctx = this.ctx;
-	      var guid = this.ctx.config.depth + ctx.pathname();
+	      var guid = (0, _utils.normalizePath)(ctx.config.depth + ctx.pathname());
 
 	      if (!cache[guid]) {
 	        cache[guid] = {};
@@ -1242,7 +1242,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var asObservable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
 
-	      var guid = this.ctx.config.depth + pathname;
+	      var guid = (0, _utils.normalizePath)(this.ctx.config.depth + pathname);
 	      return asObservable ? _knockout2.default.pureComputed({
 	        read: function read() {
 	          trigger();
@@ -1272,7 +1272,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (typeof pathname !== 'string') {
 	        pathname = this.ctx.pathname();
 	      }
-	      var guid = this.ctx.config.depth + pathname;
+	      var guid = (0, _utils.normalizePath)(this.ctx.config.depth + pathname);
 	      for (var pn in cache[guid]) {
 	        var p = cache[guid][pn];
 	        this.get(pn)(p.defaultVal);
@@ -1282,7 +1282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'reload',
 	    value: function reload() {
 	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-	      var guid = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.config.depth + this.ctx.pathname() : arguments[1];
+	      var guid = arguments.length <= 1 || arguments[1] === undefined ? (0, _utils.normalizePath)(this.ctx.config.depth + this.ctx.pathname()) : arguments[1];
 
 	      if (!this.ctx.config.persistQuery || force) {
 	        for (var p in qsParams[guid]) {
@@ -1310,7 +1310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
 
-	      var guid = this.ctx.config.depth + pathname;
+	      var guid = (0, _utils.normalizePath)(this.ctx.config.depth + pathname);
 
 	      if ((0, _utils.deepEquals)(qsParams[guid], query)) {
 	        return;
@@ -1323,7 +1323,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'updateFromString',
 	    value: function updateFromString(str, pathname) {
 	      if (pathname) {
-	        var guid = this.ctx.config.depth + pathname;
+	        var guid = (0, _utils.normalizePath)(this.ctx.config.depth + pathname);
 	        (0, _utils.merge)(qsParams, _defineProperty({}, guid, _qs2.default.parse(str)[guid]), false);
 	      } else {
 	        (0, _utils.merge)(qsParams, _qs2.default.parse(str), false);
@@ -1337,7 +1337,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var workingParams = qsParams;
 
 	      if (query) {
-	        (0, _utils.merge)(workingParams, _defineProperty({}, this.ctx.config.depth + pathname, query), false);
+	        (0, _utils.merge)(workingParams, _defineProperty({}, (0, _utils.normalizePath)(this.ctx.config.depth + pathname), query), false);
 	      }
 
 	      for (var id in workingParams) {
@@ -1396,6 +1396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isArray = isArray;
 	exports.mapKeys = mapKeys;
 	exports.merge = merge;
+	exports.normalizePath = normalizePath;
 
 	var _knockout = __webpack_require__(1);
 
@@ -1627,6 +1628,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  extend(dest, src, createAsObservable, false);
 	}
 
+	function normalizePath(path) {
+	  if (path.length === 0) {
+	    return '/';
+	  }
+	  if (path[0] !== '/') {
+	    path = ''.concat('/', path);
+	  }
+	  if (path[path.length - 1] === '/') {
+	    path = path.substr(0, path.length - 1);
+	  }
+	  return path;
+	}
+
 	function fromJS(obj, parentIsArray) {
 	  var obs = void 0;
 
@@ -1675,19 +1689,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var state = _knockout2.default.pureComputed({
 	    read: function read() {
+	      var guid = (0, _utils.normalizePath)(ctx.config.depth + ctx.pathname());
 	      trigger();
-	      return history.state ? history.state[ctx.config.depth + ctx.pathname()] : {};
+	      return history.state ? history.state[guid] : {};
 	    },
 	    write: function write(v) {
 	      if (v) {
 	        var s = history.state || {};
-	        var key = ctx.config.depth + ctx.pathname();
+	        var guid = (0, _utils.normalizePath)(ctx.config.depth + ctx.pathname());
 
-	        if (!(0, _utils.deepEquals)(v, history.state ? history.state[ctx.config.depth + ctx.pathname()] : {})) {
-	          if (s[key]) {
-	            delete s[key];
+	        if (!(0, _utils.deepEquals)(v, history.state ? history.state[guid] : {})) {
+	          if (s[guid]) {
+	            delete s[guid];
 	          }
-	          s[key] = v;
+	          s[guid] = v;
 	          history.replaceState(s, document.title);
 	          trigger(!trigger());
 	        }
@@ -1699,7 +1714,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  state.reload = function () {
 	    var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-	    var guid = arguments.length <= 1 || arguments[1] === undefined ? ctx.config.depth + ctx.pathname() : arguments[1];
+	    var guid = arguments.length <= 1 || arguments[1] === undefined ? (0, _utils.normalizePath)(ctx.config.depth + ctx.pathname()) : arguments[1];
 
 	    if (!ctx.config.persistState || force) {
 	      if (history.state && history.state[guid]) {

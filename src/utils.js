@@ -136,6 +136,20 @@ export function merge(dest, src, createAsObservable = true) {
   extend(dest, src, createAsObservable, false)
 }
 
+export function normalizePath(path) {
+  if (path.length === 0) {
+    return '/'
+  }
+  if (path[0] !== '/') {
+    path = ''.concat('/', path)
+  }
+  if (path[path.length - 1] === '/') {
+    path = path.substr(0, path.length - 1)
+  }
+  return path
+}
+
+
 function fromJS(obj, parentIsArray) {
   let obs
 
