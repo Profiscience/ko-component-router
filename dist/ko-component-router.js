@@ -344,11 +344,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var _this = this;
 
 	      if (this._queuedArgs) {
-	        var _queuedArgs = _slicedToArray(this._queuedArgs, 3);
-
-	        var p = _queuedArgs[2];
-
-	        arguments[2] = p || push;
+	        arguments[2] = this._queuedArgs[2] || push;
 	      }
 	      this._queuedArgs = arguments;
 

@@ -47,8 +47,7 @@ export default class Context {
 
   update(_, __, push) {
     if (this._queuedArgs) {
-      const [,,p] = this._queuedArgs
-      arguments[2] = p || push
+      arguments[2] = this._queuedArgs[2] || push
     }
     this._queuedArgs = arguments
 
