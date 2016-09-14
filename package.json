@@ -7,10 +7,10 @@
   "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "npm run build:lib && npm run build:dist",
+    "build": "npm run build:lib & npm run build:dist; wait",
     "build:lib": "babel src -d lib",
     "build:dist": "webpack",
-    "watch": "babel src -wd lib && webpack --watch",
+    "watch": "babel src -wd lib & webpack --watch",
     "lint": "eslint --max-warnings=0 *.js",
     "format": "eslint --fix --max-warnings=0 *.js",
     "stage": "git add dist example/dist lib",
