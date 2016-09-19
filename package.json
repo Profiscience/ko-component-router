@@ -7,7 +7,7 @@
   "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "npm run build:lib & npm run build:dist; wait",
+    "build": "npm run build:lib & npm run build:dist",
     "build:lib": "babel src -d lib",
     "build:dist": "webpack",
     "watch": "babel src -wd lib & webpack --watch",
@@ -16,6 +16,8 @@
     "stage": "git add dist example/dist lib",
     "test": "karma start",
     "test:watch": "karma start karma.watch.js",
+    "test-IE": "karma start --browsers IE",
+    "test-IE:watch": "karma start --browsers IE karma.watch.js",
     "example:build": "webpack -p --config webpack.config.example.js",
     "example:watch": "webpack --watch --config webpack.config.example.js",
     "example:serve": "webpack-dev-server --config webpack.config.example.js"
@@ -70,6 +72,7 @@
     "karma": "^1.1.0",
     "karma-coverage": "^1.0.0",
     "karma-firefox-launcher": "^1.0.0",
+    "karma-ie-launcher": "^1.0.0",
     "karma-tap": "^2.1.2",
     "karma-webpack": "^1.7.0",
     "knockout": "^3.3.0",

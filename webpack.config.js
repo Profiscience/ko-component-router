@@ -7,7 +7,8 @@ module.exports = [
   makeConfig({ minify: true })
 ]
 
-function makeConfig({ minify } = {}) {
+function makeConfig(o) {
+  const minify = o ? o.minify : false
   return {
     entry: './src/index.js',
 
