@@ -7,10 +7,10 @@
   "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "concurrently --kill-others -p name --names 'dist,lib' 'npm run build:dist' 'npm run build:lib'",
+    "build": "concurrently --kill-others -p name --names \"dist,lib\" \"npm run build:dist\" \"npm run build:lib\"",
     "build:dist": "webpack",
     "build:lib": "babel src -d lib",
-    "watch": "concurrently --kill-others -p name --names 'dist,lib' 'npm run watch:dist' 'npm run watch:lib'",
+    "watch": "concurrently --kill-others -p name --names \"dist,lib\" \"npm run watch:dist\" \"npm run watch:lib\"",
     "watch:dist": "webpack --watch",
     "watch:lib": "babel src -wd lib",
     "lint": "eslint --max-warnings=0 *.js",
