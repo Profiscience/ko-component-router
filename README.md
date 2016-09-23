@@ -63,12 +63,4 @@ ko.applyBindings()
 </body>
 ```
 
-#### NPM Global Requirements
-Install these packages globally to use them  
-E.G. `npm install -g {package}`
-* babel
-* eslint
-* karma
-* webpack
-
 _Requires Promise polyfill for IE support. [babel-polyfill](https://babeljs.io/docs/usage/polyfill/), [es6-promise](https://github.com/stefanpenner/es6-promise), etc._
