@@ -183,7 +183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        path = path.substr(ctx.config.base.length) || '/';
 	      }
 
-	      return ctx.update(path, state, pushState, false);
+	      return ctx._update(path, state, pushState, false);
 	    }
 	  }, {
 	    key: 'onpopstate',
