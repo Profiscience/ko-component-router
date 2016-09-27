@@ -61,7 +61,7 @@
     "concurrently": "^3.0.0",
     "coveralls": "^2.11.9",
     "css-loader": "^0.25.0",
-    "es6-promise": "^3.0.2",
+    "es6-promise": "^4.0.2",
     "escape-html": "^1.0.3",
     "eslint": "^3.0.1",
     "eslint-config-profiscience": "^1.0.1",
