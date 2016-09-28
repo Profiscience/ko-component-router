@@ -152,9 +152,9 @@ class Query {
   updateFromString(str, pathname) {
     if (pathname) {
       const guid = normalizePath(this.ctx.config.depth + pathname)
-      merge(qsParams, { [guid]: qs.parse(str)[guid] }, false)
+      merge(qsParams, { [guid]: this.parse(str)[guid] }, false)
     } else {
-      merge(qsParams, qs.parse(str), false)
+      merge(qsParams, this.parse(str), false)
     }
     trigger(!trigger())
   }
@@ -187,7 +187,17 @@ class Query {
   }
 
   getFullQueryString(query, pathname) {
-    return qs.stringify(this.getNonDefaultParams(query, pathname))
+    return this.stringify(this.getNonDefaultParams(query, pathname))
+  }
+
+  parse(str) {
+    const parser = this.ctx.config.queryParser || qs.parse
+    return parser(str)
+  }
+
+  stringify(query) {
+    const stringifier = this.ctx.config.queryStringifier || qs.stringify
+    return stringifier(query)
   }
 }
 
