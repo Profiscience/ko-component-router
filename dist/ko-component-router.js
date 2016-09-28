@@ -1690,6 +1690,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return history.state ? history.state[guid] : {};
 	    },
 	    write: function write(v) {
+	      v = _knockout2.default.toJS(v);
 	      if (v) {
 	        var s = history.state || {};
 	        var guid = (0, _utils.normalizePath)(ctx.config.depth + ctx.pathname());
