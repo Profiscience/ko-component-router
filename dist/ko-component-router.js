@@ -362,14 +362,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: '_update',
 	    value: function _update() {
-	      var origUrl = arguments.length <= 0 || arguments[0] === undefined ? this.canonicalPath() : arguments[0];
-	      var state = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-	      var push = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+	      var origUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.canonicalPath();
+	      var state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+	      var push = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
 	      var _this2 = this;
 
-	      var query = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
-	      var viaPathBinding = arguments.length <= 4 || arguments[4] === undefined ? false : arguments[4];
+	      var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	      var viaPathBinding = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 
 	      var url = this.resolveUrl(origUrl);
 	      var route = this.getRouteForUrl(url);
@@ -596,9 +596,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }], [{
 	    key: 'getCanonicalPath',
 	    value: function getCanonicalPath(base, pathname) {
-	      var childPath = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+	      var childPath = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 	      var querystring = arguments[3];
-	      var hash = arguments.length <= 4 || arguments[4] === undefined ? '' : arguments[4];
+	      var hash = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : '';
 
 	      return '' + base + pathname + childPath + (querystring ? '?' + querystring : '') + (hash ? '#' + hash : '');
 	    }
@@ -1175,7 +1175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Query, [{
 	    key: 'get',
 	    value: function get(prop, defaultVal) {
-	      var parser = arguments.length <= 2 || arguments[2] === undefined ? _utils.identity : arguments[2];
+	      var parser = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _utils.identity;
 
 	      var query = this;
 	      var ctx = this.ctx;
@@ -1235,8 +1235,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getAll',
 	    value: function getAll() {
-	      var asObservable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
+	      var asObservable = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	      var pathname = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.ctx.pathname();
 
 	      var guid = (0, _utils.normalizePath)(this.ctx.config.depth + pathname);
 	      return asObservable ? _knockout2.default.pureComputed({
@@ -1256,7 +1256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'setDefaults',
 	    value: function setDefaults(q) {
-	      var parser = arguments.length <= 1 || arguments[1] === undefined ? _utils.identity : arguments[1];
+	      var parser = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _utils.identity;
 
 	      for (var pn in q) {
 	        this.get(pn, q[pn], parser);
@@ -1277,8 +1277,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'reload',
 	    value: function reload() {
-	      var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-	      var guid = arguments.length <= 1 || arguments[1] === undefined ? (0, _utils.normalizePath)(this.ctx.config.depth + this.ctx.pathname()) : arguments[1];
+	      var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	      var guid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : (0, _utils.normalizePath)(this.ctx.config.depth + this.ctx.pathname());
 
 	      if (!this.ctx.config.persistQuery || force) {
 	        for (var p in qsParams[guid]) {
@@ -1303,8 +1303,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'update',
 	    value: function update() {
-	      var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	      var pathname = arguments.length <= 1 || arguments[1] === undefined ? this.ctx.pathname() : arguments[1];
+	      var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	      var pathname = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.ctx.pathname();
 
 	      var guid = (0, _utils.normalizePath)(this.ctx.config.depth + pathname);
 
@@ -1378,7 +1378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	exports.cascade = cascade;
 	exports.clone = clone;
@@ -1419,7 +1419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var restCallbacks = _callbacks.slice(1);
 
 	    var recursiveResolve = function recursiveResolve() {
-	      var shouldUpdate = arguments.length <= 0 || arguments[0] === undefined ? true : arguments[0];
+	      var shouldUpdate = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 	      return shouldUpdate ? cascade.apply(undefined, [restCallbacks].concat(args)).then(resolve) : resolve(false);
 	    };
 
@@ -1539,9 +1539,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function extend(dest, src) {
-	  var createAsObservable = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+	  var createAsObservable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
-	  var _shallow = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+	  var _shallow = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 
 	  var props = Object.keys(src);
 
@@ -1619,7 +1619,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function merge(dest, src) {
-	  var createAsObservable = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+	  var createAsObservable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
 	  extend(dest, src, createAsObservable, false);
 	}
@@ -1710,8 +1710,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _dispose = state.dispose;
 
 	  state.reload = function () {
-	    var force = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
-	    var guid = arguments.length <= 1 || arguments[1] === undefined ? (0, _utils.normalizePath)(ctx.config.depth + ctx.pathname()) : arguments[1];
+	    var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	    var guid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : (0, _utils.normalizePath)(ctx.config.depth + ctx.pathname());
 
 	    if (!ctx.config.persistState || force) {
 	      if (history.state && history.state[guid]) {
