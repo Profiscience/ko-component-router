@@ -11,6 +11,7 @@ export function factory(ctx) {
       return history.state ? history.state[guid] : {}
     },
     write(v) {
+      v = ko.toJS(v)
       if (v) {
         const s = history.state || {}
         const guid = normalizePath(ctx.config.depth + ctx.pathname())
