@@ -155,6 +155,31 @@ ${escape(`<!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/
       </section>
 
       <section>
+        <h2 id="queryStringifier">
+          queryStringifier
+          <small class="text-muted">(query) => urlEncodedQuery</small>
+        </h2>
+        <p>
+          function that recieves a JS object as the first parameter and returns
+          a url-safe encoded querystring. Defaults to <a href="https://www.npmjs.com/package/qs">qs.parse</a>.
+        </p>
+        <p>
+          may be used to implement an alternative query encoding, such as
+          <a href="https://github.com/Sage/jsurl">jsurl</a> or <a href="https://github.com/scrollback/juri">juri</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2 id="queryParser">
+          queryParser
+          <small class="text-muted">(urlEncodedQuery) => query</small>
+        </h2>
+        <p>
+          inverse of queryStringifier
+        </p>
+      </section>
+
+      <section>
         <h2 id="inTransition">
           inTransition
           <small class="text-muted">(el, fromCtx, toCtx) => {}</small>

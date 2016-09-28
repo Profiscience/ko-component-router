@@ -1320,9 +1320,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function updateFromString(str, pathname) {
 	      if (pathname) {
 	        var guid = (0, _utils.normalizePath)(this.ctx.config.depth + pathname);
-	        (0, _utils.merge)(qsParams, _defineProperty({}, guid, _qs2.default.parse(str)[guid]), false);
+	        (0, _utils.merge)(qsParams, _defineProperty({}, guid, this.parse(str)[guid]), false);
 	      } else {
-	        (0, _utils.merge)(qsParams, _qs2.default.parse(str), false);
+	        (0, _utils.merge)(qsParams, this.parse(str), false);
 	      }
 	      trigger(!trigger());
 	    }
@@ -1357,7 +1357,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'getFullQueryString',
 	    value: function getFullQueryString(query, pathname) {
-	      return _qs2.default.stringify(this.getNonDefaultParams(query, pathname));
+	      return this.stringify(this.getNonDefaultParams(query, pathname));
+	    }
+	  }, {
+	    key: 'parse',
+	    value: function parse(str) {
+	      var parser = this.ctx.config.queryParser || _qs2.default.parse;
+	      return parser(str);
+	    }
+	  }, {
+	    key: 'stringify',
+	    value: function stringify(query) {
+	      var stringifier = this.ctx.config.queryStringifier || _qs2.default.stringify;
+	      return stringifier(query);
 	    }
 	  }]);
 
