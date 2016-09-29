@@ -81,7 +81,7 @@ export default class Context {
     const shouldNavigatePromise =
       samePage
         ? this.$child
-          ? this.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
+          ? this.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
           : Promise.resolve(true)
         : this.runBeforeNavigateCallbacks()
 
@@ -167,7 +167,7 @@ export default class Context {
                 ko.tasks.schedule(() => this.config.inTransition(el, fromCtx, toCtx))
               }
               if (this.$child) {
-                this.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
+                this.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
               }
             })
         }

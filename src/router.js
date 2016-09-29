@@ -39,13 +39,17 @@ class Router {
 
     this.ctx = new Context(bindingCtx, this.config)
 
-    this.onpopstate = this.onpopstate.bind(this)
+    const isRoot = isUndefined(this.ctx.$parent)
+
     this.onclick = this.onclick.bind(this)
-    window.addEventListener('popstate', this.onpopstate, false)
+    this.onpopstate = this.onpopstate.bind(this)
     document.addEventListener(clickEvent, this.onclick, false)
+    if (isRoot) {
+      window.addEventListener('popstate', this.onpopstate, false)
+    }
 
     let dispatch = true
-    if (this.ctx.$parent) {
+    if (!isRoot) {
       dispatch = this.ctx.$parent.path() !== this.ctx.$parent.canonicalPath()
     }
 
@@ -54,21 +58,8 @@ class Router {
         ? location.hash.substr(2) + location.search
         : location.pathname + location.search + location.hash
 
-      this.dispatch({ path })
+      this.ctx._update(path, undefined, false)
     }
-  }
-
-  dispatch({ path, state, pushState = false }) {
-    let ctx = this.ctx
-    while (ctx.$child) {
-      ctx = ctx.$child
-    }
-
-    if (path.toLowerCase().indexOf(ctx.config.base.toLowerCase()) === 0) {
-      path = path.substr(ctx.config.base.length) || '/'
-    }
-
-    return ctx._update(path, state, pushState, false)
   }
 
   onpopstate(e) {
@@ -79,7 +70,7 @@ class Router {
     const path = location.pathname + location.search + location.hash
     const state = (e.state || {})[normalizePath(this.ctx.config.depth + this.ctx.pathname())]
 
-    if (this.dispatch({ path, state })) {
+    if (this.ctx._update(path, state, false)) {
       e.preventDefault()
     }
   }
@@ -116,7 +107,7 @@ class Router {
 
     const path = el.pathname + el.search + (el.hash || '')
 
-    if (this.dispatch({ path, pushState: true })) {
+    if (this.ctx._update(path)) {
       e.preventDefault()
     }
   }

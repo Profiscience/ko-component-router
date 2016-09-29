@@ -159,43 +159,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    this.ctx = new _context2.default(bindingCtx, this.config);
 
-	    this.onpopstate = this.onpopstate.bind(this);
+	    var isRoot = (0, _utils.isUndefined)(this.ctx.$parent);
+
 	    this.onclick = this.onclick.bind(this);
-	    window.addEventListener('popstate', this.onpopstate, false);
+	    this.onpopstate = this.onpopstate.bind(this);
 	    document.addEventListener(clickEvent, this.onclick, false);
+	    if (isRoot) {
+	      window.addEventListener('popstate', this.onpopstate, false);
+	    }
 
 	    var dispatch = true;
-	    if (this.ctx.$parent) {
+	    if (!isRoot) {
 	      dispatch = this.ctx.$parent.path() !== this.ctx.$parent.canonicalPath();
 	    }
 
 	    if (dispatch) {
 	      var path = this.config.hashbang && ~location.hash.indexOf('#!') ? location.hash.substr(2) + location.search : location.pathname + location.search + location.hash;
 
-	      this.dispatch({ path: path });
+	      this.ctx._update(path, undefined, false);
 	    }
 	  }
 
 	  _createClass(Router, [{
-	    key: 'dispatch',
-	    value: function dispatch(_ref2) {
-	      var path = _ref2.path;
-	      var state = _ref2.state;
-	      var _ref2$pushState = _ref2.pushState;
-	      var pushState = _ref2$pushState === undefined ? false : _ref2$pushState;
-
-	      var ctx = this.ctx;
-	      while (ctx.$child) {
-	        ctx = ctx.$child;
-	      }
-
-	      if (path.toLowerCase().indexOf(ctx.config.base.toLowerCase()) === 0) {
-	        path = path.substr(ctx.config.base.length) || '/';
-	      }
-
-	      return ctx._update(path, state, pushState, false);
-	    }
-	  }, {
 	    key: 'onpopstate',
 	    value: function onpopstate(e) {
 	      if (e.defaultPrevented) {
@@ -205,7 +190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var path = location.pathname + location.search + location.hash;
 	      var state = (e.state || {})[(0, _utils.normalizePath)(this.ctx.config.depth + this.ctx.pathname())];
 
-	      if (this.dispatch({ path: path, state: state })) {
+	      if (this.ctx._update(path, state, false)) {
 	        e.preventDefault();
 	      }
 	    }
@@ -236,7 +221,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var path = el.pathname + el.search + (el.hash || '');
 
-	      if (this.dispatch({ path: path, pushState: true })) {
+	      if (this.ctx._update(path)) {
 	        e.preventDefault();
 	      }
 	    }
@@ -906,7 +891,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var samePage = this.pathname() === pathname;
 
-	      var shouldNavigatePromise = samePage ? this.$child ? this.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false) : Promise.resolve(true) : this.runBeforeNavigateCallbacks();
+	      var shouldNavigatePromise = samePage ? this.$child ? this.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false) : Promise.resolve(true) : this.runBeforeNavigateCallbacks();
 
 	      return shouldNavigatePromise.then(function (shouldNavigate) {
 	        if (!shouldNavigate) {
@@ -982,7 +967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	              }
 	              if (_this2.$child) {
-	                _this2.$child.update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false);
+	                _this2.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false);
 	              }
 	            });
 	          };
@@ -2392,7 +2377,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var router = _getRoute4[0];
 	    var route = _getRoute4[1];
 
-	    var handled = router.update(route, _knockout2.default.toJS(state), true, _knockout2.default.toJS(query), true);
+	    var handled = router._update(route, _knockout2.default.toJS(state), true, _knockout2.default.toJS(query), true);
 
 	    if (handled) {
 	      e.preventDefault();
