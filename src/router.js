@@ -1,4 +1,5 @@
 import ko from 'knockout'
+import qs from 'qs'
 import Context from './context'
 import Route from './route'
 import { isUndefined, normalizePath } from './utils'
@@ -15,7 +16,9 @@ class Router {
     inTransition = noop,
     outTransition = noop,
     persistState = false,
-    persistQuery = false
+    persistQuery = false,
+    queryParser = qs.parse,
+    queryStringifier = qs.stringify
   }) {
     for (const route in routes) {
       routes[route] = new Route(route, routes[route])
@@ -29,7 +32,9 @@ class Router {
       inTransition,
       outTransition,
       persistState,
-      persistQuery
+      persistQuery,
+      queryParser,
+      queryStringifier
     }
 
     this.ctx = new Context(bindingCtx, this.config)

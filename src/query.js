@@ -1,5 +1,4 @@
 import ko from 'knockout'
-import qs from 'qs'
 import { clone, deepEquals, identity, isUndefined, mapKeys, merge, normalizePath } from './utils'
 
 const qsParams = {}
@@ -191,12 +190,12 @@ class Query {
   }
 
   parse(str) {
-    const parser = this.ctx.config.queryParser || qs.parse
+    const parser = ko.router.config.queryParser
     return parser(str)
   }
 
   stringify(query) {
-    const stringifier = this.ctx.config.queryStringifier || qs.stringify
+    const stringifier = ko.router.config.queryStringifier
     return stringifier(query)
   }
 }

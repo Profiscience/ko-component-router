@@ -70,6 +70,7 @@
     "html5-history-api": "^4.2.5",
     "isparta-loader": "^2.0.0",
     "jquery": "^3.0.0",
+    "juri": "^1.0.3",
     "karma": "^1.1.0",
     "karma-coverage": "^1.0.0",
     "karma-firefox-launcher": "^1.0.0",

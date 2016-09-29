@@ -1,5 +1,6 @@
 import history from 'html5-history-api'
 import promise from 'es6-promise'
+import juri from 'juri'
 import raf from 'raf'
 if (history.emulate) {
   history.redirect('!/', '')
@@ -27,6 +28,9 @@ class App {
 
     this.inTransition = inTransition
     this.outTransition = outTransition
+
+    this.queryParser = juri().decodeQString
+    this.queryStringifier = juri().encodeQString
 
     this.routes = {
       '/': 'getting-started',
@@ -137,7 +141,9 @@ ko.components.register('app', {
             base: base,
             hashbang: hashbang,
             inTransition: inTransition,
-            outTransition: outTransition">
+            outTransition: outTransition,
+            queryParser: queryParser,
+            queryStringifier: queryStringifier">
           </ko-component-router>
         </div>
       </div>

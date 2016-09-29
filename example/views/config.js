@@ -164,8 +164,17 @@ ${escape(`<!--[if lte IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/
           a url-safe encoded querystring. Defaults to <a href="https://www.npmjs.com/package/qs">qs.parse</a>.
         </p>
         <p>
+          note, this option can only be defined at the top-level router
+        </p>
+        <p>
           may be used to implement an alternative query encoding, such as
           <a href="https://github.com/Sage/jsurl">jsurl</a> or <a href="https://github.com/scrollback/juri">juri</a>.
+        </p>
+        <p>
+          <em>
+            this demo uses juri, check the source and see it in action on the
+            <a data-bind="path: '/nested-routing/foo'">nested routing</a> page.
+          </em>
         </p>
       </section>
 
