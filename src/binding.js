@@ -65,11 +65,7 @@ function applyBinding(el, bindings, ctx) {
     bindingsToApply.css = {
       'active-path': ko.pureComputed(() => {
         const [router, route] = getRoute(ctx, path)
-        return !router.isNavigating() &&
-                router.route() !== '' &&
-                router.route() !== '*' &&
-                router.route() !== '/*' &&
-                route
+        return !router.isNavigating() && router.route() !== '' && route
           ? router.route().matches(route)
           : false
         })
