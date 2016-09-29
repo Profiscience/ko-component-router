@@ -6,12 +6,8 @@ ko.components.register('config', {
   synchronous: true,
   viewModel: class Config {
     constructor(ctx) {
-      this.sub = ctx.hash.subscribe((h) => {
-        $(`#${h}`).velocity('scroll')
-      })
-    }
-    dispose() {
-      this.sub.dispose()
+      const sub = ctx.hash.subscribe((h) => $(`#${h}`).velocity('scroll'))
+      ctx.addBeforeNavigateCallback(() => sub.dispose())
     }
   },
   template: `
