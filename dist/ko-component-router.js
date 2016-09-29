@@ -2405,7 +2405,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var router = _getRoute6[0];
 	        var route = _getRoute6[1];
 
-	        return !router.isNavigating() && router.route() !== '' && route ? router.route().matches(route) : false;
+	        return !router.isNavigating() && router.route() !== '' && router.route() !== '*' && router.route() !== '/*' && route ? router.route().matches(route) : false;
 	      })
 	    };
 	  }
