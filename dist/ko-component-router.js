@@ -811,6 +811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (isRoot) {
 	      _knockout2.default.router = this;
+	      _knockout2.default.router.history = _knockout2.default.observableArray([]);
 	    } else {
 	      this.$parent = parentRouterBindingCtx.$router;
 	      this.$parent.$child = this;
@@ -892,7 +893,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      var samePage = this.pathname() === pathname;
 
-	      var shouldNavigatePromise = samePage ? this.$child ? this.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false) : Promise.resolve(true) : this.runBeforeNavigateCallbacks();
+	      var shouldNavigatePromise = function () {
+	        if (samePage) {
+	          if (_this2.$child) {
+	            var _push = push;
+	            push = false;
+	            return _this2.$child._update(childPath || '/', viaPathBinding ? state : false, _push, viaPathBinding ? query : false);
+	          } else {
+	            return Promise.resolve(true);
+	          }
+	        } else {
+	          return _this2.runBeforeNavigateCallbacks();
+	        }
+	      }();
 
 	      return shouldNavigatePromise.then(function (shouldNavigate) {
 	        if (!shouldNavigate) {
@@ -933,7 +946,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (!samePage || !(0, _utils.deepEquals)(fromCtx.query, toCtx.query)) {
-	          history[push ? 'pushState' : 'replaceState'](history.state, document.title, '' === canonicalPath ? _this2.getBase() : canonicalPath);
+	          var _path = '' === canonicalPath ? _this2.getBase() : canonicalPath;
+
+	          push ? _knockout2.default.router.history.push([history.state, _path]) : _knockout2.default.router.history.splice(_knockout2.default.router.history.length - 1, 1, [history.state, _path]);
+
+	          history[push ? 'pushState' : 'replaceState'](history.state, document.title, _path);
 	        }
 
 	        return new Promise(function (resolve) {
