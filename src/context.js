@@ -23,6 +23,7 @@ export default class Context {
 
     if (isRoot) {
       ko.router = this
+      ko.router.history = ko.observableArray([])
     } else {
       this.$parent = parentRouterBindingCtx.$router
       this.$parent.$child = this
@@ -79,12 +80,20 @@ export default class Context {
     const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
     const samePage = this.pathname() === pathname
 
-    const shouldNavigatePromise =
-      samePage
-        ? this.$child
-          ? this.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
-          : Promise.resolve(true)
-        : this.runBeforeNavigateCallbacks()
+
+    const shouldNavigatePromise = (() => {
+      if (samePage) {
+        if (this.$child) {
+          const _push = push
+          push = false
+          return this.$child._update(childPath || '/', viaPathBinding ? state : false, _push, viaPathBinding ? query : false)
+        } else {
+          return Promise.resolve(true)
+        }
+      } else {
+        return this.runBeforeNavigateCallbacks()
+      }
+    })()
 
     return shouldNavigatePromise.then((shouldNavigate) => {
       if (!shouldNavigate) {
@@ -131,10 +140,16 @@ export default class Context {
       }
 
       if (!samePage || !deepEquals(fromCtx.query, toCtx.query)) {
+        const path = '' === canonicalPath ? this.getBase() : canonicalPath
+
+        push
+          ? ko.router.history.push([history.state, path])
+          : ko.router.history.splice(ko.router.history.length - 1, 1, [history.state, path])
+
         history[push ? 'pushState' : 'replaceState'](
           history.state,
           document.title,
-          '' === canonicalPath ? this.getBase() : canonicalPath)
+          path)
       }
 
       return new Promise((resolve) => {
