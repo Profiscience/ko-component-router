@@ -2400,9 +2400,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    bindingsToApply.css = {
 	      'active-path': _knockout2.default.pureComputed(function () {
 	        return isActivePath(bindingCtx, path);
-	      }),
-	      'active-path-parent': _knockout2.default.pureComputed(function () {
-	        return bindingCtx.$router.$child && isActivePath(bindingCtx, path);
 	      })
 	    };
 	  }

@@ -63,8 +63,7 @@ function applyBinding(el, bindings, bindingCtx) {
 
   if (path) {
     bindingsToApply.css = {
-      'active-path': ko.pureComputed(() => isActivePath(bindingCtx, path)),
-      'active-path-parent': ko.pureComputed(() => bindingCtx.$router.$child && isActivePath(bindingCtx, path))
+      'active-path': ko.pureComputed(() => isActivePath(bindingCtx, path))
     }
   }
 
