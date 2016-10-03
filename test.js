@@ -332,6 +332,8 @@ async function runTests(t, config) {
     t.deepEqual(router.state(), { bar: 'bar' }, 'query binding persists state when used alone')
     t.deepEqual(router.query.getAll(), { bar: 'bar' }, 'query binding sets query when used alone')
   })
+
+  // active-path
   await step(() => {
     const activeLink = $('#should-be-active', $dom)
     t.ok(activeLink.hasClass('active-path'), 'path binding sets `active` class')
