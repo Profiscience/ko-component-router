@@ -7,6 +7,7 @@ import { cascade, deepEquals, extend, merge, normalizePath } from './utils'
 export default class Context {
   constructor(bindingCtx, config) {
     bindingCtx.$router = this
+    this.bindingCtx = bindingCtx
 
     let parentRouterBindingCtx = bindingCtx
     let isRoot = true
