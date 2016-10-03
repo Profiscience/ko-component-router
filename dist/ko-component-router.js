@@ -2439,7 +2439,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (localPathMatches(ctx, path)) {
 	    while (ctx.$child) {
 	      ctx = ctx.$child;
-	      path = path.replace(ctx.config.base, '');
+	      path = path.replace(ctx.config.base, '') || '/';
 	      if (!localPathMatches(ctx, path)) {
 	        return false;
 	      }
