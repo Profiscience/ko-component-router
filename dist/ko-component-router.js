@@ -1904,14 +1904,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Parse a string for the raw tokens.
 	 *
-	 * @param  {string} str
+	 * @param  {string}  str
+	 * @param  {Object=} options
 	 * @return {!Array}
 	 */
-	function parse (str) {
+	function parse (str, options) {
 	  var tokens = []
 	  var key = 0
 	  var index = 0
 	  var path = ''
+	  var defaultDelimiter = options && options.delimiter || '/'
 	  var res
 
 	  while ((res = PATH_REGEXP.exec(str)) != null) {
@@ -1944,8 +1946,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var partial = prefix != null && next != null && next !== prefix
 	    var repeat = modifier === '+' || modifier === '*'
 	    var optional = modifier === '?' || modifier === '*'
-	    var delimiter = res[2] || '/'
-	    var pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?')
+	    var delimiter = res[2] || defaultDelimiter
+	    var pattern = capture || group
 
 	    tokens.push({
 	      name: name || key++,
@@ -1955,7 +1957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      repeat: repeat,
 	      partial: partial,
 	      asterisk: !!asterisk,
-	      pattern: escapeGroup(pattern)
+	      pattern: pattern ? escapeGroup(pattern) : (asterisk ? '.*' : '[^' + escapeString(delimiter) + ']+?')
 	    })
 	  }
 
@@ -1976,10 +1978,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Compile a string to a template function for the path.
 	 *
 	 * @param  {string}             str
+	 * @param  {Object=}            options
 	 * @return {!function(Object=, Object=)}
 	 */
-	function compile (str) {
-	  return tokensToFunction(parse(str))
+	function compile (str, options) {
+	  return tokensToFunction(parse(str, options))
 	}
 
 	/**
@@ -2190,27 +2193,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {!RegExp}
 	 */
 	function stringToRegexp (path, keys, options) {
-	  var tokens = parse(path)
-	  var re = tokensToRegExp(tokens, options)
-
-	  // Attach keys back to the regexp.
-	  for (var i = 0; i < tokens.length; i++) {
-	    if (typeof tokens[i] !== 'string') {
-	      keys.push(tokens[i])
-	    }
-	  }
-
-	  return attachKeys(re, keys)
+	  return tokensToRegExp(parse(path, options), keys, options)
 	}
 
 	/**
 	 * Expose a function for taking tokens and returning a RegExp.
 	 *
-	 * @param  {!Array}  tokens
-	 * @param  {Object=} options
+	 * @param  {!Array}          tokens
+	 * @param  {(Array|Object)=} keys
+	 * @param  {Object=}         options
 	 * @return {!RegExp}
 	 */
-	function tokensToRegExp (tokens, options) {
+	function tokensToRegExp (tokens, keys, options) {
+	  if (!isarray(keys)) {
+	    options = /** @type {!Object} */ (keys || options)
+	    keys = []
+	  }
+
 	  options = options || {}
 
 	  var strict = options.strict
@@ -2228,6 +2227,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      var prefix = escapeString(token.prefix)
 	      var capture = '(?:' + token.pattern + ')'
+
+	      keys.push(token)
 
 	      if (token.repeat) {
 	        capture += '(?:' + prefix + capture + ')*'
@@ -2263,7 +2264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    route += strict && endsWithSlash ? '' : '(?=\\/|$)'
 	  }
 
-	  return new RegExp('^' + route, flags(options))
+	  return attachKeys(new RegExp('^' + route, flags(options)), keys)
 	}
 
 	/**
@@ -2279,14 +2280,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {!RegExp}
 	 */
 	function pathToRegexp (path, keys, options) {
-	  keys = keys || []
-
 	  if (!isarray(keys)) {
-	    options = /** @type {!Object} */ (keys)
+	    options = /** @type {!Object} */ (keys || options)
 	    keys = []
-	  } else if (!options) {
-	    options = {}
 	  }
+
+	  options = options || {}
 
 	  if (path instanceof RegExp) {
 	    return regexpToRegexp(path, /** @type {!Array} */ (keys))
