@@ -245,6 +245,16 @@ class ViewModel {
         </p>
       </section>
 
+      <h2 id="forceReloadOnQueryChange">
+        forceReloadOnQueryChange
+        <small class="text-muted">() => {}</small>
+      </h2>
+      <p>
+        tells the router to reload the current route component when query params change rather than allowing
+        the component to subscribe to <code>ctx.query.get('foo')</code>/<code>ctx.query.getAll(true)</code> or wrap it in a computed.
+      </p>
+    </section>
+
       <section>
         <h2 id="parent">
           $parent

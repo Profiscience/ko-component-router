@@ -114,6 +114,7 @@ ko.components.register('app', {
                   <li><a data-bind="path: '/context#update'">update</a></li>
                   <li><a data-bind="path: '/context#addBeforeNavigateCallback'">addBeforeNavigateCallback</a></li>
                   <li><a data-bind="path: '/context#forceReloadOnParamChange'">forceReloadOnParamChange</a></li>
+                  <li><a data-bind="path: '/context#forceReloadOnQueryChange'">forceReloadOnQueryChange</a></li>
                   <li><a data-bind="path: '/context#parent'">$parent</a></li>
                   <li><a data-bind="path: '/context#child'">$child</a></li>
                 </ul>
