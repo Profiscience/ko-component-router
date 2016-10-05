@@ -285,8 +285,8 @@ export default class Context {
       url = url.replace('./', '/')
     } else {
       let p = this
-      while (p && url.indexOf(p.config.base) > -1) {
-        url = url.replace(p.config.base, '')
+      while (p && url.toLowerCase().indexOf(p.config.base.toLowerCase()) > -1) {
+        url = url.replace(new RegExp(p.config.base, 'i'), '')
         p = p.$parent
       }
     }
