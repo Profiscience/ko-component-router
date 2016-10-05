@@ -80,7 +80,6 @@ export default class Context {
     const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
     const samePage = this.pathname() === pathname
 
-
     const shouldNavigatePromise = (() => {
       if (samePage) {
         if (this.$child) {
@@ -100,14 +99,24 @@ export default class Context {
         return Promise.resolve(false)
       }
 
-      if ((!samePage && !firstRun) || this.config._forceReload) {
+      if (!query && querystring) {
+        query = qs.parse(querystring)[normalizePath(this.config.depth + pathname)]
+      }
+
+      const paramsChanged = !deepEquals(params, this.prevParams)
+      const queryChanged = query && !deepEquals(query, this.prevQuery)
+
+      this.prevParams = params
+      if (query) {
+        this.prevQuery = query
+      }
+
+      if ((!samePage && !firstRun) ||
+          (this.config._forceReloadOnParamChange && paramsChanged) ||
+          (this.config._forceReloadOnQueryChange && queryChanged)) {
         this.isNavigating(true)
         this.reload()
         this._beforeNavigateCallbacks = []
-      }
-
-      if (!query && querystring) {
-        query = qs.parse(querystring)[normalizePath(this.config.depth + pathname)]
       }
 
       const canonicalPath = Context
@@ -159,10 +168,12 @@ export default class Context {
           toCtx.route.runPipeline(toCtx)
             .then(() => {
               if (fromCtx.route.component === toCtx.route.component) {
-                if (this.config._forceReload) {
+                if ((this.config._forceReloadOnParamChange && paramsChanged) ||
+                    (this.config._forceReloadOnQueryChange && queryChanged)) {
                   const r = toCtx.route
-                  this.config._forceReload = false
                   toCtx.route = { component: '__KO_ROUTER_EMPTY_COMPONENT__' }
+                  this.config._forceReloadOnParamChange = false
+                  this.config._forceReloadOnQueryChange = false
                   extend(this, toCtx)
                   ko.tasks.runEarly()
                   this.route(r)
@@ -170,6 +181,8 @@ export default class Context {
                   merge(this, toCtx)
                 }
               } else {
+                this.config._forceReloadOnParamChange = false
+                this.config._forceReloadOnQueryChange = false
                 extend(this, toCtx)
               }
 
@@ -216,7 +229,11 @@ export default class Context {
   }
 
   forceReloadOnParamChange() {
-    this.config._forceReload = true
+    this.config._forceReloadOnParamChange = true
+  }
+
+  forceReloadOnQueryChange() {
+    this.config._forceReloadOnQueryChange = true
   }
 
   getRouteForUrl(url) {
