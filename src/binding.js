@@ -121,7 +121,7 @@ function getRouter(bindingCtx) {
 }
 
 function localPathMatches(ctx, path) {
-  return ctx.pathname() === '/' + path.split('/')[1]
+  return (ctx.pathname() || '/') === ('/' + path.split('/')[1])
 }
 
 function which(e) {
