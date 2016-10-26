@@ -892,6 +892,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var childPath = _route$parse2[5];
 
 	      var samePage = this.pathname() === pathname;
+	      var sameRoute = this.route() === route;
 
 	      var shouldNavigatePromise = function () {
 	        if (samePage) {
@@ -918,16 +919,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var paramsChanged = !(0, _utils.deepEquals)(params, _this2.prevParams);
 	        var queryChanged = query && !(0, _utils.deepEquals)(query, _this2.prevQuery);
+	        var paramsForcedUpdate = _this2.config._forceReloadOnParamChange && paramsChanged;
+	        var queryForcedUpdate = _this2.config._forceReloadOnQueryChange && queryChanged;
+	        var forceUpdate = paramsForcedUpdate || queryForcedUpdate;
 
 	        _this2.prevParams = params;
 	        if (query) {
 	          _this2.prevQuery = query;
 	        }
 
-	        if (!samePage && !firstRun || _this2.config._forceReloadOnParamChange && paramsChanged || _this2.config._forceReloadOnQueryChange && queryChanged) {
+	        if (!sameRoute || forceUpdate) {
+	          if (_this2.$child) {
+	            _this2.$child.destroy();
+	            delete _this2.$child;
+	          }
+	        }
+
+	        if (!samePage && !firstRun || forceUpdate) {
 	          _this2.isNavigating(true);
 	          _this2.reload();
-	          _this2._beforeNavigateCallbacks = [];
 	        }
 
 	        var canonicalPath = Context.getCanonicalPath(_this2.getBase().replace(/\/$/, ''), pathname, childPath, _this2.query.getFullQueryString(query, pathname), hash);
@@ -967,16 +977,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            delete toCtx.query;
 	            toCtx.route.runPipeline(toCtx).then(function () {
 	              if (fromCtx.route.component === toCtx.route.component) {
+	                (0, _utils.merge)(_this2, toCtx);
 	                if (_this2.config._forceReloadOnParamChange && paramsChanged || _this2.config._forceReloadOnQueryChange && queryChanged) {
 	                  var r = toCtx.route;
 	                  toCtx.route = { component: '__KO_ROUTER_EMPTY_COMPONENT__' };
 	                  _this2.config._forceReloadOnParamChange = false;
 	                  _this2.config._forceReloadOnQueryChange = false;
-	                  (0, _utils.extend)(_this2, toCtx);
 	                  _knockout2.default.tasks.runEarly();
 	                  _this2.route(r);
-	                } else {
-	                  (0, _utils.merge)(_this2, toCtx);
 	                }
 	              } else {
 	                _this2.config._forceReloadOnParamChange = false;
@@ -1074,11 +1082,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'reload',
 	    value: function reload() {
-	      if (this.$child) {
-	        this.$child.destroy();
-	        delete this.$child;
-	      }
-
+	      this._beforeNavigateCallbacks = [];
 	      this.query.reload();
 	      this.state.reload();
 	    }
