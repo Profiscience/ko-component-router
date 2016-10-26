@@ -79,6 +79,7 @@ export default class Context {
     const fromCtx = this.toJS()
     const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
     const samePage = this.pathname() === pathname
+    const sameRoute = this.route() === route
 
     const shouldNavigatePromise = (() => {
       if (samePage) {
@@ -105,18 +106,25 @@ export default class Context {
 
       const paramsChanged = !deepEquals(params, this.prevParams)
       const queryChanged = query && !deepEquals(query, this.prevQuery)
+      const paramsForcedUpdate = this.config._forceReloadOnParamChange && paramsChanged
+      const queryForcedUpdate = this.config._forceReloadOnQueryChange && queryChanged
+      const forceUpdate = paramsForcedUpdate || queryForcedUpdate
 
       this.prevParams = params
       if (query) {
         this.prevQuery = query
       }
 
-      if ((!samePage && !firstRun) ||
-          (this.config._forceReloadOnParamChange && paramsChanged) ||
-          (this.config._forceReloadOnQueryChange && queryChanged)) {
+      if (!sameRoute || forceUpdate) {
+        if (this.$child) {
+          this.$child.destroy()
+          delete this.$child
+        }
+      }
+
+      if ((!samePage && !firstRun) || forceUpdate) {
         this.isNavigating(true)
         this.reload()
-        this._beforeNavigateCallbacks = []
       }
 
       const canonicalPath = Context
@@ -168,17 +176,15 @@ export default class Context {
           toCtx.route.runPipeline(toCtx)
             .then(() => {
               if (fromCtx.route.component === toCtx.route.component) {
+                merge(this, toCtx)
                 if ((this.config._forceReloadOnParamChange && paramsChanged) ||
                     (this.config._forceReloadOnQueryChange && queryChanged)) {
                   const r = toCtx.route
                   toCtx.route = { component: '__KO_ROUTER_EMPTY_COMPONENT__' }
                   this.config._forceReloadOnParamChange = false
                   this.config._forceReloadOnQueryChange = false
-                  extend(this, toCtx)
                   ko.tasks.runEarly()
                   this.route(r)
-                } else {
-                  merge(this, toCtx)
                 }
               } else {
                 this.config._forceReloadOnParamChange = false
@@ -270,11 +276,7 @@ export default class Context {
   }
 
   reload() {
-    if (this.$child) {
-      this.$child.destroy()
-      delete this.$child
-    }
-
+    this._beforeNavigateCallbacks = []
     this.query.reload()
     this.state.reload()
   }
