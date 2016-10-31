@@ -7,11 +7,11 @@
   "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "concurrently --kill-others -p name --names \"DIST,LIB\" -c blue,cyan,magenta \"npm run build:dist\" \"npm run build:lib\" \"npm run build:example\"",
+    "build": "concurrently --kill-others -p name --names \"DIST,LIB,EXAMPLE\" -c blue,cyan,magenta \"npm run build:dist\" \"npm run build:lib\" \"npm run build:example\"",
     "build:dist": "webpack",
     "build:lib": "babel src -d lib",
     "build:example": "webpack -p --config webpack.config.example.js",
-    "watch": "concurrently --kill-others -p name --names \"DIST,LIB\" -c blue,cyan,magenta \"npm run watch:dist\" \"npm run watch:lib\" \"npm run watch:example\"",
+    "watch": "concurrently --kill-others -p name --names \"DIST,LIB,EXAMPLE\" -c blue,cyan,magenta \"npm run watch:dist\" \"npm run watch:lib\" \"npm run watch:example\"",
     "watch:dist": "webpack --watch",
     "watch:lib": "babel src -wd lib",
     "watch:example": "webpack --watch --config webpack.config.example.js",
