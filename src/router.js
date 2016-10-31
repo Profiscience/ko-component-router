@@ -58,7 +58,17 @@ class Router {
         ? location.hash.substr(2) + location.search
         : location.pathname + location.search + location.hash
 
-      this.ctx._update(path, undefined, false)
+      let state = false
+      let query = false
+
+      if (!isRoot) {
+        state = this.ctx.$parent._$childInitState
+        query = this.ctx.$parent._$childInitQuery
+        delete this.ctx.$parent._$childInitState
+        delete this.ctx.$parent._$childInitQuery
+      }
+
+      this.ctx._update(path, state, false, query)
     }
   }
 

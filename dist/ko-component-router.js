@@ -176,7 +176,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (dispatch) {
 	      var path = this.config.hashbang && ~location.hash.indexOf('#!') ? location.hash.substr(2) + location.search : location.pathname + location.search + location.hash;
 
-	      this.ctx._update(path, undefined, false);
+	      var state = false;
+	      var query = false;
+
+	      if (!isRoot) {
+	        state = this.ctx.$parent._$childInitState;
+	        query = this.ctx.$parent._$childInitQuery;
+	        delete this.ctx.$parent._$childInitState;
+	        delete this.ctx.$parent._$childInitQuery;
+	      }
+
+	      this.ctx._update(path, state, false, query);
 	    }
 	  }
 
@@ -953,12 +963,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function _update() {
 	      var origUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.canonicalPath();
 	      var state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-	      var push = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
 	      var _this2 = this;
 
+	      var push = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 	      var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-	      var viaPathBinding = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 
 	      var url = this.resolveUrl(origUrl);
 	      var route = this.getRouteForUrl(url);
@@ -989,7 +998,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (_this2.$child) {
 	            var _push = push;
 	            push = false;
-	            return _this2.$child._update(childPath || '/', viaPathBinding ? state : false, _push, viaPathBinding ? query : false);
+	            return _this2.$child._update(childPath || '/', state, _push, query).then(function (handled) {
+	              state = false;
+	              query = false;
+	              return !handled;
+	            });
 	          } else {
 	            return Promise.resolve(true);
 	          }
@@ -1038,19 +1051,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	          canonicalPath: canonicalPath,
 	          hash: hash,
 	          params: params,
-	          query: query,
 	          // route must come last
 	          route: route
 	        };
 
-	        if (state === false && samePage) {
-	          toCtx.state = fromCtx.state;
-	        } else if (!_this2.config.persistState && state) {
-	          toCtx.state = state;
-	        }
+	        if (childPath && !samePage) {
+	          toCtx.state = {};
+	          toCtx.query = {};
+	          _this2._$childInitState = state;
+	          _this2._$childInitQuery = query;
+	        } else {
+	          if (state === false && samePage) {
+	            toCtx.state = fromCtx.state;
+	          } else if (!_this2.config.persistState && state) {
+	            toCtx.state = state;
+	          }
 
-	        if (_this2.config.persistState) {
-	          toCtx.state = _this2.state();
+	          if (_this2.config.persistState) {
+	            toCtx.state = _this2.state();
+	          }
 	        }
 
 	        if (!samePage || !(0, _utils.deepEquals)(fromCtx.query, toCtx.query)) {
@@ -1092,9 +1111,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _knockout2.default.tasks.schedule(function () {
 	                  return _this2.config.inTransition(el, fromCtx, toCtx);
 	                });
-	              }
-	              if (_this2.$child) {
-	                _this2.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false);
 	              }
 	            });
 	          };
