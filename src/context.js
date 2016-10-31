@@ -67,7 +67,7 @@ export default class Context {
     })
   }
 
-  _update(origUrl = this.canonicalPath(), state = false, push = true, query = false, viaPathBinding = false) {
+  _update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
     const url = this.resolveUrl(origUrl)
     const route = this.getRouteForUrl(url)
     const firstRun = this.route() === ''
@@ -86,7 +86,12 @@ export default class Context {
         if (this.$child) {
           const _push = push
           push = false
-          return this.$child._update(childPath || '/', viaPathBinding ? state : false, _push, viaPathBinding ? query : false)
+          return this.$child._update(childPath || '/', state, _push, query)
+            .then((handled) => {
+              state = false
+              query = false
+              return !handled
+            })
         } else {
           return Promise.resolve(true)
         }
@@ -141,19 +146,25 @@ export default class Context {
         canonicalPath,
         hash,
         params,
-        query,
         // route must come last
         route
       }
 
-      if (state === false && samePage) {
-        toCtx.state = fromCtx.state
-      } else if (!this.config.persistState && state) {
-        toCtx.state = state
-      }
+      if (childPath && !samePage) {
+        toCtx.state = {}
+        toCtx.query = {}
+        this._$childInitState = state
+        this._$childInitQuery = query
+      } else {
+        if (state === false && samePage) {
+          toCtx.state = fromCtx.state
+        } else if (!this.config.persistState && state) {
+          toCtx.state = state
+        }
 
-      if (this.config.persistState) {
-        toCtx.state = this.state()
+        if (this.config.persistState) {
+          toCtx.state = this.state()
+        }
       }
 
       if (!samePage || !deepEquals(fromCtx.query, toCtx.query)) {
@@ -200,9 +211,6 @@ export default class Context {
               resolve(true)
               if (animate) {
                 ko.tasks.schedule(() => this.config.inTransition(el, fromCtx, toCtx))
-              }
-              if (this.$child) {
-                this.$child._update(childPath || '/', viaPathBinding ? state : false, false, viaPathBinding ? query : false)
               }
             })
         }
