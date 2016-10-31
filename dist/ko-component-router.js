@@ -2513,7 +2513,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        router = _parsePathBinding4[0],
 	        route = _parsePathBinding4[1];
 
-	    var handled = router._update(route, _knockout2.default.toJS(state), true, _knockout2.default.toJS(query), true);
+	    var handled = router._update(route, _knockout2.default.toJS(state), true, _knockout2.default.toJS(query));
 
 	    if (handled) {
 	      e.preventDefault();

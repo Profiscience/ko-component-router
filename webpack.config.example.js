@@ -32,6 +32,11 @@ module.exports = {
       },
 
       {
+        test: /\.less$/,
+        loader: 'style!css!less'
+      },
+
+      {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'url?limit=10000&minetype=application/font-woff'
       },

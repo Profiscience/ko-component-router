@@ -45,7 +45,7 @@ function applyBinding(el, bindings, bindingCtx) {
     }
 
     const [router, route] = parsePathBinding(bindingCtx, path)
-    const handled = router._update(route, ko.toJS(state), true, ko.toJS(query), true)
+    const handled = router._update(route, ko.toJS(state), true, ko.toJS(query))
 
     if (handled) {
       e.preventDefault()

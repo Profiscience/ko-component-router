@@ -18,7 +18,7 @@ import ko from 'knockout'
 import '../src'
 import './views'
 import './bindings'
-import './styles'
+import './style.less'
 import { inTransition, outTransition } from './lib/animate'
 
 class App {
