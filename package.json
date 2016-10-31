@@ -7,32 +7,21 @@
   "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
   "scripts": {
-    "build": "concurrently --kill-others -p name --names \"DIST,LIB\" -c blue,cyan \"npm run build:dist\" \"npm run build:lib\"",
+    "build": "concurrently --kill-others -p name --names \"DIST,LIB\" -c blue,cyan,magenta \"npm run build:dist\" \"npm run build:lib\" \"npm run build:example\"",
     "build:dist": "webpack",
     "build:lib": "babel src -d lib",
-    "watch": "concurrently --kill-others -p name --names \"DIST,LIB\" -c blue,cyan \"npm run watch:dist\" \"npm run watch:lib\"",
+    "build:example": "webpack -p --config webpack.config.example.js",
+    "watch": "concurrently --kill-others -p name --names \"DIST,LIB\" -c blue,cyan,magenta \"npm run watch:dist\" \"npm run watch:lib\" \"npm run watch:example\"",
     "watch:dist": "webpack --watch",
     "watch:lib": "babel src -wd lib",
+    "watch:example": "webpack --watch --config webpack.config.example.js",
+    "serve:example": "webpack-dev-server --config webpack.config.example.js",
     "lint": "eslint --max-warnings=0 *.js",
     "format": "eslint --fix --max-warnings=0 *.js",
     "stage": "git add dist example/dist lib",
-    "test": "karma start",
-    "test:watch": "karma start karma.watch.js",
-    "example:build": "webpack -p --config webpack.config.example.js",
-    "example:watch": "webpack --watch --config webpack.config.example.js",
-    "example:serve": "webpack-dev-server --config webpack.config.example.js"
+    "test": "npm run lint; karma start",
+    "test:watch": "karma start karma.watch.js"
   },
-  "precommit": [
-    [
-      "lint",
-      "test"
-    ],
-    [
-      "build",
-      "example:build"
-    ],
-    "stage"
-  ],
   "keywords": [
     "knockoutjs",
     "knockout",
@@ -78,7 +67,6 @@
     "karma-webpack": "^1.7.0",
     "knockout": "^3.3.0",
     "ko-component-tester": "^3.1.0",
-    "pre-commit": "caseyWebb/pre-commit",
     "prismjs": "^1.3.0",
     "raf": "^3.2.0",
     "style-loader": "^0.13.0",
