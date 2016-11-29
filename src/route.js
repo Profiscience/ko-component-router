@@ -1,22 +1,32 @@
+import ko from 'knockout'
 import pathtoRegexp from 'path-to-regexp'
-import { cascade, decodeURLEncodedURIComponent, isUndefined } from './utils'
+import { isArray, runMiddleware, sequence } from './utils'
+
+const appMiddleware = []
 
 export default class Route {
-  constructor(path, pipeline) {
+  constructor(router, path, middleware) {
     if (path[path.length - 1] === '!') {
-      path = path.replace('!', ':child_path(.*)?')
+      path = path.replace('!', ':__child_path__(.*)?')
     } else {
       path = path.replace(/\(?\*\)?/, '(.*)')
     }
 
-    if (typeof pipeline === 'string') {
-      this.component = pipeline
-      this.pipeline = []
-    } else if (typeof pipeline[pipeline.length - 1] === 'string'){
-      this.component = pipeline.pop()
-      this.pipeline = pipeline
-    } else {
-      this.pipeline = pipeline
+    if (!isArray(middleware)) {
+      middleware = [middleware]
+    }
+
+    this.middleware = []
+
+    for (const m of middleware) {
+      if (typeof m === 'string') {
+        this.middleware.push((ctx) => {
+          ctx.router.component(m)
+          ko.tasks.runEarly()
+        })
+      } else {
+        this.middleware.push(m)
+      }
     }
 
     this._keys = []
@@ -24,51 +34,61 @@ export default class Route {
   }
 
   matches(path) {
-    const qsIndex = path.indexOf('?')
-
-    if (~qsIndex) {
-      path = path.split('?')[0]
-    }
-
-    return this._regexp.exec(decodeURIComponent(path))
+    return this._regexp.exec(path) !== null
   }
 
   parse(path) {
     let childPath
-    let hash = ''
     const params = {}
-    const hIndex = path.indexOf('#')
-
-    if (~hIndex) {
-      const parts = path.split('#')
-      path = parts[0]
-      hash = decodeURLEncodedURIComponent(parts[1])
-    }
-
-    const qsIndex = path.indexOf('?')
-    let [pathname, querystring] = ~qsIndex ? path.split('?') : [path] // eslint-disable-line
-    const matches = this._regexp.exec(decodeURIComponent(pathname))
+    const matches = this._regexp.exec(path)
 
     for (let i = 1, len = matches.length; i < len; ++i) {
       const k = this._keys[i - 1]
-      const v = decodeURLEncodedURIComponent(matches[i])
-      if (isUndefined(v) || !(hasOwnProperty.call(params, k.name))) {
-        if (k.name === 'child_path') {
-          if (!isUndefined(v)) {
-            childPath = `/${v}`
-            path = path.substring(0, path.lastIndexOf(childPath))
-            pathname = pathname.substring(0, pathname.lastIndexOf(childPath))
-          }
-        } else {
-          params[k.name] = v
-        }
+      const v = matches[i]
+      if (k.name === '__child_path__') {
+        childPath = '/' + v
+      } else {
+        params[k.name] = v
       }
     }
 
-    return [path, params, hash, pathname, querystring, childPath]
+    return [params, path.replace(new RegExp(childPath + '$'), ''), childPath]
   }
 
-  runPipeline(ctx) {
-    return cascade(this.pipeline, ctx)
+  async run(ctx) {
+    let disposals = []
+    this.dispose = () => sequence(disposals)
+
+    const [appUpstream, appNext] = runMiddleware(appMiddleware, ctx)
+    disposals = [
+      // before dispose
+      appNext,
+      // dispose
+      appNext
+    ]
+    await appUpstream
+
+    const [routeUpstream, routeNext] = runMiddleware(this.middleware, ctx)
+    disposals = [
+      // before dispose
+      routeNext,
+      appNext,
+      () => {
+        ctx.router.component(false)
+        ko.tasks.runEarly()
+      },
+      // after dispose
+      routeNext,
+      appNext
+    ]
+    await routeUpstream
+
+    // after render
+    await appNext()
+    await routeNext()
+  }
+
+  static use(fn) {
+    appMiddleware.push(fn)
   }
 }

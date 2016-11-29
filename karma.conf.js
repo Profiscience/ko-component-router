@@ -8,10 +8,10 @@ module.exports = function(config) {
 
     frameworks: ['tap'],
 
-    files: ['test.js'],
+    files: ['test/index.js'],
 
     preprocessors: {
-      'test.js': 'webpack'
+      'test/index.js': 'webpack'
     },
 
     browsers: ['Firefox'],
@@ -32,10 +32,7 @@ module.exports = function(config) {
       node: {
         fs: 'empty'
       },
-      isparta: {
-        embedSource: true,
-        noAutoWrap: true
-      },
+
       module: {
         preLoaders: [
           {
@@ -46,11 +43,12 @@ module.exports = function(config) {
             ],
             loader: 'babel',
             query: {
-              'plugins': [
+              plugins: [
+                'transform-async-functions',
                 'transform-es2015-modules-commonjs',
-                'syntax-async-functions',
-                'transform-runtime',
-                'transform-regenerator'
+                'transform-object-rest-spread',
+                'transform-regenerator',
+                'transform-runtime'
               ],
               presets: ['es2015']
             }
@@ -67,6 +65,11 @@ module.exports = function(config) {
 
     webpackMiddleware: {
       noInfo: true
+    },
+
+    isparta: {
+      embedSource: true,
+      noAutoWrap: true
     }
   })
 }

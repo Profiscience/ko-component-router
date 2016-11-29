@@ -1,17 +1,22 @@
 import ko from 'knockout'
-import router from './router'
+import Router from './router'
 import './binding'
-
-ko.components.register('__KO_ROUTER_EMPTY_COMPONENT__', { template: '<span></span>' })
 
 ko.components.register('ko-component-router', {
   synchronous: true,
-  viewModel: router,
+  viewModel: { createViewModel: (params, { element }) => new Router(params, element) },
   template:
-    `<div data-bind='if: ctx.route().component'>
-      <div class="component-wrapper" data-bind='component: {
-        name: ctx.route().component,
-        params: ctx
-      }'></div>
+    `<div data-bind='if: component'>
+      <div data-bind='
+        attr: { class: "ko-component-router-view " + component() },
+        component: {
+          name: component,
+          params: ctx
+        }'>
+      </div>
     </div>`
 })
+
+ko.router = Router
+
+export default Router
