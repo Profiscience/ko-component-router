@@ -8,13 +8,21 @@ module.exports = function(config) {
 
     frameworks: ['tap'],
 
-    files: ['test.js'],
+    files: ['test/index.js'],
 
     preprocessors: {
-      'test.js': 'webpack'
+      'test/index.js': 'webpack'
     },
 
-    // config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    browsers: ['Debug'],
+
+    customLaunchers: {
+      Debug: {
+        base: 'Chrome',
+        flags: ['--incognito', '--user-data-dir=./test/.chrome']
+      }
+    },
+
     logLevel: config.LOG_INFO,
 
     autoWatch: true,
@@ -34,11 +42,12 @@ module.exports = function(config) {
             ],
             loader: 'babel',
             query: {
-              'plugins': [
+              plugins: [
+                'transform-async-functions',
                 'transform-es2015-modules-commonjs',
-                'syntax-async-functions',
-                'transform-runtime',
-                'transform-regenerator'
+                'transform-object-rest-spread',
+                'transform-regenerator',
+                'transform-runtime'
               ],
               presets: ['es2015']
             }

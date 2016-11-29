@@ -1,6 +1,10 @@
 .DS_Store
-
-coverage/
-
-node_modules/
 npm-debug.log
+npm-debug.log.*
+
+.chrome/
+.vscode/
+coverage/
+dist/
+lib/
+node_modules/
