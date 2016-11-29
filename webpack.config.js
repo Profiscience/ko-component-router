@@ -27,7 +27,12 @@ function makeConfig(o) {
           loader: 'babel',
           query: {
             cacheDirectory: true,
-            plugins: ['transform-es2015-modules-commonjs'],
+            plugins: [
+              'transform-async-functions',
+              'transform-es2015-modules-commonjs',
+              'transform-object-rest-spread',
+              'transform-regenerator'
+            ],
             presets: ['es2015']
           }
         }
@@ -42,8 +47,6 @@ function makeConfig(o) {
         amd: 'knockout'
       }
     },
-
-    // devtool: 'source-map',
 
     plugins: minify
       ? [

@@ -1,341 +1,45 @@
-import ko from 'knockout'
-import qs from 'qs'
-import { factory as queryFactory } from './query'
-import { factory as stateFactory } from './state'
-import { cascade, deepEquals, extend, merge, normalizePath } from './utils'
+import { sequence } from './utils'
 
 export default class Context {
-  constructor(bindingCtx, config) {
-    bindingCtx.$router = this
-    this.bindingCtx = bindingCtx
+  constructor({ router, route, path, pathname, params, passthrough }) {
+    this.router = router
+    this.route = route
+    this.path = path
+    this.pathname = pathname
+    this.params = params
 
-    let parentRouterBindingCtx = bindingCtx
-    let isRoot = true
-    while (parentRouterBindingCtx.$parentContext) {
-      parentRouterBindingCtx = parentRouterBindingCtx.$parentContext
-      if (parentRouterBindingCtx.$router) {
-        isRoot = false
-        break
-      } else {
-        parentRouterBindingCtx.$router = this
-      }
-    }
-
-    if (isRoot) {
-      ko.router = this
-      ko.router.history = ko.observableArray([])
-    } else {
-      this.$parent = parentRouterBindingCtx.$router
-      this.$parent.$child = this
-      config.base = this.$parent.pathname()
-    }
-
-    this.config = config
-    this.config.depth = Context.getDepth(this)
-
-    this.isNavigating = ko.observable(true)
-
-    this.route = ko.observable('')
-    this.canonicalPath = ko.observable('')
-    this.path = ko.observable('')
-    this.pathname = ko.observable('')
-    this.hash = ko.observable('')
-    this.params = {}
-    this.query = queryFactory(this)
-    this.state = stateFactory(this)
+    Object.assign(this, passthrough)
 
     this._beforeNavigateCallbacks = []
-  }
-
-  update(_, __, push) {
-    if (this._queuedArgs) {
-      arguments[2] = this._queuedArgs[2] || push
-    }
-    this._queuedArgs = arguments
-
-    if (this._queuedUpdate) {
-      return this._queuedUpdate
-    }
-
-    return this._queuedUpdate = new Promise((resolve) => {
-      ko.tasks.schedule(() => {
-        this._update
-          .apply(this, this._queuedArgs)
-          .then(resolve)
-        this._queuedUpdate = false
-      })
-    })
-  }
-
-  _update(origUrl = this.canonicalPath(), state = false, push = true, query = false) {
-    const url = this.resolveUrl(origUrl)
-    const route = this.getRouteForUrl(url)
-    const firstRun = this.route() === ''
-
-    if (!route) {
-      return this.$parent ? this.$parent.update(...arguments) : false
-    }
-
-    const fromCtx = this.toJS()
-    const [path, params, hash, pathname, querystring, childPath] = route.parse(url)
-    const samePage = this.pathname() === pathname
-    const sameRoute = this.route() === route
-
-    const shouldNavigatePromise = (() => {
-      if (samePage) {
-        if (this.$child) {
-          const _push = push
-          push = false
-          return this.$child._update(childPath || '/', state, _push, query)
-            .then((handled) => {
-              state = false
-              query = false
-              return !handled
-            })
-        } else {
-          return Promise.resolve(true)
-        }
-      } else {
-        return this.runBeforeNavigateCallbacks()
-      }
-    })()
-
-    return shouldNavigatePromise.then((shouldNavigate) => {
-      if (!shouldNavigate) {
-        return Promise.resolve(false)
-      }
-
-      if (!query && querystring) {
-        query = qs.parse(querystring)[normalizePath(this.config.depth + pathname)]
-      }
-
-      const paramsChanged = !deepEquals(params, this.prevParams)
-      const queryChanged = query && !deepEquals(query, this.prevQuery)
-      const paramsForcedUpdate = this.config._forceReloadOnParamChange && paramsChanged
-      const queryForcedUpdate = this.config._forceReloadOnQueryChange && queryChanged
-      const forceUpdate = paramsForcedUpdate || queryForcedUpdate
-
-      this.prevParams = params
-      if (query) {
-        this.prevQuery = query
-      }
-
-      if (!sameRoute || forceUpdate) {
-        if (this.$child) {
-          this.$child.destroy()
-          delete this.$child
-        }
-      }
-
-      if ((!samePage && !firstRun) || forceUpdate) {
-        this.isNavigating(true)
-        this.reload()
-      }
-
-      const canonicalPath = Context
-        .getCanonicalPath(
-          this.getBase().replace(/\/$/, ''),
-          pathname,
-          childPath,
-          this.query.getFullQueryString(query, pathname),
-          hash)
-
-      const toCtx = {
-        path,
-        pathname,
-        canonicalPath,
-        hash,
-        params,
-        // route must come last
-        route
-      }
-
-      if (childPath && !samePage) {
-        toCtx.state = {}
-        toCtx.query = {}
-        this._$childInitState = state
-        this._$childInitQuery = query
-      } else {
-        if (state === false && samePage) {
-          toCtx.state = fromCtx.state
-        } else if (!this.config.persistState && state) {
-          toCtx.state = state
-        }
-
-        if (this.config.persistState) {
-          toCtx.state = this.state()
-        }
-      }
-
-      if (!samePage || !deepEquals(fromCtx.query, toCtx.query)) {
-        const path = '' === canonicalPath ? this.getBase() : canonicalPath
-
-        push
-          ? ko.router.history.push([history.state, path])
-          : ko.router.history.splice(ko.router.history.length - 1, 1, [history.state, path])
-
-        history[push ? 'pushState' : 'replaceState'](
-          history.state,
-          document.title,
-          path)
-      }
-
-      return new Promise((resolve) => {
-        const complete = (animate) => {
-          const el = this.config.el.getElementsByClassName('component-wrapper')[0]
-          delete toCtx.query
-          toCtx.route.runPipeline(toCtx)
-            .then(() => {
-              if (fromCtx.route.component === toCtx.route.component) {
-                merge(this, toCtx)
-                if ((this.config._forceReloadOnParamChange && paramsChanged) ||
-                    (this.config._forceReloadOnQueryChange && queryChanged)) {
-                  const r = toCtx.route
-                  toCtx.route = { component: '__KO_ROUTER_EMPTY_COMPONENT__' }
-                  this.config._forceReloadOnParamChange = false
-                  this.config._forceReloadOnQueryChange = false
-                  ko.tasks.runEarly()
-                  this.route(r)
-                }
-              } else {
-                this.config._forceReloadOnParamChange = false
-                this.config._forceReloadOnQueryChange = false
-                extend(this, toCtx)
-              }
-
-              if (query) {
-                this.query.update(query, pathname)
-              }
-              this.isNavigating(false)
-              ko.tasks.runEarly()
-              resolve(true)
-              if (animate) {
-                ko.tasks.schedule(() => this.config.inTransition(el, fromCtx, toCtx))
-              }
-            })
-        }
-
-        if (firstRun || samePage) {
-          complete(firstRun)
-        } else if (!samePage) {
-          this.config.outTransition(this.config.el, fromCtx, toCtx, complete)
-          if (this.config.outTransition.length !== 4) {
-            complete(true)
-          }
-        }
-      })
-    })
   }
 
   addBeforeNavigateCallback(cb) {
-    this._beforeNavigateCallbacks.push(cb)
+    this._beforeNavigateCallbacks.unshift(cb)
   }
 
-  runBeforeNavigateCallbacks() {
+  get $parent() {
+    return typeof this.router.$parent === 'undefined'
+      ? undefined
+      : this.router.$parent.ctx
+  }
+
+  get $child() {
+    return typeof this.router.$child === 'undefined'
+      ? undefined
+      : this.router.$child.ctx
+  }
+
+  get element() {
+    return document.getElementsByClassName('ko-component-router-view')[this.router.depth - 1]
+  }
+
+  async runBeforeNavigateCallbacks() {
     let ctx = this
     let callbacks = []
-
     while (ctx) {
-      callbacks = ctx._beforeNavigateCallbacks.concat(callbacks)
+      callbacks = [...ctx._beforeNavigateCallbacks, ...callbacks]
       ctx = ctx.$child
     }
-    return cascade(callbacks)
-  }
-
-  forceReloadOnParamChange() {
-    this.config._forceReloadOnParamChange = true
-  }
-
-  forceReloadOnQueryChange() {
-    this.config._forceReloadOnQueryChange = true
-  }
-
-  getRouteForUrl(url) {
-    const pathname = url
-      .split('#')[0]
-      .split('?')[0]
-
-    let matchingRouteWithFewestDynamicSegments
-    let fewestMatchingSegments = Infinity
-
-    for (const rn in this.config.routes) {
-      const r = this.config.routes[rn]
-      if (r.matches(pathname)) {
-        if (r._keys.length === 0) {
-          return r
-        } else if (fewestMatchingSegments === Infinity ||
-          (r._keys.length < fewestMatchingSegments && r._keys[0].pattern !== '.*')) {
-          fewestMatchingSegments = r._keys.length
-          matchingRouteWithFewestDynamicSegments = r
-        }
-      }
-    }
-    return matchingRouteWithFewestDynamicSegments
-  }
-
-  destroy() {
-    if (this.$child) {
-      this.$child.destroy()
-      delete this.$child
-    }
-
-    this.query.dispose()
-    this.state.dispose()
-  }
-
-  reload() {
-    this._beforeNavigateCallbacks = []
-    this.query.reload()
-    this.state.reload()
-  }
-
-  resolveUrl(origUrl) {
-    let url = (origUrl + '').replace('/#!', '')
-    if (url.indexOf('./') === 0) {
-      url = url.replace('./', '/')
-    } else {
-      let p = this
-      while (p && url.toLowerCase().indexOf(p.config.base.toLowerCase()) > -1) {
-        url = url.replace(new RegExp(p.config.base, 'i'), '')
-        p = p.$parent
-      }
-    }
-    return url
-  }
-
-  toJS() {
-    return ko.toJS({
-      route: this.route,
-      path: this.path,
-      pathname: this.pathname,
-      canonicalPath: this.canonicalPath,
-      hash: this.hash,
-      state: this.state,
-      params: this.params,
-      query: this.query.getAll(false, this.pathname())
-    })
-  }
-
-  getBase() {
-    let base = ''
-    let p = this
-    while (p) {
-      base = p.config.base + (!p.config.hashbang || p.$parent ? '' : '/#!') + base
-      p = p.$parent
-    }
-    return base
-  }
-
-  static getCanonicalPath(base, pathname, childPath = '', querystring, hash = '') {
-    return `${base}${pathname}${childPath}${querystring ? '?' + querystring : ''}${hash ? '#' + hash : ''}`
-  }
-
-  static getDepth(ctx) {
-    let depth = 0
-    while (ctx.$parent) {
-      ctx = ctx.$parent
-      depth++
-    }
-    return depth
+    return await sequence(callbacks)
   }
 }

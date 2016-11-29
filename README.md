@@ -8,16 +8,12 @@
 [![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)](https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table)
 [![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
 
-**PSST...** I've been hard at work on v4. You learn some things after writing a router
-or 3. Check it out in the `next` branch!
-
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
 
-Supports nested routing, read/write querystring param observables, read/write state observables
+__NOTE:__ You're on the *next* branch, i.e. v4. Some things are different here, and may fluctuate
+without warning until a 4.0.0 release is published.
 
-__[DOCS](https://Profiscience.github.io/ko-component-router/)__
-
-###### app.js ######
+### Basic Usage ###
 ```javascript
 import ko from 'knockout'
 import 'ko-component-router'
@@ -32,10 +28,7 @@ ko.components.register('app', {
     }
   },
   template: `
-    <ko-component-router params="
-      routes: routes,
-      hashbang: false">
-    </ko-component-router>
+    <ko-component-router params="routes: routes"></ko-component-router>
   `
 })
 
@@ -47,23 +40,13 @@ ko.components.register('user', {
   viewModel: class User {
     constructor(ctx) {
       // ctx.params
-      // ctx.query
-      // ctx.hash
       //
       // ...and more!
     }
-  },
-  template: '<!-- ctx is also available as $router in the binding context -->'
+  }
 })
 
 ko.applyBindings()
 ```
 
-###### index.html ######
-```html
-<body>
-  <app></app>
-</body>
-```
-
-_Requires Promise polyfill for IE support. [babel-polyfill](https://babeljs.io/docs/usage/polyfill/), [es6-promise](https://github.com/stefanpenner/es6-promise), etc._
+[More](./docs)

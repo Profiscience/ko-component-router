@@ -1,92 +1,159 @@
 import ko from 'knockout'
-import qs from 'qs'
 import Context from './context'
 import Route from './route'
-import { isUndefined, normalizePath } from './utils'
 
-const clickEvent = (!isUndefined(document)) && document.ontouchstart
-  ? 'touchstart'
-  : 'click'
+const events = {
+  click: document && document.ontouchstart
+    /* istanbul ignore next */
+    ? 'touchstart'
+    : 'click',
+  popstate: 'popstate'
+}
 
-class Router {
-  constructor(el, bindingCtx, {
-    routes,
-    base = '',
-    hashbang = false,
-    inTransition = noop,
-    outTransition = noop,
-    persistState = false,
-    persistQuery = false,
-    queryParser = qs.parse,
-    queryStringifier = qs.stringify
-  }) {
-    for (const route in routes) {
-      routes[route] = new Route(route, routes[route])
+const routers = []
+
+export default class Router {
+  constructor(params, el) {
+    const { routes, base = '' } = params
+
+    this.element = el
+    
+    delete params.routes
+    delete params.base
+    this.passthrough = params
+
+    this.component = ko.observable()
+
+    Router.link(this, base)
+
+    this.routes = Object.keys(routes).map((r) => new Route(this, r, routes[r]))
+
+    if (!this.$parent) {
+      this.history = ko.observableArray([])
     }
 
-    this.config = {
-      el,
-      base,
-      hashbang,
-      routes,
-      inTransition,
-      outTransition,
-      persistState,
-      persistQuery,
-      queryParser,
-      queryStringifier
+    this.onclick = Router.onclick.bind(this)
+    this.onpopstate = Router.onpopstate.bind(this)
+
+    document.addEventListener(events.click, this.onclick)
+    if (!this.$parent) {
+      window.addEventListener(events.popstate, this.onpopstate)
     }
 
-    this.ctx = new Context(bindingCtx, this.config)
+    this.update(this.getPathFromLocation(), false)
+  }
 
-    const isRoot = isUndefined(this.ctx.$parent)
+  async update(url, push = true) {
+    const path = Router.getPath(url)
+    const route = this.resolvePath(path)
 
-    this.onclick = this.onclick.bind(this)
-    this.onpopstate = this.onpopstate.bind(this)
-    document.addEventListener(clickEvent, this.onclick, false)
-    if (isRoot) {
-      window.addEventListener('popstate', this.onpopstate, false)
+    if (!route) {
+      return false
     }
 
-    let dispatch = true
-    if (!isRoot) {
-      dispatch = this.ctx.$parent.path() !== this.ctx.$parent.canonicalPath()
+    const [params, pathname, childPath] = route.parse(path)
+
+    if (this.ctx && this.ctx.pathname === pathname) {
+      return this.$child && await this.$child.update(childPath, push)
     }
 
-    if (dispatch) {
-      const path = (this.config.hashbang && ~location.hash.indexOf('#!'))
-        ? location.hash.substr(2) + location.search
-        : location.pathname + location.search + location.hash
-
-      let state = false
-      let query = false
-
-      if (!isRoot) {
-        state = this.ctx.$parent._$childInitState
-        query = this.ctx.$parent._$childInitQuery
-        delete this.ctx.$parent._$childInitState
-        delete this.ctx.$parent._$childInitQuery
+    if (this.ctx) {
+      const shouldNavigate = await this.ctx.runBeforeNavigateCallbacks()
+      if (shouldNavigate === false) {
+        return false
       }
 
-      this.ctx._update(path, state, false, query)
+      await this.ctx.route.dispose()
+    }
+
+    history[push ? 'pushState' : 'replaceState'](
+      history.state,
+      document.title,
+      this.base + path
+    )
+
+    this.ctx = new Context({
+      router: this,
+      params,
+      route,
+      path,
+      pathname,
+      passthrough: this.passthrough
+    })
+
+    await route.run(this.ctx)
+
+    return true
+  }
+
+  resolvePath(path) {
+    let matchingRouteWithFewestDynamicSegments
+    let fewestMatchingSegments = Infinity
+
+    for (const rn in this.routes) {
+      const r = this.routes[rn]
+      if (r.matches(path)) {
+        if (r._keys.length === 0) {
+          return r
+        } else if (fewestMatchingSegments === Infinity ||
+          (r._keys.length < fewestMatchingSegments && r._keys[0].pattern !== '.*')) {
+          fewestMatchingSegments = r._keys.length
+          matchingRouteWithFewestDynamicSegments = r
+        }
+      }
+    }
+
+    return matchingRouteWithFewestDynamicSegments
+  }
+
+  getPathFromLocation() {
+    return Router
+      .canonicalizePath(location.pathname + location.search + location.hash)
+      .replace(new RegExp(this.base, 'i'), '')
+  }
+
+  dispose() {
+    document.removeEventListener(events.click, this.onclick, false)
+    window.removeEventListener(events.popstate, this.onpopstate, false)
+    Router.unlink(this)
+  }
+
+  static use(fn) {
+    Route.use(fn)
+  }
+
+  static link(router, base) {
+    if (routers.length === 0) {
+      ko.router = router
+      router.base = base
+    } else {
+      const $parent = routers[routers.length - 1]
+      const { ctx: { route, path } } = $parent
+      const [, pathname] = route.parse(path)
+      router.$parent = $parent
+      router.$parent.$child = router
+      router.base = base + pathname
+    }
+
+    routers.push(router)
+    router.depth = routers.length
+  }
+
+  static unlink(router) {
+    routers.pop()
+    if (routers.length === 0) {
+      ko.router = Router
+    }
+    if (router.$parent) {
+      delete router.$parent.$child
     }
   }
 
-  onpopstate(e) {
+  static onclick(e) {
     if (e.defaultPrevented) {
       return
     }
 
-    const path = location.pathname + location.search + location.hash
-    const state = (e.state || {})[normalizePath(this.ctx.config.depth + this.ctx.pathname())]
-
-    if (this.ctx._update(path, state, false)) {
-      e.preventDefault()
-    }
-  }
-
-  onclick(e) {
-    // ensure link
     let el = e.target
     while (el && 'A' !== el.nodeName) {
       el = el.parentNode
@@ -95,14 +162,14 @@ class Router {
       return
     }
 
-    const isDoubleClick = 1 !== which(e)
-    const hasModifier = e.metaKey || e.ctrlKey || e.shiftKey
+    const isCrossOrigin = !Router.sameOrigin(el.href)
+    const isDoubleClick = 1 !== Router.which(e)
     const isDownload = el.hasAttribute('download')
-    const hasOtherTarget = el.hasAttribute('target')
-    const hasExternalRel = el.getAttribute('rel') === 'external'
-    const isMailto = ~(el.getAttribute('href') || '').indexOf('mailto:')
-    const isCrossOrigin = !sameOrigin(el.href)
     const isEmptyHash = el.getAttribute('href') === '#'
+    const isMailto = (el.getAttribute('href') || '').indexOf('mailto:') === 0
+    const hasExternalRel = el.getAttribute('rel') === 'external'
+    const hasModifier = e.metaKey || e.ctrlKey || e.shiftKey
+    const hasOtherTarget = el.hasAttribute('target')
 
     if (isCrossOrigin ||
         isDoubleClick ||
@@ -115,37 +182,49 @@ class Router {
       return
     }
 
-    const path = el.pathname + el.search + (el.hash || '')
+    const { pathname, search, hash = '' } = el
+    const path = pathname + search + hash
 
-    if (this.ctx._update(path)) {
+    if (this.update(path)) {
       e.preventDefault()
     }
   }
 
-  dispose() {
-    document.removeEventListener(clickEvent, this.onclick, false)
-    window.removeEventListener('popstate', this.onpopstate, false)
-    this.ctx.destroy()
+  static onpopstate(e) {
+    if (e.defaultPrevented) {
+      return
+    }
+
+    if (this.update(this.getPathFromLocation(), false)) {
+      e.preventDefault()
+    }
+  }
+
+  static canonicalizePath(path) {
+    return path.replace(new RegExp('/?#?!?/?'), '/')
+  }
+
+  static getPath(url) {
+    const parser = document.createElement('a')
+    const b = ko.router.base
+    if (b && url.indexOf(b)) {
+      url = url.split(b)[1]
+    }
+    parser.href = Router.canonicalizePath(url)
+    return parser.pathname
+  }
+
+  static sameOrigin(href) {
+    const { hostname, port, protocol } = location
+    let origin = protocol + '//' + hostname
+    if (port) {
+      origin += ':' + port
+    }
+    return href && href.indexOf(origin) === 0
+  }
+
+  static which(e) {
+    e = e || window.event
+    return null === e.which ? e.button : e.which
   }
 }
-
-function createViewModel(routerParams, componentInfo) {
-  const el = componentInfo.element
-  const bindingCtx = ko.contextFor(el)
-  return new Router(el, bindingCtx, ko.toJS(routerParams))
-}
-
-function which(e) {
-  e = e || window.event
-  return null === e.which ? e.button : e.which
-}
-
-function noop() {}
-
-function sameOrigin(href) {
-  let origin = location.protocol + '//' + location.hostname
-  if (location.port) origin += ':' + location.port
-  return (href && (0 === href.indexOf(origin)))
-}
-
-export default { createViewModel }
