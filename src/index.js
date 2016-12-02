@@ -1,5 +1,6 @@
 import ko from 'knockout'
 import Router from './router'
+import './binding'
 
 ko.components.register('ko-component-router', {
   synchronous: true,

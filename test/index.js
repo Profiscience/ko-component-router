@@ -5,6 +5,7 @@ import tape from 'tape'
 import '../src'
 
 import './anchor'
+import './binding'
 import './routing'
 import './middleware'
 import './before-navigate-callbacks'
@@ -14,6 +15,7 @@ import './passthrough'
 const tests = [
   'routing',
   'anchor',
+  'binding',
   'middleware',
   'before-navigate-callbacks',
   'element',

@@ -14,10 +14,16 @@ const routers = []
 
 export default class Router {
   constructor(params, el) {
-    const { routes, base = '' } = params
+    const bindingCtx = ko.contextFor(el)
+    bindingCtx.$router = this
+    this.bindingCtx = bindingCtx
+
+    const { routes, base = '', hashbang } = params
+
+    this.config = { hashbang }
 
     this.element = el
-    
+
     delete params.routes
     delete params.base
     this.passthrough = params
@@ -69,7 +75,7 @@ export default class Router {
     history[push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
-      this.base + path
+      this.config.base + path
     )
 
     this.ctx = new Context({
@@ -109,7 +115,7 @@ export default class Router {
   getPathFromLocation() {
     return Router
       .canonicalizePath(location.pathname + location.search + location.hash)
-      .replace(new RegExp(this.base, 'i'), '')
+      .replace(new RegExp(this.config.base, 'i'), '')
   }
 
   dispose() {
@@ -125,14 +131,16 @@ export default class Router {
   static link(router, base) {
     if (routers.length === 0) {
       ko.router = router
-      router.base = base
+      router.config.base = router.config.hashbang
+        ? base + '/#!'
+        : base
     } else {
       const $parent = routers[routers.length - 1]
       const { ctx: { route, path } } = $parent
       const [, pathname] = route.parse(path)
       router.$parent = $parent
       router.$parent.$child = router
-      router.base = base + pathname
+      router.config.base = base + pathname
     }
 
     routers.push(router)
@@ -206,7 +214,7 @@ export default class Router {
 
   static getPath(url) {
     const parser = document.createElement('a')
-    const b = ko.router.base
+    const b = ko.router.config.base
     if (b && url.indexOf(b)) {
       url = url.split(b)[1]
     }

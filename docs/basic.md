@@ -58,12 +58,13 @@ to the console.
 
 ---
 
-The router accepts 2 parameters:
+The router accepts 3 parameters:
 
 | option | description | example |
 | ------ | ----------- | ------- |
 | routes | object containing express-style routes as keys, and their corresponding view component names or an array containing [middleware](./middleware.md) | `{ '/home': 'home' }` |
 | base   | optional parameter defining the base path, this should only be used with the top-level router if using child routing | `/blog` |
+| hashbang | use hashbang (HTML4) routing (defaults to `false`) | false |
 
 ---
 
