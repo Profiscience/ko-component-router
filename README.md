@@ -8,6 +8,9 @@
 [![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)](https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table)
 [![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
 
+**PSST...** I've been hard at work on v4. You learn some things after writing a router
+or 3. Check it out in the `next` branch!
+
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
 
 Supports nested routing, read/write querystring param observables, read/write state observables
