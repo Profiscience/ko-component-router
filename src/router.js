@@ -71,10 +71,13 @@ export default class Router {
       await this.ctx.route.dispose()
     }
 
+    const currentUrl = Router.canonicalizePath(location.pathname + location.search + location.hash)
+    const { search, hash } = Router.parseUrl(currentUrl)
+
     history[push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
-      this.config.base + path
+      this.config.base + path + search + hash
     )
 
     this.ctx = new Context({
@@ -212,14 +215,18 @@ export default class Router {
     return path.replace(new RegExp('/?#?!?/?'), '/')
   }
 
-  static getPath(url) {
+  static parseUrl(url) {
     const parser = document.createElement('a')
     const b = ko.router.config.base.toLowerCase()
     if (b && url.toLowerCase().indexOf(b) === 0) {
       url = url.replace(new RegExp(b, 'i'), '') || '/'
     }
     parser.href = Router.canonicalizePath(url)
-    return parser.pathname
+    return parser
+  }
+
+  static getPath(url) {
+    return Router.parseUrl(url).pathname
   }
 
   static sameOrigin(href) {
