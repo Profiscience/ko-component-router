@@ -1,5 +1,11 @@
+import _isPlainObject from 'is-plain-object'
+
 export function isArray(arr) {
   return typeof arr.splice === 'function'
+}
+
+export function isPlainObject(x) {
+  return _isPlainObject(x)
 }
 
 export function runMiddleware(callbacks, ...args) {

@@ -12,7 +12,10 @@ ko.components.register('nested', {
       this.routes = {
         '/a': 'a',
         '/b': 'b',
-        '/c': 'c'
+        '/c': 'c',
+        '/': { // https://www.youtube.com/watch?v=5l-PjIqPOBw
+          '/d': 'd'
+        }
       }
 
       const hLen = history.length
@@ -43,11 +46,22 @@ ko.components.register('nested', {
           next()
         }
       })
+
+      ko.components.register('d', {
+        template: '<div></div>',
+        viewModel() {
+          t.pass('nested router shorthand works')
+          next()
+        }
+      })
     }
 
     * async runTests(next) {
       yield ko.router.update('/nested/b')
       yield ko.router.$child.update('/c')
+      debugger
+      const p = ko.router.$child.update('/d')
+      yield p
       next()
     }
 
@@ -55,6 +69,7 @@ ko.components.register('nested', {
       ko.components.unregister('a')
       ko.components.unregister('b')
       ko.components.unregister('c')
+      ko.components.unregister('d')
       ko.components.unregister('nested')
     }
   }
