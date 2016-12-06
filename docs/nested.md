@@ -7,7 +7,7 @@ There are two ways to define child routes, and which you use depends on the
 way you choose to structure your app, and just how much control you desire at each
 route. You can also use both in the same app as you feel necessary.
 
-# Method 1 (nested `<ko-component-router>` component)
+## Method 1 (nested `<ko-component-router>` component)
 In this method, you have a route which resolves to a component which contains
 another router component. In the top level, suffix your route with `!`, and
 you're good to go.
@@ -51,7 +51,7 @@ ko.components.register('user-show', ...)
 ko.components.register('user-edit', ...)
 ```
 
-# Method 2 (deep route object)
+## Method 2 (deep route object)
 Alternatively, you may define all of your routes in one place (or not, if using a module system) as such...
 
 ```javascript
