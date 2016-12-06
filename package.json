@@ -27,6 +27,7 @@
     "spa"
   ],
   "dependencies": {
+    "is-plain-object": "^2.0.1",
     "path-to-regexp": "^1.2.1"
   },
   "peerDependencies": {
