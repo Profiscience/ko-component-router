@@ -1,7 +1,6 @@
 import ko from 'knockout'
 import Context from './context'
 import Route from './route'
-// import { isUndefined } from './utils'
 
 const events = {
   click: document && document.ontouchstart
