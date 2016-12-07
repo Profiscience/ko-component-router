@@ -37,7 +37,7 @@ export default class Router {
       this.isRoot = true
       this.history = ko.observableArray([])
       document.addEventListener(events.click, Router.onclick)
-      window.addEventListener(events.popstate, Router.onpopstate.bind(this))
+      window.addEventListener(events.popstate, Router.onpopstate)
     }
 
     this.update(this.getPathFromLocation(), false)
@@ -209,14 +209,7 @@ export default class Router {
   }
 
   static onpopstate(e) {
-    const path = this.getPathFromLocation()
-
-    if (e.defaultPrevented) {
-      return
-    }
-
-    this.update(path, false)
-
+    ko.router.update(ko.router.getPathFromLocation(), false)
     e.preventDefault()
   }
 
