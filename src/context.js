@@ -1,4 +1,4 @@
-import { sequence } from './utils'
+import { isUndefined, sequence } from './utils'
 
 export default class Context {
   constructor({ router, route, path, pathname, params, passthrough }) {
@@ -19,13 +19,13 @@ export default class Context {
   }
 
   get $parent() {
-    return typeof this.router.$parent === 'undefined'
+    return this.router.isRoot
       ? undefined
       : this.router.$parent.ctx
   }
 
   get $child() {
-    return typeof this.router.$child === 'undefined'
+    return isUndefined(this.router.$child)
       ? undefined
       : this.router.$child.ctx
   }

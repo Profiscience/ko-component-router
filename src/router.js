@@ -1,6 +1,7 @@
 import ko from 'knockout'
 import Context from './context'
 import Route from './route'
+// import { isUndefined } from './utils'
 
 const events = {
   click: document && document.ontouchstart
@@ -32,23 +33,17 @@ export default class Router {
     this.routes = Object.keys(routes).map((r) => new Route(this, r, routes[r]))
 
     if (!this.$parent) {
+      ko.router = this
+      this.isRoot = true
       this.history = ko.observableArray([])
-    }
-
-    this.onclick = Router.onclick.bind(this)
-    this.onpopstate = Router.onpopstate.bind(this)
-
-    document.addEventListener(events.click, this.onclick)
-    if (!this.$parent) {
-      window.addEventListener(events.popstate, this.onpopstate)
+      document.addEventListener(events.click, Router.onclick)
+      window.addEventListener(events.popstate, Router.onpopstate.bind(this))
     }
 
     this.update(this.getPathFromLocation(), false)
   }
 
   async update(url, push = true) {
-    this.isNavigating(true)
-
     const path = Router.getPath(url)
     const route = this.resolvePath(path)
 
@@ -59,7 +54,11 @@ export default class Router {
     const [params, pathname, childPath] = route.parse(path)
 
     if (this.ctx && this.ctx.pathname === pathname) {
-      return this.$child && await this.$child.update(childPath, push)
+      if (this.$child) {
+        return await this.$child.update(childPath, push)
+      } else {
+        return false
+      }
     }
 
     if (this.ctx) {
@@ -67,6 +66,8 @@ export default class Router {
       if (shouldNavigate === false) {
         return false
       }
+
+      this.isNavigating(true)
 
       await this.ctx.route.dispose()
     }
@@ -134,7 +135,6 @@ export default class Router {
 
   static link(router, base) {
     if (routers.length === 0) {
-      ko.router = router
       router.config.base = router.config.hashbang
         ? base + '/#!'
         : base
@@ -155,13 +155,13 @@ export default class Router {
     if (routers.length === 0) {
       ko.router = Router
     }
-    if (router.$parent) {
+    if (!router.isRoot) {
       delete router.$parent.$child
     }
   }
 
   static onclick(e) {
-    if (e.defaultPrevented) {
+    if (e.defaultPrevented || e.target.dataset.external) {
       return
     }
 
@@ -182,7 +182,11 @@ export default class Router {
     const hasModifier = e.metaKey || e.ctrlKey || e.shiftKey
     const hasOtherTarget = el.hasAttribute('target')
 
-    if (isCrossOrigin ||
+    const { pathname, search, hash = '' } = el
+    const path = (pathname + search + hash).replace(new RegExp(ko.router.config.base, 'i'), '')
+
+    if (
+      isCrossOrigin ||
         isDoubleClick ||
         isDownload ||
         isEmptyHash ||
@@ -193,22 +197,27 @@ export default class Router {
       return
     }
 
-    const { pathname, search, hash = '' } = el
-    const path = pathname + search + hash
+    ko.router.update(path)
+      .then((navigated) => {
+        if (!navigated) {
+          e.target.dataset.external = true
+          e.target.dispatchEvent(e)
+        }
+      })
 
-    if (this.update(path)) {
-      e.preventDefault()
-    }
+    e.preventDefault()
   }
 
   static onpopstate(e) {
+    const path = this.getPathFromLocation()
+
     if (e.defaultPrevented) {
       return
     }
 
-    if (this.update(this.getPathFromLocation(), false)) {
-      e.preventDefault()
-    }
+    this.update(path, false)
+
+    e.preventDefault()
   }
 
   static canonicalizePath(path) {

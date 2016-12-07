@@ -1,6 +1,6 @@
 import ko from 'knockout'
 import pathtoRegexp from 'path-to-regexp'
-import { isArray, isPlainObject, runMiddleware, sequence } from './utils'
+import { isArray, isPlainObject, isString, runMiddleware, sequence } from './utils'
 
 const appMiddleware = []
 
@@ -9,7 +9,7 @@ export default class Route {
     this.middleware = []
 
     for (const m of isArray(middleware) ? middleware : [middleware]) {
-      if (typeof m === 'string') {
+      if (isString(m)) {
         this.middleware.push((ctx) => {
           ctx.router.component(m)
           ko.tasks.runEarly()
@@ -52,7 +52,7 @@ export default class Route {
 
     for (let i = 1, len = matches.length; i < len; ++i) {
       const k = this._keys[i - 1]
-      const v = matches[i]
+      const v = matches[i] || ''
       if (k.name === '__child_path__') {
         childPath = '/' + v
       } else {

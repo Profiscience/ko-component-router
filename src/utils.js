@@ -8,6 +8,14 @@ export function isPlainObject(x) {
   return _isPlainObject(x)
 }
 
+export function isString(x) {
+  return typeof x === 'string'
+}
+
+export function isUndefined(x) {
+  return typeof x === 'undefined'
+}
+
 export function runMiddleware(callbacks, ...args) {
   const downstream = []
 
