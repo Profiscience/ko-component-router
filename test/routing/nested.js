@@ -59,7 +59,6 @@ ko.components.register('nested', {
     * async runTests(next) {
       yield ko.router.update('/nested/b')
       yield ko.router.$child.update('/c')
-      debugger
       const p = ko.router.$child.update('/d')
       yield p
       next()

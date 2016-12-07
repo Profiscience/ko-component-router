@@ -1,4 +1,5 @@
 import ko from 'knockout'
+import { isUndefined } from './utils'
 
 ko.bindingHandlers.path = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
@@ -30,11 +31,11 @@ function parsePathBinding(bindingCtx, path) {
   if (path.indexOf('//') === 0) {
     path = path.replace('//', '/')
 
-    while (router.$parent) {
+    while (!router.isRoot) {
       router = router.$parent
     }
   } else {
-    while (path && path.match(/\/?\.\./i) && router.$parent) {
+    while (path && path.match(/\/?\.\./i) && !router.isRoot) {
       router = router.$parent
       path = path.replace(/\/?\.\./i, '')
     }
@@ -44,8 +45,8 @@ function parsePathBinding(bindingCtx, path) {
 }
 
 function getRouter(bindingCtx) {
-  while (typeof bindingCtx !== 'undefined') {
-    if (typeof bindingCtx.$router !== 'undefined') {
+  while (!isUndefined(bindingCtx)) {
+    if (!isUndefined(bindingCtx.$router)) {
       return bindingCtx.$router
     }
     bindingCtx = bindingCtx.$parentContext
