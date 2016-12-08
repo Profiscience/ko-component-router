@@ -4,14 +4,6 @@ export function isArray(arr) {
   return typeof arr.splice === 'function'
 }
 
-export function isFunction(x) {
-  return typeof x === 'function'
-}
-
-export function isGenerator(x) {
-  return x.constructor.name === 'GeneratorFunction'
-}
-
 export function isPlainObject(x) {
   return _isPlainObject(x)
 }
@@ -27,12 +19,8 @@ export function isUndefined(x) {
 export function runMiddleware(callbacks, ...args) {
   const downstream = []
 
-  callbacks = callbacks.map((_fn) => {
-    const fn = isGenerator(_fn)
-      ? _fn
-      : generatorify(_fn)
-
-    const runner = fn(...args)
+  callbacks = callbacks.map((fn) => {
+    const runner = generatorify(fn)(...args)
     const run = async () => {
       let ret = runner.next()
       ret = isThenable(ret)
@@ -58,23 +46,33 @@ export async function sequence(callbacks, ...args) {
   }
 }
 
-function generatorify(fn) {
-  return async function * (...args) {
-    const ret = await promisify(fn)(...args)
+function isFunction(x) {
+  return typeof x === 'function'
+}
 
-    if (isPlainObject(ret)) {
-      yield await promisify(ret.beforeRender)()
-      yield await promisify(ret.afterRender)()
-      yield await promisify(ret.beforeDispose)()
-      yield await promisify(ret.afterDispose)()
-    } else {
-      yield ret
-    }
-  }
+function isGenerator(x) {
+  return x.constructor.name === 'GeneratorFunction'
 }
 
 function isThenable(x) {
   return !isUndefined(x) && isFunction(x.then)
+}
+
+function generatorify(fn) {
+  return isGenerator(fn)
+    ? fn
+    : async function * (...args) {
+        const ret = await promisify(fn)(...args)
+
+        if (isPlainObject(ret)) {
+          yield await promisify(ret.beforeRender)()
+          yield await promisify(ret.afterRender)()
+          yield await promisify(ret.beforeDispose)()
+          yield await promisify(ret.afterDispose)()
+        } else {
+          yield ret
+        }
+      }
 }
 
 function promisify(_fn = () => {}) {
