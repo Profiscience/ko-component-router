@@ -36,10 +36,13 @@
   "devDependencies": {
     "babel-loader": "^6.2.0",
     "babel-plugin-transform-async-functions": "^6.8.0",
+    "babel-plugin-transform-async-to-generator": "^6.16.0",
     "babel-plugin-transform-object-rest-spread": "^6.19.0",
     "babel-plugin-transform-regenerator": "^6.9.0",
     "babel-preset-es2015": "^6.1.18",
+    "babel-preset-es2017": "^6.16.0",
     "coveralls": "^2.11.9",
+    "escompress-webpack-plugin": "^0.5.1",
     "eslint": "^3.0.1",
     "eslint-config-profiscience": "^1.0.1",
     "isparta-loader": "^2.0.0",
