@@ -7,7 +7,6 @@ coverage/
 src/
 test/
 
-.eslintignore
 .eslintrc
 .gitignore
 .travis.yml
