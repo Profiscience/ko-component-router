@@ -10,9 +10,7 @@
   "main": "dist/ko-component-router.js",
   "scripts": {
     "build": "webpack",
-    "watch": "webpack --watch",
     "lint": "eslint --max-warnings=0 *.js",
-    "format": "eslint --fix --max-warnings=0 *.js",
     "test": "karma start",
     "prepublish": "npm run build"
   },
