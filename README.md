@@ -7,7 +7,7 @@
 [![Dependency Status](https://img.shields.io/david/Profiscience/ko-component-router.svg)](https://david-dm.org/Profiscience/ko-component-router)
 [![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)](https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table)
 [![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
-[![Gitter](https://img.shields.io/gitter/room/profiscience/ko-component-router.svg)
+[![Gitter](https://img.shields.io/gitter/room/profiscience/ko-component-router.svg)](https://gitter.im/Profiscience/ko-component-router)
 
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
 
