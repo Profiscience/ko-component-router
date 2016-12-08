@@ -1,6 +1,24 @@
 'use strict' // eslint-disable-line
 
+// eslint-disable-next-line
+console.info(`Usage:
+  --chrome    open in chrome
+  --firefox   open in firefox
+  --watch     keep alive and re-run on change
+
+  e.g. "npm test -- --chrome --watch"
+`)
+
 const path = require('path')
+const { watch, chrome, firefox } = require('minimist')(process.argv.slice(2))
+
+const browsers = []
+if (chrome) {
+  browsers.push('_Chrome')
+}
+if (firefox) {
+  browsers.push('_Firefox')
+}
 
 module.exports = function(config) {
   config.set({
@@ -17,9 +35,22 @@ module.exports = function(config) {
       'test/index.js': 'webpack'
     },
 
-    browsers: ['Firefox'],
+    browsers,
 
-    singleRun: true,
+    customLaunchers: {
+      _Chrome: {
+        base: 'Chrome',
+        flags: ['--incognito']
+      },
+      _Firefox: {
+        base: 'Firefox',
+        flags: ['-private']
+      },
+    },
+
+    autoWatch: watch,
+
+    singleRun: !watch,
 
     reporters: ['dots', 'coverage'],
 
@@ -74,6 +105,7 @@ module.exports = function(config) {
         noAutoWrap: true,
         babel: {
           plugins: [
+            'transform-async-generator-functions',
             'transform-es2015-modules-commonjs',
             'transform-regenerator'
           ],

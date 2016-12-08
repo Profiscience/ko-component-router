@@ -8,7 +8,7 @@ before_script:
 - sh -e /etc/init.d/xvfb start
 script:
 - npm run lint
-- npm test
+- npm test -- --firefox
 after_script:
 - ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.txt
 notifications:

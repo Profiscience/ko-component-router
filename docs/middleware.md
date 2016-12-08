@@ -97,15 +97,59 @@ In the viewmodel for the `user` component, `ctx.user` will contain the user. Sin
 we're returning a promise, the next middleware (in this case the component setter)
 will not be executed until after the call has completed.
 
-Now for the real fun, generator middleware.
+Let's see how we can take some finer control. As has been the theme, you've got options...
+
+### Lifecycle Object
+You can return an object from your middleware that contains functions to be executed
+at different points in the page lifecycle.
+
+```javascript
+import Query from 'ko-query'
+
+function(ctx) {
+  return {
+    beforeRender(/* done */) {
+      console.log('[router] navigating to', ctx.pathname)
+      ctx.query = new Query({}, ctx.pathname)
+
+      return loadSomeAsyncData.then((data) => {
+        ctx.data = data
+
+        // callbacks are also supported
+        // done()
+      })
+    },
+    afterRender() {
+      console.log('[router] navigated to', ctx.pathname)
+      $(ctx.element).fadeIn()
+    },
+    beforeDispose() {
+      console.log('[router] navigating away from', ctx.pathname)
+      $(ctx.element).fadeOut()
+    },
+    afterDispose() {
+      console.log('[router] navigated away from', ctx.pathname)
+      ctx.query.dispose()
+    }
+  }
+}
+```
+
+You may be wondering, "why a function returning an object instead of just an object?"
+
+Well, if you read the docs on nested routing, you'll see that you can define routes
+by passing an object to a route. To avoid _too much_ polymorphism that could cause
+confusion, this was the ideal approach. It also enables dynamic middleware and
+more meta-programming opportunities.
+
+### Generator Middleware
+Now for the real fun — in my humble opinion, of course —, generator middleware.
 
 If you're unfamiliar with generators, [read up](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*),
 but fear not. In short, they are functions that are able to suspend and resume
-execution. Remember how I said there is a better way to control the route lifecycle?
+execution.
 
-This is that better way.
-
-Let's let some code talk for a second, then walk through what is going on...
+Let's write the same `monolithicMiddleware` with a generator, then walk through what is going on...
 
 ```javascript
 import Query from 'ko-query'
@@ -113,7 +157,7 @@ import Query from 'ko-query'
 function * monolithicMiddleware(ctx) {
   console.log('[router] navigating to', ctx.pathname)
   ctx.query = new Query({}, ctx.pathname)
-  yield
+  yield loadSomeAsyncData().then((data) => ctx.data = data)
 
   console.log('[router] navigated to', ctx.pathname)
   $(ctx.element).fadeIn()
@@ -123,7 +167,6 @@ function * monolithicMiddleware(ctx) {
   $(ctx.element).fadeOut()
   yield
 
-  // after dispose
   console.log('[router] navigated away from', ctx.pathname)
   ctx.query.dispose()
 }
@@ -134,13 +177,17 @@ ko.router.use(monolithicMiddleware)
 _Hopefully_ it's pretty obvious what is going on here, but if not, I'll elaborate.
 
 Generator middleware is expected to yield up to 3 times, and will be resumed at
-various times during the page lifecycle.
+the same points in the lifecycle: beforeRender, afterRender, beforeDispose, and afterDispose.
 
 Function entry to the first `yield` contains logic to be executed before the component
 is initialized, the second just after render, the third just before dispose, and the last
 just after.
 
-Yielding a promise is supported for async operations
+Yielding a promise is supported for async operations.
+
+I :heart: future JS.
+
+## Execution Order
 
 Middleware is executed in the following order...
 
