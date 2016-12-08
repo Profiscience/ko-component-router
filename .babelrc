@@ -1,6 +1,5 @@
 {
   "plugins": [
-    "transform-es2015-modules-commonjs",
     "transform-async-functions",
     "transform-object-rest-spread",
     "transform-regenerator"

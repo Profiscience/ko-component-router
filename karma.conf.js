@@ -8,7 +8,10 @@ module.exports = function(config) {
 
     frameworks: ['tap'],
 
-    files: ['test/index.js'],
+    files: [
+      'node_modules/regenerator-runtime/runtime.js',
+      'test/index.js'
+    ],
 
     preprocessors: {
       'test/index.js': 'webpack'
@@ -38,25 +41,17 @@ module.exports = function(config) {
           {
             test: /\.js$/,
             exclude: [
-              path.resolve('src/!(utils)'),
-              path.resolve('node_modules/')
+              path.resolve('src'),
+              path.resolve('node_modules')
             ],
             loader: 'babel',
             query: {
-              plugins: [
-                'transform-async-functions',
-                'transform-es2015-modules-commonjs',
-                'transform-object-rest-spread',
-                'transform-regenerator',
-                'transform-runtime'
-              ],
-              presets: ['es2015']
+              cacheDirectory: true
             }
           },
           {
             test: /\.js$/,
-            include: path.resolve('src/'),
-            exclude: /utils/,
+            include: path.resolve('src'),
             loader: 'isparta'
           }
         ]

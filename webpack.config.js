@@ -10,7 +10,7 @@ module.exports = [
 function makeConfig(o) {
   const minify = o ? o.minify : false
   return {
-    entry: './src/index.js',
+    entry: ['regenerator-runtime/runtime', './src/index.js'],
 
     output: {
       path: 'dist',
@@ -26,21 +26,14 @@ function makeConfig(o) {
           exclude: /(node_modules)/,
           loader: 'babel',
           query: {
-            cacheDirectory: true,
-            plugins: [
-              'transform-async-functions',
-              'transform-es2015-modules-commonjs',
-              'transform-object-rest-spread',
-              'transform-regenerator'
-            ],
-            presets: ['es2015']
+            cacheDirectory: true
           }
         }
       ]
     },
 
     externals: {
-      'knockout': {
+      knockout: {
         root: 'ko',
         commonjs: 'knockout',
         commonjs2: 'knockout',
