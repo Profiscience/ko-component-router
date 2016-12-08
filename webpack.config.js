@@ -1,20 +1,51 @@
 'use strict' // eslint-disable-line
 
 const webpack = require('webpack')
+const ESCompressPlugin = require('escompress-webpack-plugin')
 
 module.exports = [
   makeConfig(),
-  makeConfig({ minify: true })
+  makeConfig({ minify: true }),
+  makeConfig({ es2015: true }),
+  makeConfig({ minify: true, es2015: true })
 ]
 
 function makeConfig(o) {
   const minify = o ? o.minify : false
+  const es2015 = o ? o.es2015 : false
+
+  const entry = ['./src/index.js']
+  const presets = ['es2017']
+  const babelPlugins = []
+  const webpackPlugins = []
+
+  if (es2015) {
+    babelPlugins.push('transform-es2015-modules-commonjs')
+  } else {
+    presets.unshift('es2015')
+    entry.unshift('regenerator-runtime/runtime')
+  }
+
+  if (minify) {
+    webpackPlugins.push(new webpack.optimize.DedupePlugin())
+    webpackPlugins.push(es2015 ? new ESCompressPlugin() : new webpack.optimize.UglifyJsPlugin())
+  }
+
+  let filename = 'ko-component-router'
+  if (es2015) {
+    filename += '.es2015'
+  }
+  if (minify) {
+    filename += '.min'
+  }
+  filename += '.js'
+
   return {
-    entry: ['regenerator-runtime/runtime', './src/index.js'],
+    entry,
 
     output: {
       path: 'dist',
-      filename: minify ? 'ko-component-router.min.js' : 'ko-component-router.js',
+      filename,
       library:  'ko-component-router',
       libraryTarget: 'umd'
     },
@@ -26,7 +57,9 @@ function makeConfig(o) {
           exclude: /(node_modules)/,
           loader: 'babel',
           query: {
-            cacheDirectory: true
+            cacheDirectory: true,
+            presets,
+            plugins: babelPlugins
           }
         }
       ]
@@ -41,11 +74,6 @@ function makeConfig(o) {
       }
     },
 
-    plugins: minify
-      ? [
-          new webpack.optimize.DedupePlugin(),
-          new webpack.optimize.UglifyJsPlugin()
-        ]
-      : []
+    plugins: webpackPlugins
   }
 }
