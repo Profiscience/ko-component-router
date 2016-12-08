@@ -16,7 +16,7 @@ function makeConfig(o) {
 
   const entry = ['./src/index.js']
   const presets = ['es2017']
-  const babelPlugins = []
+  const babelPlugins = ['transform-async-generator-functions']
   const webpackPlugins = []
 
   if (es2015) {
