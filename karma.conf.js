@@ -55,16 +55,38 @@ module.exports = function(config) {
             loader: 'isparta'
           }
         ]
+      },
+
+      babel: {
+        plugins: [
+          'transform-object-rest-spread',
+          'transform-es2015-modules-commonjs',
+          'transform-regenerator'
+        ],
+        presets: [
+          'es2015',
+          'es2017'
+        ]
+      },
+
+      isparta: {
+        embedSource: true,
+        noAutoWrap: true,
+        babel: {
+          plugins: [
+            'transform-es2015-modules-commonjs',
+            'transform-regenerator'
+          ],
+          presets: [
+            'es2015',
+            'es2017'
+          ]
+        },
       }
     },
 
     webpackMiddleware: {
       noInfo: true
-    },
-
-    isparta: {
-      embedSource: true,
-      noAutoWrap: true
     }
   })
 }

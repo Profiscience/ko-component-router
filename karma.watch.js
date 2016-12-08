@@ -50,6 +50,17 @@ module.exports = function(config) {
           }
         ]
       },
+      babel: {
+        plugins: [
+          'transform-object-rest-spread',
+          'transform-es2015-modules-commonjs',
+          'transform-regenerator'
+        ],
+        presets: [
+          'es2015',
+          'es2017'
+        ]
+      },
       devtool: 'eval-source-map'
     },
 
