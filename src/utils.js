@@ -69,10 +69,12 @@ function generatorify(fn) {
             switch (count++) {
               case 1:
                 ret = await promisify(fn)(...args) || false
-                return isPlainObject(ret) ? await promisify(ret.beforeRender)() : ret
-              case 2: return await promisify(ret.afterRender)()
-              case 3: return await promisify(ret.beforeDispose)()
-              case 4: return await promisify(ret.afterDispose)()
+                return ret && ret.beforeRender
+                  ? await promisify(ret.beforeRender)()
+                  : ret
+              case 2: return ret && await promisify(ret.afterRender)()
+              case 3: return ret && await promisify(ret.beforeDispose)()
+              case 4: return ret && await promisify(ret.afterDispose)()
             }
           }
         }
