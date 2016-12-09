@@ -58,22 +58,43 @@ function isThenable(x) {
   return !isUndefined(x) && isFunction(x.then)
 }
 
+// generators are expensive to transpile re: file size and readability. alas, fake it.
 function generatorify(fn) {
   return isGenerator(fn)
     ? fn
-    : async function * (...args) {
-        const ret = await promisify(fn)(...args)
-
-        if (isPlainObject(ret)) {
-          yield await promisify(ret.beforeRender)()
-          yield await promisify(ret.afterRender)()
-          yield await promisify(ret.beforeDispose)()
-          yield await promisify(ret.afterDispose)()
-        } else {
-          yield ret
+    : function(...args) {
+        let count = 1, ret
+        return {
+          async next() {
+            switch (count++) {
+              case 1:
+                ret = await promisify(fn)(...args) || false
+                return isPlainObject(ret) ? await promisify(ret.beforeRender)() : ret
+              case 2: return await promisify(ret.afterRender)()
+              case 3: return await promisify(ret.beforeDispose)()
+              case 4: return await promisify(ret.afterDispose)()
+            }
+          }
         }
       }
 }
+
+// function generatorify(fn) {
+//   return isGenerator(fn)
+//     ? fn
+//     : async function * (...args) {
+//         const ret = await promisify(fn)(...args)
+//
+//         if (isPlainObject(ret)) {
+//           yield await promisify(ret.beforeRender)()
+//           yield await promisify(ret.afterRender)()
+//           yield await promisify(ret.beforeDispose)()
+//           yield await promisify(ret.afterDispose)()
+//         } else {
+//           yield ret
+//         }
+//       }
+// }
 
 function promisify(_fn = () => {}) {
   return async (...args) => {
