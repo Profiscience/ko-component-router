@@ -8,6 +8,8 @@
   "bugs": "https://github.com/Profiscience/ko-component-router/issues",
   "repository": "Profiscience/ko-component-router",
   "main": "dist/ko-component-router.js",
+  "jsnext:main": "dist/modules/index.js",
+  "module": "dist/modules/index.js",
   "scripts": {
     "build": "scripts/build.js",
     "watch": "scripts/watch.js",
