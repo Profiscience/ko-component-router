@@ -121,7 +121,7 @@ const config = {
 }
 
 compile().then(() => {
-  const server = new Server(config) // eslint-disable-line
+  const server = new Server(config, (code) => process.exit(code)) // eslint-disable-line
   server.start()
   chokidar.watch(path.resolve(__dirname, '../src')).on('change', () => compile())
 })
