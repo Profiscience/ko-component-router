@@ -3,6 +3,16 @@
 $ npm install ko-component-router
 ```
 
+The following browser features are required:
+
+Feature | Browser support | polyfill
+---|---|---
+Promises/A+ | [Link](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#Browser_compatibility) | [es6-promise](https://github.com/stefanpenner/es6-promise)
+Object.assign | [Link](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Browser_compatibility) | [Snippet](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill)
+pushState/replaceState | [Link](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Browser_compatibility) | [html5-history-api](https://github.com/devote/HTML5-History-API)
+
+
+
 # Basic Usage
 
 If a picture is worth 1k words, code is worth 1M...
