@@ -2,7 +2,7 @@ import $ from 'jquery'
 import ko from 'knockout'
 import tape from 'tape'
 
-import '../src'
+import '../dist/modules'
 
 import './anchor'
 import './binding'

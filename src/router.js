@@ -3,10 +3,7 @@ import Context from './context'
 import Route from './route'
 
 const events = {
-  click: document && document.ontouchstart
-    /* istanbul ignore next */
-    ? 'touchstart'
-    : 'click',
+  click: document.ontouchstart ? 'touchstart' : 'click',
   popstate: 'popstate'
 }
 
