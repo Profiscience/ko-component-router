@@ -6,7 +6,7 @@ export default class Context {
     this.route = route
     this.path = path
     this.pathname = pathname
-    this.fullPath = this.router.base + this.pathname
+    this.fullPath = this.router.config.base + this.pathname
     this.params = params
 
     Object.assign(this, passthrough)
