@@ -1,3 +1,4 @@
+import ko from 'knockout'
 import { isUndefined, sequence } from './utils'
 
 export default class Context {
@@ -7,6 +8,7 @@ export default class Context {
     this.path = path
     this.pathname = pathname
     this.fullPath = this.router.config.base + this.pathname
+    this.canonicalPath = this.fullPath.replace(new RegExp(ko.router.config.base, 'i'), '')
     this.params = params
 
     Object.assign(this, passthrough)
