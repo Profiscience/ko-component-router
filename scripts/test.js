@@ -7,12 +7,13 @@ console.info(`Usage:
   --chrome    open in chrome
   --firefox   open in firefox
   --watch     keep alive and re-run on change
+  --coverage  generate coverage report
 
   e.g. "npm test -- --chrome --watch"
 `)
 
 const path = require('path')
-const { watch, chrome, firefox } = require('minimist')(process.argv.slice(2))
+const { watch, chrome, firefox, coverage } = require('minimist')(process.argv.slice(2))
 const chokidar = require('chokidar')
 const { Server } = require('karma')
 const compile = require('./lib/compile')
@@ -23,6 +24,27 @@ if (chrome) {
 }
 if (firefox) {
   browsers.push('_Firefox')
+}
+
+const preLoaders = [
+  {
+    test: /\.js$/,
+    exclude: [
+      path.resolve('node_modules')
+    ],
+    loader: 'babel',
+    query: {
+      cacheDirectory: true,
+    }
+  }
+]
+if (coverage) {
+  preLoaders[0].exclude.push(path.resolve('dist'))
+  preLoaders.push({
+    test: /\.js$/,
+    include: path.resolve('dist'),
+    loader: 'isparta'
+  })
 }
 
 const config = {
@@ -72,24 +94,7 @@ const config = {
     },
 
     module: {
-      preLoaders: [
-        {
-          test: /\.js$/,
-          exclude: [
-            path.resolve('dist'),
-            path.resolve('node_modules')
-          ],
-          loader: 'babel',
-          query: {
-            cacheDirectory: true,
-          }
-        },
-        {
-          test: /\.js$/,
-          include: path.resolve('dist'),
-          loader: 'isparta'
-        }
-      ]
+      preLoaders
     },
 
     babel: {
