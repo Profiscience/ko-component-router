@@ -1,6 +1,6 @@
 import ko from 'knockout'
 import pathtoRegexp from 'path-to-regexp'
-import { isArray, isPlainObject, isString, isUndefined, runMiddleware, sequence } from './utils'
+import { isArray, isPlainObject, isString, runMiddleware, sequence } from './utils'
 
 const appMiddleware = []
 
