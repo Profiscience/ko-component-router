@@ -56,7 +56,12 @@ export default class Route {
 
   async run(ctx) {
     let disposals = []
-    this.dispose = () => sequence(disposals)
+    this.dispose = async () => {
+      if (ctx.$child) {
+        await ctx.$child.route.dispose()
+      }
+      return await sequence(disposals)
+    }
 
     const [appUpstream, appNext] = runMiddleware(appMiddleware, ctx)
     disposals = [

@@ -126,6 +126,9 @@ export default class Router {
     document.removeEventListener(events.click, this.onclick, false)
     window.removeEventListener(events.popstate, this.onpopstate, false)
     Router.unlink(this)
+    if (this.isRoot) {
+      this.ctx.route.dispose()
+    }
   }
 
   static use(fn) {
