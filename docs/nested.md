@@ -119,8 +119,7 @@ ko.components.register('user-header', {
     </a>
     
     <ko-component-router></ko-component-router>
-  `,
-  viewModel: App
+  `
 })
 
 ko.components.register('user-list', ...)
