@@ -27,10 +27,8 @@ ko.components.register('middleware', {
             t.ok(ctx, 'middleware is ran with ctx as first argument')
           },
           'sync',
-          () => {
-            t.ok(document.getElementById('sync'), 'post-component middleware is ran after render')
-            next()
-          }],
+          () => next()
+        ],
 
         '/async': [
           (ctx, next) => {

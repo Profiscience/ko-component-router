@@ -10,10 +10,7 @@ export default class Route {
 
     for (const m of isArray(middleware) ? middleware : [middleware]) {
       if (isString(m)) {
-        this.middleware.push((ctx) => {
-          ctx.router.component(m)
-          ko.tasks.runEarly()
-        })
+        this.component = m
       } else if (isPlainObject(m)) {
         path = path.replace(/\/?!?$/, '/!')
         this.middleware.push((ctx) => {
@@ -90,6 +87,11 @@ export default class Route {
       appNext
     ]
     await routeUpstream
+
+    if (ctx.route.component) {
+      ctx.router.component(ctx.route.component)
+      ko.tasks.runEarly()
+    }
 
     // after render
     await appNext()
