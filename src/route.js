@@ -1,6 +1,6 @@
 import ko from 'knockout'
 import pathtoRegexp from 'path-to-regexp'
-import { isArray, isPlainObject, isString, runMiddleware, sequence } from './utils'
+import { isArray, isPlainObject, isString, isUndefined, runMiddleware, sequence } from './utils'
 
 const appMiddleware = []
 
@@ -13,16 +13,10 @@ export default class Route {
         this.component = m
       } else if (isPlainObject(m)) {
         path = path.replace(/\/?!?$/, '/!')
-        this.middleware.push((ctx) => {
-          const c = '__nested_router__'
-          ko.components.register(c, {
-            viewModel() { this.routes = m },
-            template: '<ko-component-router params="routes: routes"></ko-component-router>'
-          })
-          ctx.router.component(c)
-          ko.tasks.runEarly()
-          ko.components.unregister(c)
-        })
+        this.children = m
+        if (!this.component) {
+          this.component = 'ko-component-router'
+        }
       } else {
         this.middleware.push(m)
       }

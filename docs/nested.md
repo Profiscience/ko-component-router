@@ -58,7 +58,6 @@ Alternatively, you may define all of your routes in one place (or not, if using 
 class App {
   constructor() {
     this.routes = {
-      // note the `!`
       '/user': {
         '/': 'user-list',
         '/new': 'user-create',
@@ -79,3 +78,55 @@ ko.components.register('user-create', ...)
 ko.components.register('user-show', ...)
 ko.components.register('user-edit', ...)
 ```
+
+> That's great and all, but an empty router isn't enough for me. I want define
+> a custom component for the parent, and still use the nested route syntax.
+— you, right now.
+
+Well, you can do that, simply pass the component name as you would and include
+an empty router component in the template. Here's the above, with a common header
+for all user pages.
+
+```javascript
+class App {
+  constructor() {
+    this.routes = {
+      '/user': [
+        'user-header',
+        {
+          '/': 'user-list',
+          '/new': 'user-create',
+          '/:id': 'user-show',
+          '/:id/edit': 'user-edit'
+        }
+      ]
+    }
+  }
+}
+
+ko.components.register('app', {
+  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  viewModel: App
+})
+
+ko.components.register('user-header', {
+  template: `
+    <a data-bind="path: '/'">
+      List
+    </a>
+    <a data-bind="path: '/new'">
+      New User
+    </a>
+    
+    <ko-component-router></ko-component-router>
+  `,
+  viewModel: App
+})
+
+ko.components.register('user-list', ...)
+ko.components.register('user-create', ...)
+ko.components.register('user-show', ...)
+ko.components.register('user-edit', ...)
+```
+
+:hamburger: :fries: Have it your way.

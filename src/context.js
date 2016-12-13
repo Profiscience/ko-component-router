@@ -3,15 +3,17 @@ import { isUndefined, sequence } from './utils'
 
 export default class Context {
   constructor({ router, route, path, pathname, params, passthrough }) {
-    this.router = router
-    this.route = route
-    this.path = path
-    this.pathname = pathname
-    this.fullPath = this.router.config.base + this.pathname
-    this.canonicalPath = this.fullPath.replace(new RegExp(ko.router.config.base, 'i'), '')
-    this.params = params
-
-    Object.assign(this, passthrough)
+    // ensure args take precedence over passthrough so as not to break
+    // nested route shorthand
+    Object.assign(this, passthrough, {
+      router,
+      route,
+      path,
+      pathname,
+      params,
+      fullPath: router.config.base + pathname,
+      canonicalPath: (router.config.base + pathname).replace(new RegExp(ko.router.config.base, 'i'), '')
+    })
 
     this._beforeNavigateCallbacks = []
   }
