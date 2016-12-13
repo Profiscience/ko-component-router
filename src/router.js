@@ -11,7 +11,7 @@ const routers = []
 
 export default class Router {
   constructor(params, el) {
-    const { routes, base = '', hashbang } = params
+    const { routes = {}, base = '', hashbang } = params
 
     ko.contextFor(el).$router = this
 
@@ -26,6 +26,9 @@ export default class Router {
 
     Router.link(this, base)
 
+    if (this.$parent && this.$parent.ctx.route.children) {
+      Object.assign(routes, this.$parent.ctx.route.children)
+    }
     this.routes = Object.keys(routes).map((r) => new Route(this, r, routes[r]))
 
     if (!this.$parent) {

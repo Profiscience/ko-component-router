@@ -13,9 +13,15 @@ ko.components.register('nested', {
         '/a': 'a',
         '/b': 'b',
         '/c': 'c',
-        '/': { // https://www.youtube.com/watch?v=5l-PjIqPOBw
-          '/d': 'd'
-        }
+        '/d': { // https://www.youtube.com/watch?v=5l-PjIqPOBw
+          '/e': 'e'
+        },
+        '/f': [
+          'f',
+          {
+            '/g': 'g'
+          }
+        ]
       }
 
       const hLen = history.length
@@ -47,10 +53,25 @@ ko.components.register('nested', {
         }
       })
 
-      ko.components.register('d', {
+      ko.components.register('e', {
         template: '<div></div>',
         viewModel() {
           t.pass('nested router shorthand works')
+          next()
+        }
+      })
+
+      ko.components.register('f', {
+        template: '<ko-component-router></ko-component-router>',
+        viewModel() {
+          t.pass('nested router shorthand uses supplied component')
+        }
+      })
+
+      ko.components.register('g', {
+        template: '<div></div>',
+        viewModel() {
+          t.pass('anonymous router in route using shorthand works')
           next()
         }
       })
@@ -59,8 +80,8 @@ ko.components.register('nested', {
     * async runTests(next) {
       yield ko.router.update('/nested/b')
       yield ko.router.$child.update('/c')
-      const p = ko.router.$child.update('/d')
-      yield p
+      yield ko.router.$child.update('/d/e')
+      yield ko.router.$child.update('/f/g')
       next()
     }
 
