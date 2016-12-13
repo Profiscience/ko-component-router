@@ -11,8 +11,7 @@
 
 Component-based router for developing wicked awesome single-page apps with KnockoutJS.
 
-__NOTE:__ You're on the *next* branch, i.e. v4. Some things are different here, and may fluctuate
-without warning until a 4.0.0 release is published. See [Migrating from 3.x to 4.x](https://github.com/Profiscience/ko-component-router/wiki/Migrating-from-3.x-to-4.x).
+__NOTE:__ You're on the *next* branch, i.e. v4. Some things are different here. See [Migrating from 3.x to 4.x](https://github.com/Profiscience/ko-component-router/wiki/Migrating-from-3.x-to-4.x).
 
 ### Installation
 ```bash
