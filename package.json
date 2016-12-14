@@ -73,6 +73,7 @@
     "rollup-plugin-commonjs": "^5.0.5",
     "rollup-plugin-node-resolve": "^2.0.0",
     "tape": "^4.4.0",
+    "uglify-js": "^2.7.5",
     "webpack": "^1.14.0"
   }
 }
