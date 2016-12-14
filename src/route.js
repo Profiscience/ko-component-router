@@ -39,7 +39,6 @@ export default class Route {
       return false
     }
     if (this.children) {
-      debugger
       for (const childRoute of this.children) {
         const childPath = '/' + (matches[matches.length - 1] || '')
         if (childRoute.matches(childPath)) {
