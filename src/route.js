@@ -5,7 +5,7 @@ import { isArray, isPlainObject, isString, runMiddleware, sequence } from './uti
 const appMiddleware = []
 
 export default class Route {
-  constructor(router, path, middleware) {
+  constructor(path, middleware) {
     this.middleware = []
 
     for (const m of isArray(middleware) ? middleware : [middleware]) {
@@ -13,7 +13,7 @@ export default class Route {
         this.component = m
       } else if (isPlainObject(m)) {
         path = path.replace(/\/?!?$/, '/!')
-        this.children = m
+        this.children = Object.entries(m).map(([r, m]) => new Route(r, m))
         if (!this.component) {
           this.component = 'ko-component-router'
         }
@@ -28,12 +28,28 @@ export default class Route {
       path = path.replace(/\(?\*\)?/, '(.*)')
     }
 
+    this.path = path
     this._keys = []
     this._regexp = pathtoRegexp(path, this._keys)
   }
 
   matches(path) {
-    return this._regexp.exec(path) !== null
+    const matches = this._regexp.exec(path)
+    if (matches === null) {
+      return false
+    }
+    if (this.children) {
+      debugger
+      for (const childRoute of this.children) {
+        const childPath = '/' + (matches[matches.length - 1] || '')
+        if (childRoute.matches(childPath)) {
+          return true
+        }
+      }
+      return false
+    }
+
+    return true
   }
 
   parse(path) {

@@ -7,12 +7,14 @@ import basic from './basic'
 import params from './params'
 import nested from './nested'
 import similar from './similar'
+import ambiguous from './ambiguous'
 
 const paths = [
   '/basic',
   '/params/foo',
   '/nested/a',
-  '/similar/foo/bar'
+  '/similar/foo/bar',
+  '/ambiguous/a/b/c'
 ]
 
 ko.components.register('routing', {
@@ -27,7 +29,8 @@ ko.components.register('routing', {
         ...basic,
         ...params,
         ...nested,
-        ...similar
+        ...similar,
+        ...ambiguous
       }, (r) => [
         (ctx) => extend(ctx, { t, next }),
         r
