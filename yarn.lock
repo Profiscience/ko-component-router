@@ -1088,8 +1088,8 @@ debug@2.2.0, debug@~2.2.0:
     ms "0.7.1"
 
 debug@^2.1.1, debug@^2.2.0:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-2.4.2.tgz#a255d4489f58a2d7b6aaaddb9b7c60828f6ba27a"
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-2.4.3.tgz#3fe67c5588e724d0f5d9e48c8f08ff69b4b20643"
   dependencies:
     ms "0.7.2"
 
