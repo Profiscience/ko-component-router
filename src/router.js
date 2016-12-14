@@ -202,7 +202,7 @@ export default class Router {
       .then((navigated) => {
         if (!navigated) {
           e.target.dataset.external = true
-          e.target.dispatchEvent(e)
+          e.target.dispatchEvent(new e.constructor(e.type, e))
         }
       })
 
