@@ -117,9 +117,8 @@ export default class Router {
   }
 
   getPathFromLocation() {
-    return Router
-      .canonicalizePath(location.pathname + location.search + location.hash)
-      .replace(new RegExp(this.config.base, 'i'), '')
+    const path = location.pathname + location.search + location.hash
+    return path.replace(new RegExp(this.config.base, 'i'), '')
   }
 
   dispose() {

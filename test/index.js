@@ -11,6 +11,7 @@ import './middleware'
 import './before-navigate-callbacks'
 import './element'
 import './passthrough'
+import './issues'
 
 const tests = [
   'routing',
@@ -19,7 +20,8 @@ const tests = [
   'middleware',
   'before-navigate-callbacks',
   'element',
-  'passthrough'
+  'passthrough',
+  'issues'
 ]
 
 class Test {
