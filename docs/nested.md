@@ -117,7 +117,7 @@ ko.components.register('user-header', {
     <a data-bind="path: '/new'">
       New User
     </a>
-    
+
     <ko-component-router></ko-component-router>
   `
 })
@@ -127,5 +127,12 @@ ko.components.register('user-create', ...)
 ko.components.register('user-show', ...)
 ko.components.register('user-edit', ...)
 ```
+
+**One more thing!**
+
+Using the deep route object has the benefit of letting the router know all
+available routes synchronously, so it enables ambiguous routes to be used.
+This is yet another case where [code](../test/routing/ambiguous.js) can
+explain things much easier than I can.
 
 :hamburger: :fries: Have it your way.

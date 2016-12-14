@@ -26,10 +26,10 @@ export default class Router {
 
     Router.link(this, base)
 
+    this.routes = Object.entries(routes).map(([r, m]) => new Route(r, m))
     if (this.$parent && this.$parent.ctx.route.children) {
-      Object.assign(routes, this.$parent.ctx.route.children)
+      this.routes.push(...this.$parent.ctx.route.children)
     }
-    this.routes = Object.keys(routes).map((r) => new Route(this, r, routes[r]))
 
     if (!this.$parent) {
       ko.router = this
