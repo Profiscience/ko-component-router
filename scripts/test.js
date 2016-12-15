@@ -26,6 +26,11 @@ if (firefox) {
   browsers.push('_Firefox')
 }
 
+const reporters = ['dots']
+if (coverage) {
+  reporters.push('coverage')
+}
+
 const preLoaders = [
   {
     test: /\.js$/,
@@ -78,7 +83,7 @@ const config = {
 
   singleRun: !watch,
 
-  reporters: ['dots', 'coverage'],
+  reporters,
 
   coverageReporter: {
     dir : 'coverage/',
