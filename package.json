@@ -11,7 +11,7 @@
     "build": "node scripts/build.js",
     "watch": "node scripts/watch.js",
     "test": "node scripts/test.js",
-    "lint": "eslint --max-warnings=0 *.js",
+    "lint": "eslint --max-warnings=0 src/ test/ scripts/",
     "prepublish": "npm run build"
   },
   "main": "dist/ko-component-router.js",
