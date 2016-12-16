@@ -136,3 +136,7 @@ This is yet another case where [code](../test/routing/ambiguous.js) can
 explain things much easier than I can.
 
 :hamburger: :fries: Have it your way.
+
+---
+
+[Back](./)
