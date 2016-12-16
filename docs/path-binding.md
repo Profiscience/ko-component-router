@@ -4,7 +4,7 @@ For your convenience, the router includes a binding called `path` that allows
 you to set the href of anchor tags without mucking around with the base path
 and having to juggle different levels too much.
 
-__Basic__
+__Local__
 ```html
 <a data-bind="path: '/foo'">
 ```
@@ -28,4 +28,4 @@ This will route to the `/foo` route at the parent router.
 
 ---
 
-Words to the wise... use absolute paths. It's much easier.
+[Back](./)
