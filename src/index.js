@@ -17,6 +17,4 @@ ko.components.register('ko-component-router', {
     </div>`
 })
 
-ko.router = Router
-
 export default Router

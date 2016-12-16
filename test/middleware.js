@@ -1,4 +1,5 @@
 import ko from 'knockout'
+import Router from '../dist/modules'
 
 ko.components.register('middleware', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
@@ -7,9 +8,9 @@ ko.components.register('middleware', {
       const runner = this.runTests(_next)
       const next = runner.next.bind(runner)
 
-      t.ok(ko.router, 'should attach ko.router.use after import for middleware')
+      t.ok(Router, 'should attach Router.use after import for middleware')
 
-      ko.router.use(function * (ctx) {
+      Router.use(function * (ctx) {
         ctx.beforeRenderGlobalMiddlewareHit = true
         yield
         ctx.afterRenderGlobalMiddlewareHit = true
@@ -155,11 +156,11 @@ ko.components.register('middleware', {
 
       yield history.replaceState(null, null, '/sync')
 
-      yield ko.router.update('/async')
-      yield ko.router.update('/generator')
-      yield ko.router.update('/object')
+      yield Router.update('/async')
+      yield Router.update('/generator')
+      yield Router.update('/object')
 
-      ko.router.update('/').then(() => {
+      Router.update('/').then(() => {
         history.pushState(null, null, begin)
         next()
       })

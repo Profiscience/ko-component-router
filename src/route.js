@@ -1,8 +1,7 @@
 import ko from 'knockout'
 import pathtoRegexp from 'path-to-regexp'
+import Router from './router'
 import { isArray, isPlainObject, isString, runMiddleware, sequence } from './utils'
-
-const appMiddleware = []
 
 export default class Route {
   constructor(path, middleware) {
@@ -78,7 +77,7 @@ export default class Route {
       return await sequence(disposals)
     }
 
-    const [appUpstream, appNext] = runMiddleware(appMiddleware, ctx)
+    const [appUpstream, appNext] = runMiddleware(Router.middleware, ctx)
     disposals = [
       // before dispose
       appNext,
@@ -110,9 +109,5 @@ export default class Route {
     // after render
     await appNext()
     await routeNext()
-  }
-
-  static use(fn) {
-    appMiddleware.push(fn)
   }
 }
