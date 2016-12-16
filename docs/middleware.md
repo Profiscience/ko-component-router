@@ -200,3 +200,7 @@ Middleware is executed in the following order...
 - App before dispose
 - Route after dispose
 - App after dispose
+
+---
+
+[Back](./)
