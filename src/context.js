@@ -1,20 +1,11 @@
-import ko from 'knockout'
 import { isUndefined, sequence } from './utils'
 
 export default class Context {
-  constructor({ router, route, path, pathname, params, passthrough }) {
-    // ensure args take precedence over passthrough so as not to break
-    // nested route shorthand
-    Object.assign(this, passthrough, {
-      router,
-      route,
-      path,
-      pathname,
-      params,
-      fullPath: router.config.base + pathname,
-      canonicalPath: (router.config.base + pathname).replace(new RegExp(ko.router.config.base, 'i'), '')
-    })
+  constructor(params) {
+    Object.assign(this, params)
 
+    this.fullPath = this.router.base + this.pathname
+    this.canonicalPath = this.fullPath.replace(new RegExp(this.router.$root.base, 'i'), '')
     this._beforeNavigateCallbacks = []
   }
 
@@ -35,7 +26,7 @@ export default class Context {
   }
 
   get element() {
-    return document.getElementsByClassName('ko-component-router-view')[this.router.depth - 1]
+    return document.getElementsByClassName('ko-component-router-view')[this.router.depth]
   }
 
   async runBeforeNavigateCallbacks() {

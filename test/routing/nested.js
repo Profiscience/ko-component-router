@@ -1,4 +1,5 @@
 import ko from 'knockout'
+import Router from '../../dist/modules'
 
 ko.components.register('nested', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
@@ -78,10 +79,10 @@ ko.components.register('nested', {
     }
 
     * async runTests(next) {
-      yield ko.router.update('/nested/b')
-      yield ko.router.$child.update('/c')
-      yield ko.router.$child.update('/d/e')
-      yield ko.router.$child.update('/f/g')
+      yield Router.update('/nested/b')
+      yield Router.get(1).update('/c')
+      yield Router.get(1).update('/d/e')
+      yield Router.get(1).update('/f/g')
       next()
     }
 

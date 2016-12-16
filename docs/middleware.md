@@ -12,13 +12,13 @@ and keep your viewmodel as slim as possible (think skinny controllers, fat model
 
 ### App
 
-App middleware is ran for every route and is registered using `ko.router.use`,
+App middleware is ran for every route and is registered using `Router.use`,
 or if you use a module system you may prefer something to the effect of...
 
 ```javascript
-import router from 'ko-component-router'
+import Router from 'ko-component-router'
 
-router.use(fn)
+Router.use(fn)
 ```
 
 ### Route
@@ -76,7 +76,9 @@ Middleware functions are passed 2 arguments:
 Let's look at some example logging middleware...
 
 ```javascript
-ko.router.use((ctx) => console.log('[router] navigating to', ctx.pathname))
+import Router from 'ko-component-router'
+
+Router.use((ctx) => console.log('[router] navigating to', ctx.pathname))
 ```
 
 But wait, there's more!
@@ -152,6 +154,7 @@ execution.
 Let's write the same `monolithicMiddleware` with a generator, then walk through what is going on...
 
 ```javascript
+import Router from 'ko-component-router'
 import Query from 'ko-query'
 
 function * monolithicMiddleware(ctx) {
@@ -171,7 +174,7 @@ function * monolithicMiddleware(ctx) {
   ctx.query.dispose()
 }
 
-ko.router.use(monolithicMiddleware)
+Router.use(monolithicMiddleware)
 ```
 
 _Hopefully_ it's pretty obvious what is going on here, but if not, I'll elaborate.

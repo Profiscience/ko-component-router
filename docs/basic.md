@@ -11,8 +11,6 @@ Promises/A+ | [Link](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Ref
 Object.assign | [Link](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Browser_compatibility) | [Snippet](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill)
 pushState/replaceState | [Link](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Browser_compatibility) | [html5-history-api](https://github.com/devote/HTML5-History-API)
 
-
-
 # Basic Usage
 
 If a picture is worth 1k words, code is worth 1M...
@@ -66,6 +64,33 @@ Assuming we landed on `/`, the `home` component would be displayed. If we then c
 the "Show User" link, the `user` component would be displayed, and the user id logged
 to the console.
 
+You also have the option of declaring your routes as a static property on the router
+constructor as such...
+
+```javascript
+import ko from 'knockout'
+import Router from 'ko-component-router'
+
+Router.routes = {
+  '/': 'home',
+  '/user/:userID': 'user'
+}
+
+// define views
+ko.components.register('home', ...)
+ko.components.register('user', ...)
+
+ko.applyBindings()
+```
+
+```html
+<!doctype html>
+<script src="/app.js"></script>
+<ko-component-router></ko-component-router>
+```
+
+__NOTE:__ when using without a module system, `Router` is exposed on ko.router
+
 ---
 
 The router accepts 3 parameters:
@@ -75,6 +100,15 @@ The router accepts 3 parameters:
 | routes | object containing express-style routes as keys, and their corresponding view component names or an array containing [middleware](./middleware.md) | `{ '/home': 'home' }` |
 | base   | optional parameter defining the base path, this should only be used with the top-level router if using child routing | `/blog` |
 | hashbang | use hashbang (HTML4) routing (defaults to `false`) | false |
+
+as shown above, routes can also be set at `Router.routes`. Likewise, you can set
+
+```javascript
+Router.config = {
+  base: '/app',
+  hashbang: true
+}
+```
 
 ---
 

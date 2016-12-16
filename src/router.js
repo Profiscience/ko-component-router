@@ -9,37 +9,36 @@ const events = {
 
 const routers = []
 
-export default class Router {
+class Router {
   constructor(params, el) {
-    const { routes = {}, base = '', hashbang } = params
-
     ko.contextFor(el).$router = this
 
-    this.config = { hashbang }
     this.element = el
     this.component = ko.observable()
     this.isNavigating = ko.observable(true)
 
-    delete params.routes
-    delete params.base
+    Router.link(this, params)
+
     this.passthrough = params
 
-    Router.link(this, base)
-
-    this.routes = Object.entries(routes).map(([r, m]) => new Route(r, m))
-    if (this.$parent && this.$parent.ctx.route.children) {
-      this.routes.push(...this.$parent.ctx.route.children)
-    }
-
-    if (!this.$parent) {
-      ko.router = this
-      this.isRoot = true
+    if (this.isRoot) {
       this.history = ko.observableArray([])
       document.addEventListener(events.click, Router.onclick)
       window.addEventListener(events.popstate, Router.onpopstate)
     }
 
+    const routes = Object.assign(this.isRoot ? Router.routes : {}, params.routes)
+    this.routes = Object.entries(routes).map(([r, m]) => new Route(r, m))
+    if (!this.isRoot && this.$parent.ctx.route.children) {
+      this.routes.push(...this.$parent.ctx.route.children)
+    }
+    delete params.routes
+
     this.update(this.getPathFromLocation(), false)
+  }
+
+  static async update(...args) {
+    return await routers[0].update(...args)
   }
 
   async update(url, push = true) {
@@ -77,17 +76,16 @@ export default class Router {
     history[push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
-      this.config.base + path + search + hash
+      this.base + path + search + hash
     )
 
-    this.ctx = new Context({
+    this.ctx = new Context(Object.assign({}, this.passthrough, {
       router: this,
       params,
       route,
       path,
-      pathname,
-      passthrough: this.passthrough
-    })
+      pathname
+    }))
 
     await route.run(this.ctx)
 
@@ -118,7 +116,7 @@ export default class Router {
 
   getPathFromLocation() {
     const path = location.pathname + location.search + location.hash
-    return path.replace(new RegExp(this.config.base, 'i'), '')
+    return path.replace(new RegExp(this.base, 'i'), '')
   }
 
   dispose() {
@@ -131,31 +129,44 @@ export default class Router {
   }
 
   static use(fn) {
-    Route.use(fn)
+    Router.middleware.push(fn)
   }
 
-  static link(router, base) {
-    if (routers.length === 0) {
-      router.config.base = router.config.hashbang
-        ? base + '/#!'
-        : base
+  // https://gitlab.com/Rich-Harris/buble/issues/164
+  static get get() {
+    return (i) => routers[i]
+  }
+
+  static link(router, params) {
+    routers.push(router)
+    router.depth = routers.length - 1
+    router.isRoot = router.depth === 0
+    router.$root = routers[0]
+
+    if (router.isRoot) {
+      if (params.base) {
+        Router.config.base = params.base
+        delete params.base
+      }
+      router.base = Router.config.base
+      if (params.hashbang) {
+        Router.config.hashbang = params.hashbang
+        delete params.hashbang
+      }
+      if (Router.config.hashbang) {
+        router.base += '/#!'
+      }
     } else {
-      const $parent = routers[routers.length - 1]
-      const { ctx: { pathname }, config: { base } } = $parent
+      const $parent = routers[router.depth - 1]
+      const { ctx: { pathname }, base } = $parent
       router.$parent = $parent
       router.$parent.$child = router
-      router.config.base = base + pathname
+      router.base = base + pathname
     }
-
-    routers.push(router)
-    router.depth = routers.length
   }
 
   static unlink(router) {
     routers.pop()
-    if (routers.length === 0) {
-      ko.router = Router
-    }
     if (!router.isRoot) {
       delete router.$parent.$child
     }
@@ -184,7 +195,7 @@ export default class Router {
     const hasOtherTarget = el.hasAttribute('target')
 
     const { pathname, search, hash = '' } = el
-    const path = (pathname + search + hash).replace(new RegExp(ko.router.config.base, 'i'), '')
+    const path = (pathname + search + hash).replace(new RegExp(routers[0].base, 'i'), '')
 
     if (
       isCrossOrigin ||
@@ -198,7 +209,7 @@ export default class Router {
       return
     }
 
-    ko.router.update(path)
+    Router.update(path)
       .then((navigated) => {
         if (!navigated) {
           e.target.dataset.external = true
@@ -210,7 +221,7 @@ export default class Router {
   }
 
   static onpopstate(e) {
-    ko.router.update(ko.router.getPathFromLocation(), false)
+    Router.update(routers[0].getPathFromLocation(), false)
     e.preventDefault()
   }
 
@@ -220,7 +231,7 @@ export default class Router {
 
   static parseUrl(url) {
     const parser = document.createElement('a')
-    const b = ko.router.config.base.toLowerCase()
+    const b = routers[0].base.toLowerCase()
     if (b && url.toLowerCase().indexOf(b) === 0) {
       url = url.replace(new RegExp(b, 'i'), '') || '/'
     }
@@ -246,3 +257,9 @@ export default class Router {
     return null === e.which ? e.button : e.which
   }
 }
+
+Router.config = { base: '', hashbang: false }
+Router.middleware = []
+Router.routes = {}
+
+export default Router

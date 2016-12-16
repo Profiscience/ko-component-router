@@ -1,6 +1,7 @@
 import ko from 'knockout'
-
 import { extend, mapValues } from 'lodash'
+
+import Router from '../../dist/modules'
 
 import init from './init'
 import basic from './basic'
@@ -8,13 +9,15 @@ import params from './params'
 import nested from './nested'
 import similar from './similar'
 import ambiguous from './ambiguous'
+import _static from './static'
 
 const paths = [
   '/basic',
   '/params/foo',
   '/nested/a',
   '/similar/foo/bar',
-  '/ambiguous/a/b/c'
+  '/ambiguous/a/b/c',
+  '/static'
 ]
 
 ko.components.register('routing', {
@@ -36,6 +39,13 @@ ko.components.register('routing', {
         r
       ])
 
+      Router.routes = mapValues({
+        ..._static
+      }, (r) => [
+        (ctx) => extend(ctx, { t, next }),
+        r
+      ])
+
       next()
     }
 
@@ -45,7 +55,7 @@ ko.components.register('routing', {
       yield history.pushState(null, null, '/init')
 
       for (const path of paths) {
-        yield ko.router.update(path)
+        yield Router.update(path)
       }
 
       history.pushState(null, null, begin)

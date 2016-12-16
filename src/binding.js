@@ -17,7 +17,7 @@ ko.bindingHandlers.path = {
 
 export function resolveHref(bindingCtx, _path) {
   const [router, path] = parsePathBinding(bindingCtx, _path)
-  return router.config.base + path
+  return router.base + path
 }
 
 function isActivePath(bindingCtx, _path) {

@@ -1,4 +1,5 @@
 import ko from 'knockout'
+import Router from '../dist/modules'
 
 ko.components.register('before-navigate-callbacks', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
@@ -68,26 +69,26 @@ ko.components.register('before-navigate-callbacks', {
         }
       })
 
-      await ko.router.update('/sync')
+      await Router.update('/sync')
       block = true
-      t.notOk(await ko.router.update('/'), 'returning false should prevent navigation')
+      t.notOk(await Router.update('/'), 'returning false should prevent navigation')
       block = false
-      t.ok(await ko.router.update('/'), 'returning !false should not prevent navigation')
+      t.ok(await Router.update('/'), 'returning !false should not prevent navigation')
 
-      await ko.router.update('/async-callback')
+      await Router.update('/async-callback')
       block = true
-      t.notOk(await ko.router.update('/'), 'calling the callback with false should prevent navigation')
+      t.notOk(await Router.update('/'), 'calling the callback with false should prevent navigation')
       block = false
-      t.ok(await ko.router.update('/'), 'calling the callback with !false should not prevent navigation')
+      t.ok(await Router.update('/'), 'calling the callback with !false should not prevent navigation')
 
-      await ko.router.update('/async-promise')
+      await Router.update('/async-promise')
       block = true
-      t.notOk(await ko.router.update('/'), 'returning a promise that resolves false should prevent navigation')
+      t.notOk(await Router.update('/'), 'returning a promise that resolves false should prevent navigation')
       block = false
-      t.ok(await ko.router.update('/'), 'returning a promise that resolves !false should prvent navigation')
+      t.ok(await Router.update('/'), 'returning a promise that resolves !false should prvent navigation')
 
-      await ko.router.update('/nested')
-      await ko.router.update('/')
+      await Router.update('/nested')
+      await Router.update('/')
     }
 
     dispose() {
