@@ -22,7 +22,7 @@ const paths = [
 
 ko.components.register('routing', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
-  viewModel: class RoutingTest {
+  viewModel: class RoutingTestSuite {
     constructor({ t, next: _next }) {
       const runner = this.runTests(_next)
       const next = runner.next.bind(runner)
@@ -59,7 +59,6 @@ ko.components.register('routing', {
       }
 
       history.pushState(null, null, begin)
-
       next()
     }
   }

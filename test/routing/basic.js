@@ -2,7 +2,7 @@ import ko from 'knockout'
 
 ko.components.register('basic', {
   template: '<div></div>',
-  viewModel: class {
+  viewModel: class BasicRoutingTest {
     constructor({ t, next }) {
       t.pass('navigates to basic route')
       next()

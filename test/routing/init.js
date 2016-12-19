@@ -2,7 +2,7 @@ import ko from 'knockout'
 
 ko.components.register('init', {
   template: '<div></div>',
-  viewModel: class {
+  viewModel: class RoutingInitializationTest {
     constructor({ t, next }) {
       t.pass('initializes')
       next()

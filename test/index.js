@@ -2,7 +2,7 @@ import $ from 'jquery'
 import ko from 'knockout'
 import tape from 'tape'
 
-import '../dist/modules'
+import Router from '../dist/modules'
 
 import './anchor'
 import './binding'
@@ -11,6 +11,7 @@ import './middleware'
 import './before-navigate-callbacks'
 import './element'
 import './passthrough'
+import './plugins'
 import './issues'
 
 const tests = [
@@ -21,6 +22,7 @@ const tests = [
   'before-navigate-callbacks',
   'element',
   'passthrough',
+  'plugins',
   'issues'
 ]
 
@@ -51,6 +53,11 @@ class Test {
   }
 
   runTest(test) {
+    Router.config = { base: '', hashbang: false }
+    Router.middleware = []
+    Router.plugins = []
+    Router.routes = {}
+
     return new Promise((resolve) =>
       tape(test, (t) => {
         this.t = t

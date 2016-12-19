@@ -3,7 +3,7 @@ import Router from '../dist/modules'
 
 ko.components.register('before-navigate-callbacks', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
-  viewModel: class MiddlewareTest {
+  viewModel: class BeforeNavigateCallbackTest {
     constructor({ t, next }) {
       this.routes = {
         '/': 'empty',
