@@ -128,8 +128,8 @@ class Router {
     }
   }
 
-  static use(fn) {
-    Router.middleware.push(fn)
+  static use(...fn) {
+    Router.middleware.push(...fn)
   }
 
   // https://gitlab.com/Rich-Harris/buble/issues/164
