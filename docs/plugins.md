@@ -127,3 +127,7 @@ the route will not be passed along.
 
 One more thing to note, a route with an array value will have the plugins ran against each
 element in it, not the whole array.
+
+---
+
+[Back](./)
