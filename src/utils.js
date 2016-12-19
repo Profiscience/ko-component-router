@@ -12,8 +12,19 @@ export function isString(x) {
   return typeof x === 'string'
 }
 
+export function isFunction(x) {
+  return typeof x === 'function'
+}
+
 export function isUndefined(x) {
   return typeof x === 'undefined'
+}
+
+export function flatMap(arr, fn) {
+  return arr.reduce((flattened, x) => {
+    const v = fn(x)
+    return flattened.concat(isArray(v) ? v : [v])
+  }, [])
 }
 
 export function runMiddleware(callbacks, ...args) {
@@ -44,10 +55,6 @@ export async function sequence(callbacks, ...args) {
       return false
     }
   }
-}
-
-function isFunction(x) {
-  return typeof x === 'function'
 }
 
 function isGenerator(x) {

@@ -2,7 +2,7 @@ import ko from 'knockout'
 
 ko.components.register('similar', {
   template: '<div></div>',
-  viewModel: class {
+  viewModel: class SimilarRoutesTest {
     constructor({ t, next, params }) {
       t.notOk(params.foo, 'should use most restrictive route')
       next()

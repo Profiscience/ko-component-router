@@ -3,7 +3,7 @@ import Router from '../../dist/modules'
 
 ko.components.register('nested', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
-  viewModel: class {
+  viewModel: class NestedRoutingTest {
     constructor({ t, next: _next }) {
       t.pass('navigates to route with children')
 

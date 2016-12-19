@@ -1,13 +1,19 @@
 import ko from 'knockout'
 import pathtoRegexp from 'path-to-regexp'
 import Router from './router'
-import { isArray, isPlainObject, isString, runMiddleware, sequence } from './utils'
+import { flatMap, isArray, isFunction, isPlainObject, isString, runMiddleware, sequence } from './utils'
 
 export default class Route {
   constructor(path, middleware) {
-    this.middleware = []
-
-    for (const m of isArray(middleware) ? middleware : [middleware]) {
+    this.middleware = flatMap(isArray(middleware) ? middleware : [middleware], (m) => {
+      const pluginMiddleware = Router.plugins.reduce((ms, p) => {
+        const _m = p(m)
+        return _m ? ms.concat(isArray(_m) ? _m : [_m]) : ms
+      }, [])
+      return pluginMiddleware.length > 0
+        ? pluginMiddleware
+        : m
+    }).reduce((ms, m) => {
       if (isString(m)) {
         this.component = m
       } else if (isPlainObject(m)) {
@@ -16,10 +22,11 @@ export default class Route {
         if (!this.component) {
           this.component = 'ko-component-router'
         }
-      } else {
-        this.middleware.push(m)
+      } else if (isFunction(m)) {
+        ms.push(m)
       }
-    }
+      return ms
+    }, [])
 
     if (path[path.length - 1] === '!') {
       path = path.replace('!', ':__child_path__(.*)?')

@@ -2,7 +2,7 @@ import ko from 'knockout'
 
 ko.components.register('passthrough', {
   template: '<ko-component-router params="routes: routes, foo: \'foo\'"></ko-component-router>',
-  viewModel: class MiddlewareTest {
+  viewModel: class PassthroughTest {
     constructor({ t, next }) {
       this.routes = {
         '/': 'foo'

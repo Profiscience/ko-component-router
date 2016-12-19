@@ -128,8 +128,12 @@ class Router {
     }
   }
 
-  static use(...fn) {
-    Router.middleware.push(...fn)
+  static use(...fns) {
+    Router.middleware.push(...fns)
+  }
+
+  static usePlugin(...fns) {
+    Router.plugins.push(...fns)
   }
 
   // https://gitlab.com/Rich-Harris/buble/issues/164
@@ -260,6 +264,7 @@ class Router {
 
 Router.config = { base: '', hashbang: false }
 Router.middleware = []
+Router.plugins = []
 Router.routes = {}
 
 export default Router

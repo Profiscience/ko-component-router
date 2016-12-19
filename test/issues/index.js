@@ -16,7 +16,7 @@ ko.components.register('issues', {
       }"></div>
     </div>
   `,
-  viewModel: class Issues {
+  viewModel: class IssuesTestSuite {
     constructor({ t, next: _next }) {
       this.test = ko.observable()
       const runner = this.runTests(t, _next)

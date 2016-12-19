@@ -3,7 +3,7 @@ import ko from 'knockout'
 
 ko.components.register('element', {
   template: '<ko-component-router id="router" params="routes: routes"></ko-component-router>',
-  viewModel: class MiddlewareTest {
+  viewModel: class ElementTest {
     constructor({ t, next }) {
       this.routes = {
         '/': 'foo'
