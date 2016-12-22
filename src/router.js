@@ -10,10 +10,7 @@ const events = {
 const routers = []
 
 class Router {
-  constructor(params, el) {
-    ko.contextFor(el).$router = this
-
-    this.element = el
+  constructor(params) {
     this.component = ko.observable()
     this.isNavigating = ko.observable(true)
 
