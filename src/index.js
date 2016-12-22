@@ -13,15 +13,15 @@ ko.components.register('ko-component-router', {
 
 ko.bindingHandlers.__ko_component_router__ = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
-    const router = bindingCtx.$rawData
+    const $router = bindingCtx.$rawData
 
     ko.applyBindingsToNode(el, {
-      css: router.component,
+      css: $router.component,
       component: {
-        name: router.component,
-        params: router.ctx
+        name: $router.component,
+        params: $router.ctx
       }
-    }, bindingCtx.extend({ $router: bindingCtx.$rawData }))
+    }, bindingCtx.extend({ $router }))
 
     return { controlsDescendantBindings: true }
   }
