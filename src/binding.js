@@ -1,4 +1,5 @@
 import ko from 'knockout'
+import Router from './router'
 import { isUndefined } from './utils'
 
 ko.bindingHandlers.path = {
@@ -35,6 +36,11 @@ function parsePathBinding(bindingCtx, path) {
       router = router.$parent
     }
   } else {
+    if (path.indexOf('./') === 0) {
+      path = path.replace('./', '/')
+      router = router.$child
+    }
+
     while (path && path.match(/\/?\.\./i) && !router.isRoot) {
       router = router.$parent
       path = path.replace(/\/?\.\./i, '')
@@ -51,4 +57,5 @@ function getRouter(bindingCtx) {
     }
     bindingCtx = bindingCtx.$parentContext
   }
+  return Router.get(0)
 }

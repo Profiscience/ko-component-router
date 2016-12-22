@@ -2,7 +2,7 @@ import $ from 'jquery'
 import ko from 'knockout'
 
 ko.components.register('element', {
-  template: '<ko-component-router id="router" params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router params="routes: routes"></ko-component-router>',
   viewModel: class ElementTest {
     constructor({ t, next }) {
       this.routes = {
@@ -12,7 +12,6 @@ ko.components.register('element', {
       ko.components.register('foo', {
         template: '<div></div>',
         viewModel(ctx) {
-          t.equals($('#router').get(0), ctx.router.element, 'attaches router element to router.element')
           t.ok(ctx.element)
           t.equals($('.ko-component-router-view.foo')[0], ctx.element, 'attaches view element to ctx.element')
           next()
