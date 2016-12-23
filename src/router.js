@@ -246,7 +246,13 @@ class Router {
       url = url.replace(new RegExp(b, 'i'), '') || '/'
     }
     parser.href = Router.canonicalizePath(url)
-    return parser
+    return {
+      hash: parser.hash,
+      pathname: (parser.pathname.charAt(0) === '/')
+        ? parser.pathname
+        : '/' + parser.pathname,
+      search: parser.search
+    }
   }
 
   static getPath(url) {
