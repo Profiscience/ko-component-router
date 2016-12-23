@@ -9,11 +9,10 @@ ko.components.register('force-update', {
       this.routes = {
         '/': 'foo'
       }
-      
+
       history.pushState(null, null, '/')
 
       ko.components.register('foo', {
-        template: '<div></div>',
         viewModel(ctx) {
           if (++count === 1) {
             ctx.router.update('/', { force: true })

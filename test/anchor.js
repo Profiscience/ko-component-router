@@ -37,7 +37,7 @@ ko.components.register('anchor', {
         '/b': 'b'
       }
 
-      ko.components.register('empty', { template: '<div></div>' })
+      ko.components.register('empty', {})
 
       ko.components.register('a', {
         template: '<a id="relative-b" href="b"></a>',
@@ -48,7 +48,6 @@ ko.components.register('anchor', {
       })
 
       ko.components.register('b', {
-        template: '<div></div>',
         viewModel() {
           t.pass('can handle anchors with relative paths')
           next()

@@ -48,7 +48,6 @@ ko.components.register('plugins', {
       Router.usePlugin(dataPlugin)
 
       ko.components.register('component', {
-        template: '<div></div>',
         viewModel() {
           t.pass('plugin works with returned string')
           next()
@@ -56,7 +55,6 @@ ko.components.register('plugins', {
       })
 
       ko.components.register('data', {
-        template: '<div></div>',
         viewModel(ctx) {
           t.equals(true, ctx.data, 'plugin works with returned middleware func')
           next()
@@ -64,7 +62,6 @@ ko.components.register('plugins', {
       })
 
       ko.components.register('data-multi', {
-        template: '<div></div>',
         viewModel(ctx) {
           t.deepEquals({ true: true, false: false }, ctx.data, 'plugin works with returned array of middleware funcs')
           next()
@@ -72,7 +69,6 @@ ko.components.register('plugins', {
       })
 
       ko.components.register('composed', {
-        template: '<div></div>',
         viewModel(ctx) {
           t.equals(true, ctx.data, 'plugins can be composed')
           next()

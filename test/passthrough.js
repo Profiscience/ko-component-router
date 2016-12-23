@@ -9,7 +9,6 @@ ko.components.register('passthrough', {
       }
 
       ko.components.register('foo', {
-        template: '<div></div>',
         viewModel(ctx) {
           t.equals('foo', ctx.foo, 'attaches additional params supplied via router to ctx')
           next()

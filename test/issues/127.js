@@ -14,7 +14,6 @@ ko.components.register('127', {
       }
 
       ko.components.register('foo', {
-        template: '<div></div>',
         viewModel() {
           t.pass('nested routers work with hashbang routing')
           next()

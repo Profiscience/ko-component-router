@@ -13,7 +13,7 @@ ko.components.register('before-navigate-callbacks', {
         '/nested/!': 'nested'
       }
 
-      ko.components.register('empty', { template: '<div></div>' })
+      ko.components.register('empty', {})
 
       setTimeout(() => this.runTests(t).then(next))
     }
@@ -24,21 +24,18 @@ ko.components.register('before-navigate-callbacks', {
       history.replaceState(null, null, '/sync')
 
       ko.components.register('sync', {
-        template: '<div></div>',
         viewModel(ctx) {
           ctx.addBeforeNavigateCallback(() => !block)
         }
       })
 
       ko.components.register('async-callback', {
-        template: '<div></div>',
         viewModel(ctx) {
           ctx.addBeforeNavigateCallback((done) => done(!block))
         }
       })
 
       ko.components.register('async-promise', {
-        template: '<div></div>',
         viewModel(ctx) {
           ctx.addBeforeNavigateCallback(() => Promise.resolve(!block))
         }
@@ -59,7 +56,6 @@ ko.components.register('before-navigate-callbacks', {
       })
 
       ko.components.register('nested-child', {
-        template: '<div></div>',
         viewModel(ctx) {
           ctx.addBeforeNavigateCallback((done) => {
           setTimeout(() => {

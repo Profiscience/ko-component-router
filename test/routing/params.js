@@ -6,7 +6,6 @@
  import ko from 'knockout'
 
 ko.components.register('params', {
-  template: '<div></div>',
   viewModel: class ParamsTest {
     constructor({ t, next, params }) {
       t.equal('foo', params.foo, 'parses param to ctx.params')
