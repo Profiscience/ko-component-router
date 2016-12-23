@@ -4,6 +4,10 @@ export function isArray(arr) {
   return typeof arr.splice === 'function'
 }
 
+export function isBool(x) {
+  return typeof x === 'boolean'
+}
+
 export function isPlainObject(x) {
   return _isPlainObject(x)
 }
