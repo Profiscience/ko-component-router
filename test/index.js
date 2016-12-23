@@ -7,6 +7,7 @@ import Router from '../dist/modules'
 import './anchor'
 import './binding'
 import './routing'
+import './history'
 import './force-update'
 import './middleware'
 import './before-navigate-callbacks'
@@ -17,6 +18,7 @@ import './issues'
 
 const tests = [
   'routing',
+  'history',
   'force-update',
   'anchor',
   'binding',
@@ -27,6 +29,15 @@ const tests = [
   'plugins',
   'issues'
 ]
+
+ko.components.loaders.unshift({
+  loadComponent(name, config, done) {
+    if (!config.template) {
+      config.template = '<a></a>'
+    }
+    done(null)
+  }
+})
 
 class Test {
   constructor() {

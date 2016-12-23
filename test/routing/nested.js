@@ -30,7 +30,6 @@ ko.components.register('nested', {
       // this should be the initial call, and is responsible for calling
       // `next()` to start the test runner
       ko.components.register('a', {
-        template: '<div></div>',
         viewModel() {
           t.pass('initializes nested route')
           t.equals(hLen, history.length, 'child route does not add history entry')
@@ -39,7 +38,6 @@ ko.components.register('nested', {
       })
 
       ko.components.register('b', {
-        template: '<div></div>',
         viewModel() {
           t.pass('navigates to new child route from parent router')
           next()
@@ -47,7 +45,6 @@ ko.components.register('nested', {
       })
 
       ko.components.register('c', {
-        template: '<div></div>',
         viewModel() {
           t.pass('navigates to new child route from child router')
           next()
@@ -55,7 +52,6 @@ ko.components.register('nested', {
       })
 
       ko.components.register('e', {
-        template: '<div></div>',
         viewModel() {
           t.pass('nested router shorthand works')
           next()
@@ -70,7 +66,6 @@ ko.components.register('nested', {
       })
 
       ko.components.register('g', {
-        template: '<div></div>',
         viewModel() {
           t.pass('anonymous router in route using shorthand works')
           next()
@@ -91,6 +86,9 @@ ko.components.register('nested', {
       ko.components.unregister('b')
       ko.components.unregister('c')
       ko.components.unregister('d')
+      ko.components.unregister('e')
+      ko.components.unregister('f')
+      ko.components.unregister('g')
       ko.components.unregister('nested')
     }
   }
