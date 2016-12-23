@@ -1,6 +1,7 @@
 import ko from 'knockout'
 import Context from './context'
 import Route from './route'
+import { isBool, isUndefined } from './utils'
 
 const events = {
   click: document.ontouchstart ? 'touchstart' : 'click',
@@ -38,7 +39,13 @@ class Router {
     return await routers[0].update(...args)
   }
 
-  async update(url, push = true) {
+  async update(url, args) {
+    if (isBool(args)) {
+      args = { push: args }
+    } else if (isUndefined(args)) {
+      args = { push: true }
+    }
+
     const path = Router.getPath(url)
     const route = this.resolvePath(path)
 
@@ -48,9 +55,9 @@ class Router {
 
     const [params, pathname, childPath] = route.parse(path)
 
-    if (this.ctx && this.ctx.pathname === pathname) {
+    if (this.ctx && this.ctx.pathname === pathname && !args.force) {
       if (this.$child) {
-        return await this.$child.update(childPath, push)
+        return await this.$child.update(childPath, args.push)
       } else {
         return false
       }
@@ -70,7 +77,7 @@ class Router {
     const currentUrl = Router.canonicalizePath(location.pathname + location.search + location.hash)
     const { search, hash } = Router.parseUrl(currentUrl)
 
-    history[push ? 'pushState' : 'replaceState'](
+    history[args.push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
       this.base + path + search + hash

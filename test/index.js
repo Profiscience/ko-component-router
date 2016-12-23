@@ -7,6 +7,7 @@ import Router from '../dist/modules'
 import './anchor'
 import './binding'
 import './routing'
+import './force-update'
 import './middleware'
 import './before-navigate-callbacks'
 import './element'
@@ -16,6 +17,7 @@ import './issues'
 
 const tests = [
   'routing',
+  'force-update',
   'anchor',
   'binding',
   'middleware',
