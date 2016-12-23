@@ -27,7 +27,6 @@ ko.components.register('middleware', {
           (ctx) => {
             t.ok(ctx, 'middleware is ran with ctx as first argument')
           },
-          'sync',
           () => next()
         ],
 
@@ -130,18 +129,16 @@ ko.components.register('middleware', {
         ]
       }
 
-      ko.components.register('empty', { template: '<div></div>' })
-      ko.components.register('sync', { template: '<div id="sync"></div>' })
-      ko.components.register('async', { template: '<div></div>' })
+      ko.components.register('empty', { })
+
       ko.components.register('generator', {
-        template: '<div></div>',
         viewModel: (ctx) => {
           ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
           next()
         }
       })
+      
       ko.components.register('object', {
-        template: '<div></div>',
         viewModel: (ctx) => {
           ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
           next()
@@ -168,8 +165,6 @@ ko.components.register('middleware', {
 
     dispose() {
       ko.components.unregister('empty')
-      ko.components.unregister('sync')
-      ko.components.unregister('async')
       ko.components.unregister('generator')
       ko.components.unregister('object')
       ko.components.unregister('middleware')

@@ -19,7 +19,6 @@ ko.components.register('ambiguous', {
       }
 
       ko.components.register('wrong', {
-        template: '<div></div>',
         viewModel() {
           t.fail('fails on ambiguous routes w/ nested shorthand')
           next()
@@ -27,7 +26,6 @@ ko.components.register('ambiguous', {
       })
 
       ko.components.register('right', {
-        template: '<div></div>',
         viewModel() {
           t.pass('figures out ambiguous routes w/ nested shorthand')
           next()

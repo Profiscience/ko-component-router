@@ -10,7 +10,6 @@ ko.components.register('element', {
       }
 
       ko.components.register('foo', {
-        template: '<div></div>',
         viewModel(ctx) {
           t.ok(ctx.element)
           t.equals($('.ko-component-router-view.foo')[0], ctx.element, 'attaches view element to ctx.element')
