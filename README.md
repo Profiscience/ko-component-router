@@ -9,13 +9,17 @@
 [![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
 [![Gitter](https://img.shields.io/gitter/room/profiscience/ko-component-router.svg)](https://gitter.im/Profiscience/ko-component-router)
 
-Super-duper flexible component-based router for developing wicked awesome single-page apps with KnockoutJS.
+Super duper flexible component based router for developing wicked awesome single page apps with KnockoutJS.
 
-__NOTE:__ You're on the *next* branch, i.e. v4. Some things are different here. See [Migrating from 3.x to 4.x](https://github.com/Profiscience/ko-component-router/wiki/Migrating-from-3.x-to-4.x).
+[Migrating from 3.x to 4.x](https://github.com/Profiscience/ko-component-router/wiki/Migrating-from-3.x-to-4.x).
 
 ### Installation
 ```bash
-$ npm install -S ko-component-router@next
+$ yarn add ko-component-router
+```
+...or...
+```bash
+$ npm install -S ko-component-router
 ```
 
 ### Basic Usage
