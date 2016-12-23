@@ -20,7 +20,6 @@ class Router {
     this.passthrough = params
 
     if (this.isRoot) {
-      this.history = ko.observableArray([])
       document.addEventListener(events.click, Router.onclick)
       window.addEventListener(events.popstate, Router.onpopstate)
     }
@@ -43,7 +42,10 @@ class Router {
     if (isBool(args)) {
       args = { push: args }
     } else if (isUndefined(args)) {
-      args = { push: true }
+      args = {}
+    }
+    if (isUndefined(args.push)) {
+      args.push = true
     }
 
     const path = Router.getPath(url)
