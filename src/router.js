@@ -142,9 +142,8 @@ class Router {
     Router.plugins.push(...fns)
   }
 
-  // https://gitlab.com/Rich-Harris/buble/issues/164
-  static get get() {
-    return (i) => routers[i]
+  static get(i) {
+    return routers[i]
   }
 
   static link(router, params) {
