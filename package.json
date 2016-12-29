@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Component-based routing for KnockoutJS",
   "author": "Casey Webb <notcaseywebb@gmail.com>",
   "license": "WTFPL",
