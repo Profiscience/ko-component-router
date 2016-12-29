@@ -39,6 +39,8 @@ class Router {
   }
 
   async update(url, args) {
+    const fromCtx = this.ctx
+
     if (isBool(args)) {
       args = { push: args }
     } else if (isUndefined(args)) {
@@ -57,7 +59,7 @@ class Router {
 
     const [params, pathname, childPath] = route.parse(path)
 
-    if (this.ctx && this.ctx.pathname === pathname && !args.force) {
+    if (fromCtx && fromCtx.pathname === pathname && !args.force) {
       if (this.$child) {
         return await this.$child.update(childPath, args.push)
       } else {
@@ -65,15 +67,13 @@ class Router {
       }
     }
 
-    if (this.ctx) {
-      const shouldNavigate = await this.ctx.runBeforeNavigateCallbacks()
+    if (fromCtx) {
+      const shouldNavigate = await fromCtx.runBeforeNavigateCallbacks()
       if (shouldNavigate === false) {
         return false
       }
 
       this.isNavigating(true)
-
-      await this.ctx.route.dispose()
     }
 
     const currentUrl = Router.canonicalizePath(location.pathname + location.search + location.hash)
@@ -85,7 +85,7 @@ class Router {
       this.base + path + search + hash
     )
 
-    this.ctx = new Context(Object.assign({}, this.passthrough, {
+    const toCtx = new Context(Object.assign({}, this.passthrough, {
       router: this,
       params,
       route,
@@ -93,7 +93,22 @@ class Router {
       pathname
     }))
 
-    await route.run(this.ctx)
+    if (fromCtx) {
+      await fromCtx.route.runBeforeDispose()
+    }
+
+    await toCtx.route.runBeforeRender(toCtx)
+
+    this.ctx = toCtx
+    this.component(false)
+    ko.tasks.runEarly()
+    this.component(this.ctx.route.component)
+    ko.tasks.runEarly()
+
+    if (fromCtx) {
+      await fromCtx.route.runAfterDispose()
+    }
+    await toCtx.route.runAfterRender()
 
     this.isNavigating(false)
 
@@ -130,7 +145,7 @@ class Router {
     window.removeEventListener(events.popstate, this.onpopstate, false)
     Router.unlink(this)
     if (this.isRoot) {
-      this.ctx.route.dispose()
+      this.ctx.route.runBeforeDispose().then(() => this.ctx.route.runAfterDispose())
     }
   }
 
