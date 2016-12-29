@@ -192,17 +192,26 @@ I :heart: future JS.
 
 ## Execution Order
 
-Middleware is executed in the following order...
+Assuming navigation from a => b, where "X/app" indicates app middleware for route X,
+middleware is executed in the following order...
 
-- App before render
-- Route before render
-- App after render
-- Router after render
-- [before navigate callbacks]
-- Route before dispose
-- App before dispose
-- Route after dispose
-- App after dispose
+- a: before dispose
+- a/app: before dispose
+
+- b/app: before render
+- b: before render
+
+- a: after dispose
+- a/app: after dispose
+
+- b/app: after render
+- b: after render
+
+*Why is the next page's before render middleware called before this one is disposed
+entirely!?*
+
+Because doing prevents intermediate whitespace while asynchronous before render
+middleware is executing.
 
 ---
 

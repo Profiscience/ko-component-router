@@ -1,4 +1,3 @@
-import ko from 'knockout'
 import pathtoRegexp from 'path-to-regexp'
 import Router from './router'
 import { flatMap, isArray, isFunction, isPlainObject, isString, runMiddleware, sequence } from './utils'
@@ -75,46 +74,44 @@ export default class Route {
     return [params, path.replace(new RegExp(childPath + '$'), ''), childPath]
   }
 
-  async run(ctx) {
-    let disposals = []
-    this.dispose = async () => {
+  async runBeforeRender(ctx) {
+    const afterRenders = []
+    const beforeDisposes = []
+    const afterDisposes = []
+
+    this.runAfterRender = async () => {
       if (ctx.$child) {
-        await ctx.$child.route.dispose()
+        await ctx.$child.route.runAfterRender()
       }
-      return await sequence(disposals)
+      return await sequence(afterRenders)
+    }
+    this.runBeforeDispose = async () => {
+      if (ctx.$child) {
+        await ctx.$child.route.runBeforeDispose()
+      }
+      return await sequence(beforeDisposes)
+    }
+    this.runAfterDispose = async () => {
+      if (ctx.$child) {
+        await ctx.$child.route.runAfterDispose()
+      }
+      return await sequence(afterDisposes)
     }
 
-    const [appUpstream, appNext] = runMiddleware(Router.middleware, ctx)
-    disposals = [
-      // before dispose
-      appNext,
-      // dispose
-      appNext
-    ]
-    await appUpstream
+    const [appBeforeRender, appDownstream] = runMiddleware(Router.middleware, ctx)
 
-    const [routeUpstream, routeNext] = runMiddleware(this.middleware, ctx)
-    disposals = [
-      // before dispose
-      routeNext,
-      appNext,
-      () => {
-        ctx.router.component(false)
-        ko.tasks.runEarly()
-      },
-      // after dispose
-      routeNext,
-      appNext
-    ]
-    await routeUpstream
+    afterRenders.push(appDownstream)
+    beforeDisposes.push(appDownstream)
+    afterDisposes.push(appDownstream)
 
-    if (ctx.route.component) {
-      ctx.router.component(ctx.route.component)
-      ko.tasks.runEarly()
-    }
+    await appBeforeRender
 
-    // after render
-    await appNext()
-    await routeNext()
+    const [routeBeforeRender, routeDownstream] = runMiddleware(this.middleware, ctx)
+
+    afterRenders.push(routeDownstream)
+    beforeDisposes.unshift(routeDownstream)
+    afterDisposes.unshift(routeDownstream)
+
+    await routeBeforeRender
   }
 }
