@@ -210,7 +210,7 @@ middleware is executed in the following order...
 *Why is the next page's before render middleware called before this one is disposed
 entirely!?*
 
-Because doing prevents intermediate whitespace while asynchronous before render
+Because doing so prevents intermediate whitespace while asynchronous before render
 middleware is executing.
 
 ---
