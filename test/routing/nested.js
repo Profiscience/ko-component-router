@@ -31,6 +31,7 @@ ko.components.register('nested', {
       // `next()` to start the test runner
       ko.components.register('a', {
         viewModel() {
+          t.equals(Router.head, Router.get(0), 'Router.head is top-most router')
           t.pass('initializes nested route')
           t.equals(hLen, history.length, 'child route does not add history entry')
           next()
@@ -66,7 +67,8 @@ ko.components.register('nested', {
       })
 
       ko.components.register('g', {
-        viewModel() {
+        viewModel(ctx) {
+          t.equals(ctx.router, Router.tail, 'Router.tail is bottom-most router')
           t.pass('anonymous router in route using shorthand works')
           next()
         }

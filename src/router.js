@@ -161,6 +161,14 @@ class Router {
     return routers[i]
   }
 
+  static get head() {
+    return routers[0]
+  }
+
+  static get tail() {
+    return routers[routers.length - 1]
+  }
+
   static link(router, params) {
     routers.push(router)
     router.depth = routers.length - 1
