@@ -14,7 +14,7 @@ ko.components.register('binding', {
       history.replaceState(null, null, '/a/a')
 
       this.routes = {
-        '/a/!': ['a', {
+        '/a/!': ['a', { // eslint-disable-line
           '/a': 'a-inner'
         }]
       }
