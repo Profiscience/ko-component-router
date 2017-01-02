@@ -21,6 +21,12 @@ Routes to `path`; adds history state entry if `push === true`
 #### Router.get(index)
 Return router at the given depth, beginning at 0
 
+#### Router.head
+Top-most router
+
+#### Router.tail
+Deepest router
+
 #### Router.use(fn)
 Convenience function for `Router.middleware.push(fn)`
 
