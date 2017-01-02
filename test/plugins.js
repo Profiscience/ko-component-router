@@ -14,10 +14,10 @@ ko.components.register('plugins', {
         '/component': {
           component: 'component'
         },
-        '/data': ['data', {
+        '/data': ['data', { // eslint-disable-line
           data: Promise.resolve(true)
         }],
-        '/data-multi': ['data-multi', {
+        '/data-multi': ['data-multi', { // eslint-disable-line
           data: {
             true: Promise.resolve(true),
             false: Promise.resolve(false)
