@@ -7,10 +7,10 @@ ko.bindingHandlers.path = {
     // allow adjacent routers to initialize
     ko.tasks.schedule(() => ko.applyBindingsToNode(el, {
       attr: {
-        href: resolveHref(bindingCtx, valueAccessor())
+        href: ko.pureComputed(() => resolveHref(bindingCtx, ko.unwrap(valueAccessor())))
       },
       css: {
-        'active-path': ko.pureComputed(() => isActivePath(bindingCtx, valueAccessor()))
+        'active-path': ko.pureComputed(() => isActivePath(bindingCtx, ko.unwrap(valueAccessor())))
       }
     }))
   }

@@ -86,7 +86,7 @@ const config = {
   reporters,
 
   coverageReporter: {
-    dir : 'coverage/',
+    dir: 'coverage/',
     reporters: [
       { type: 'html', subdir: 'html' },
       { type: 'lcovonly', subdir: '.', file: 'lcov.txt' }

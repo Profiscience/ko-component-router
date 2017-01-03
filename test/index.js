@@ -9,6 +9,7 @@ import './binding'
 import './routing'
 import './history'
 import './force-update'
+import './with'
 import './middleware'
 import './before-navigate-callbacks'
 import './element'
@@ -20,6 +21,7 @@ const tests = [
   'routing',
   'history',
   'force-update',
+  'with',
   'anchor',
   'binding',
   'middleware',
