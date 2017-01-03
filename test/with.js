@@ -4,8 +4,6 @@ ko.components.register('with', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
   viewModel: class With {
     constructor({ t, next }) {
-      const count = 0
-
       this.routes = {
         '/a': 'a',
         '/b': 'b'
