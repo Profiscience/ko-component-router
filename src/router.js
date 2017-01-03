@@ -49,6 +49,9 @@ class Router {
     if (isUndefined(args.push)) {
       args.push = true
     }
+    if (isUndefined(args.with)) {
+      args.with = {}
+    }
 
     const path = Router.getPath(url)
     const route = this.resolvePath(path)
@@ -85,7 +88,7 @@ class Router {
       this.base + path + search + hash
     )
 
-    const toCtx = new Context(Object.assign({}, this.passthrough, {
+    const toCtx = new Context(Object.assign({}, args.with, this.passthrough, {
       router: this,
       params,
       route,
