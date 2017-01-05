@@ -64,7 +64,7 @@ class Router {
 
     if (fromCtx && fromCtx.pathname === pathname && !args.force) {
       if (this.$child) {
-        return await this.$child.update(childPath, args.push)
+        return await this.$child.update(childPath, args)
       } else {
         return false
       }
