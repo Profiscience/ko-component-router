@@ -64,7 +64,7 @@ class Router {
 
     if (fromCtx && fromCtx.pathname === pathname && !args.force) {
       if (this.$child) {
-        return await this.$child.update(childPath, args.push)
+        return await this.$child.update(childPath, args)
       } else {
         return false
       }
@@ -146,7 +146,7 @@ class Router {
   dispose() {
     document.removeEventListener(events.click, this.onclick, false)
     window.removeEventListener(events.popstate, this.onpopstate, false)
-    Router.unlink(this)
+    Router.unlink()
     if (this.isRoot) {
       this.ctx.route.runBeforeDispose().then(() => this.ctx.route.runAfterDispose())
     }
@@ -200,11 +200,8 @@ class Router {
     }
   }
 
-  static unlink(router) {
+  static unlink() {
     routers.pop()
-    if (!router.isRoot) {
-      delete router.$parent.$child
-    }
   }
 
   static onclick(e) {
