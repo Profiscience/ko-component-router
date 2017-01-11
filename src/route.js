@@ -114,4 +114,8 @@ export default class Route {
 
     await routeBeforeRender
   }
+
+  static createRoutes(routes) {
+    return Object.entries(routes).map(([r, m]) => new Route(r, m))
+  }
 }
