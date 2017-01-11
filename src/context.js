@@ -19,10 +19,18 @@ export default class Context {
       : this.router.$parent.ctx
   }
 
+  get $parents() {
+    return this.router.$parents.map((r) => r.ctx)
+  }
+
   get $child() {
     return isUndefined(this.router.$child)
       ? undefined
       : this.router.$child.ctx
+  }
+
+  get $children() {
+    return this.router.$children.map((r) => r.ctx)
   }
 
   get element() {

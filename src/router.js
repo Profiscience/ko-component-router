@@ -54,6 +54,10 @@ class Router {
     return routers[this.depth + 1]
   }
 
+  get $children() {
+    return routers.slice(this.depth + 1)
+  }
+
   async update(url, args) {
     const fromCtx = this.ctx
 

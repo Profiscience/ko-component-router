@@ -27,6 +27,8 @@ ko.components.register('nested', {
 
       const hLen = history.length
 
+      let parentRouter
+
       // this should be the initial call, and is responsible for calling
       // `next()` to start the test runner
       ko.components.register('a', {
@@ -61,17 +63,33 @@ ko.components.register('nested', {
 
       ko.components.register('f', {
         template: '<ko-component-router></ko-component-router>',
-        viewModel() {
+        viewModel(ctx) {
+          parentRouter = ctx.router
           t.pass('nested router shorthand uses supplied component')
         }
       })
 
       ko.components.register('g', {
         viewModel(ctx) {
+          t.equals(Router.head.$parent, undefined, 'root router.$parent is undefined')
+          t.equals(Router.head.ctx.$parent, undefined, 'root ctx.$parent is undefined')
+
           t.equals(ctx.router, Router.tail, 'Router.tail is bottom-most router')
           t.equals(ctx.router.$parent, Router.tail.$parent, 'Router.$parent is parent router')
-          t.equals(ctx.router.$parents[0], Router.tail.$parent)
-          t.equals(ctx.router.$parents[1], Router.tail.$parent.$parent, 'Router.$parents is array of parents, 0=$parent, 1=$parent.$parent, etc...')
+          t.equals(ctx.$parent.router, Router.tail.$parent, 'ctx.$parent is parent ctx')
+
+          t.equals(ctx.router.$parents[0], Router.tail.$parent, 'Router.$parents is array of parents, 0=$parent')
+          t.equals(ctx.router.$parents[1], Router.tail.$parent.$parent, 'Router.$parents is array of parents, 1=$parent.$parent')
+
+          t.equals(ctx.$parents[0].router, Router.tail.$parent, 'ctx.$parents is array of parents, 0=$parent')
+          t.equals(ctx.$parents[1].router, Router.tail.$parent.$parent, 'ctx.$parents is array of parents, 1=$parent.$parent')
+
+          t.equals(parentRouter.$child, ctx.router, 'router.$child child router')
+          t.equals(parentRouter.$children[0], ctx.router, 'router.$children is array of child routers')
+
+          t.equals(parentRouter.ctx.$child, ctx, 'ctx.$child child ctx')
+          t.equals(parentRouter.ctx.$children[0], ctx, 'ctx.$children is array of child ctxs')
+
           t.pass('anonymous router in route using shorthand works')
           next()
         }
