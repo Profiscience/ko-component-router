@@ -16,6 +16,18 @@ Is the root router
 #### router.update(path, push = true)
 Routes to `path`; adds history state entry if `push === true`
 
+#### router.$parent
+Parent router accessor
+
+#### router.$parents
+Array of parent routers
+
+#### router.$child
+Child router accessor
+
+#### router.$children
+Array of child routers
+
 ### Static
 
 #### Router.get(index)

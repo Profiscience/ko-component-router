@@ -27,8 +27,14 @@ Object containing route parameters
 #### ctx.$parent
 Parent context accessor
 
+#### ctx.$parents
+Array of parent contexts
+
 #### ctx.$child
 Child context accessor
+
+#### ctx.$children
+Array of child contexts
 
 #### ctx.addBeforeNavigateCallback(([done]) => done())
 Adds a function to be executed before the page is navigated away from. Callbacks
