@@ -39,12 +39,12 @@ ko.components.register('routing', {
         r
       ])
 
-      Router.routes = mapValues({
+      Router.useRoutes(mapValues({
         ..._static
       }, (r) => [
         (ctx) => extend(ctx, { t, next }),
         r
-      ])
+      ]))
 
       next()
     }
