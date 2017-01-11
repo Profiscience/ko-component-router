@@ -46,6 +46,10 @@ class Router {
     return routers[this.depth - 1]
   }
 
+  get $parents() {
+    return routers.slice(0, this.depth).reverse()
+  }
+
   get $child() {
     return routers[this.depth + 1]
   }

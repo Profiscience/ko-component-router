@@ -69,6 +69,9 @@ ko.components.register('nested', {
       ko.components.register('g', {
         viewModel(ctx) {
           t.equals(ctx.router, Router.tail, 'Router.tail is bottom-most router')
+          t.equals(ctx.router.$parent, Router.tail.$parent, 'Router.$parent is parent router')
+          t.equals(ctx.router.$parents[0], Router.tail.$parent)
+          t.equals(ctx.router.$parents[1], Router.tail.$parent.$parent, 'Router.$parents is array of parents, 0=$parent, 1=$parent.$parent, etc...')
           t.pass('anonymous router in route using shorthand works')
           next()
         }
