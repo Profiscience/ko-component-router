@@ -27,11 +27,17 @@ Top-most router
 #### Router.tail
 Deepest router
 
+#### Router.setConfig({ base = '', hashbang = false })
+Sets router configuration
+
 #### Router.use(fn)
 Convenience function for `Router.middleware.push(fn)`
 
 #### Router.usePlugin(fn)
 Convenience function for `Router.plugins.push(fn)`
+
+#### Router.useRoutes(routes)
+Convenience function for `Object.assign(Router.routes, routes)`
 
 #### Router.update(path, [push = true], [options = { push: true, force: false, with: {} }])
 Convenience function for `Router.get(0).update(...)`

@@ -14,28 +14,40 @@ class Router {
   constructor(params) {
     this.component = ko.observable()
     this.isNavigating = ko.observable(true)
+    this.routes = Route.createRoutes(params.routes || {})
 
-    Router.link(this, params)
-
-    this.passthrough = params
+    Router.link(this)
 
     if (this.isRoot) {
+      Router.setConfig(params)
+      this.routes.push(...Route.createRoutes(Router.routes))
       document.addEventListener(events.click, Router.onclick)
       window.addEventListener(events.popstate, Router.onpopstate)
-    }
-
-    const routes = Object.assign(this.isRoot ? Router.routes : {}, params.routes)
-    this.routes = Object.entries(routes).map(([r, m]) => new Route(r, m))
-    if (!this.isRoot && this.$parent.ctx.route.children) {
+    } else if (this.$parent.ctx.route.children) {
       this.routes.push(...this.$parent.ctx.route.children)
     }
-    delete params.routes
+
+    this.passthrough = Object.entries(params).reduce((accum, [k, v]) =>
+      k === 'base' || k === 'hashbang' || k === 'routes'
+        ? accum
+        : Object.assign(accum, { [k]: v }),
+      {})
 
     this.update(this.getPathFromLocation(), false)
   }
 
-  static async update(...args) {
-    return await routers[0].update(...args)
+  get base() {
+    return this.isRoot
+      ? (Router.config.hashbang ? '/#!' : '') + Router.config.base
+      : this.$parent.base + this.$parent.ctx.pathname
+  }
+
+  get $parent() {
+    return routers[this.depth - 1]
+  }
+
+  get $child() {
+    return routers[this.depth + 1]
   }
 
   async update(url, args) {
@@ -152,12 +164,25 @@ class Router {
     }
   }
 
+  static setConfig({ base, hashbang }) {
+    if (base) {
+      Router.config.base = base
+    }
+    if (hashbang) {
+      Router.config.hashbang = hashbang
+    }
+  }
+
   static use(...fns) {
     Router.middleware.push(...fns)
   }
 
   static usePlugin(...fns) {
     Router.plugins.push(...fns)
+  }
+
+  static useRoutes(routes) {
+    Object.assign(Router.routes, routes)
   }
 
   static get(i) {
@@ -172,32 +197,15 @@ class Router {
     return routers[routers.length - 1]
   }
 
-  static link(router, params) {
-    routers.push(router)
-    router.depth = routers.length - 1
-    router.isRoot = router.depth === 0
-    router.$root = routers[0]
+  static async update(...args) {
+    return await routers[0].update(...args)
+  }
 
-    if (router.isRoot) {
-      if (params.base) {
-        Router.config.base = params.base
-        delete params.base
-      }
-      router.base = Router.config.base
-      if (params.hashbang) {
-        Router.config.hashbang = params.hashbang
-        delete params.hashbang
-      }
-      if (Router.config.hashbang) {
-        router.base += '/#!'
-      }
-    } else {
-      const $parent = routers[router.depth - 1]
-      const { ctx: { pathname }, base } = $parent
-      router.$parent = $parent
-      router.$parent.$child = router
-      router.base = base + pathname
-    }
+  static link(router) {
+    router.depth = routers.length
+    router.isRoot = router.depth === 0
+    routers.push(router)
+    router.$root = routers[0]
   }
 
   static unlink() {
