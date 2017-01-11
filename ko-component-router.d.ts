@@ -57,28 +57,38 @@ interface KoComponentRouterConfig {
 }
 
 declare module 'ko-component-router' {
-    interface RouterStatic extends KoComponentRouterInstance {
-    }
-    namespace RouterStatic {
-        export var config: KoComponentRouterConfig;
-        export var middleware: KoComponentRouterMiddleware[];
-        export var plugins: any[];
-        export var routes: KoComponentRouterRoutes;
-        export const head: KoComponentRouterInstance;
-        export const tail: KoComponentRouterInstance;
+    class Router implements KoComponentRouterInstance {
+        static config: KoComponentRouterConfig;
+        static middleware: KoComponentRouterMiddleware[];
+        static plugins: any[];
+        static routes: KoComponentRouterRoutes;
+        static head: KoComponentRouterInstance;
+        static tail: KoComponentRouterInstance;
 
-        export function canonicalizePath(path: string): string;
-        export function get(index: number): KoComponentRouterInstance;
-        export function getPath(url: string): string;
-        export function parseUrl(url: string): { hash: string, pathname: string, search: string };
-        export function sameOrigin(href: string): boolean;
-        export function setConfig(config: KoComponentRouterConfig): void;
-        export function update(path: string, push?: boolean): Promise<boolean>;
-        export function update(path: string, options: { push?: boolean; force?: boolean; with?: any }): Promise<boolean>;
-        export function use(...middleware: KoComponentRouterMiddleware[]): void;
-        export function usePlugin(...fns): void;    
-        export function useRoutes(routes: KoComponentRouterRoutes): void;
+        static canonicalizePath(path: string): string;
+        static get(index: number): KoComponentRouterInstance;
+        static getPath(url: string): string;
+        static parseUrl(url: string): { hash: string, pathname: string, search: string };
+        static sameOrigin(href: string): boolean;
+        static setConfig(config: KoComponentRouterConfig): void;
+        static update(path: string, push?: boolean): Promise<boolean>;
+        static update(path: string, options: { push?: boolean; force?: boolean; with?: any }): Promise<boolean>;
+        static use(...middleware: KoComponentRouterMiddleware[]): void;
+        static usePlugin(...fns): void;    
+        static useRoutes(routes: KoComponentRouterRoutes): void;
+
+        $child: KoComponentRouterInstance;
+        $parent: KoComponentRouterInstance;
+        base: string;
+        ctx: KoComponentRouterContext;
+        isRoot: boolean;
+        isNavigating: KnockoutObservable<boolean>;
+
+        constructor();
+        getPathFromLocation(): string;
+        resolvePath(path): any;
+        update(path: string, push?: boolean): Promise<boolean>;
     }
 
-    export = RouterStatic;
+    export = Router;
 }
