@@ -51,11 +51,16 @@ interface KoComponentRouterRoutes {
         | Array<string | KoComponentRouterPromiseMiddleware | KoComponentRouterLifecycleMiddleware>;
 }
 
+interface KoComponentRouterConfig {
+    base?: string;
+    hashbang?: boolean;
+}
+
 declare module 'ko-component-router' {
     interface RouterStatic extends KoComponentRouterInstance {
     }
     namespace RouterStatic {
-        export var config: { base?: string; hashbang?: boolean; };
+        export var config: KoComponentRouterConfig;
         export var middleware: KoComponentRouterMiddleware[];
         export var plugins: any[];
         export var routes: KoComponentRouterRoutes;
@@ -67,10 +72,12 @@ declare module 'ko-component-router' {
         export function getPath(url: string): string;
         export function parseUrl(url: string): { hash: string, pathname: string, search: string };
         export function sameOrigin(href: string): boolean;
+        export function setConfig(config: KoComponentRouterConfig): void;
         export function update(path: string, push?: boolean): Promise<boolean>;
         export function update(path: string, options: { push?: boolean; force?: boolean; with?: any }): Promise<boolean>;
         export function use(...middleware: KoComponentRouterMiddleware[]): void;
         export function usePlugin(...fns): void;    
+        export function useRoutes(routes: KoComponentRouterRoutes): void;
     }
 
     export = RouterStatic;
