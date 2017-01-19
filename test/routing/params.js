@@ -5,16 +5,16 @@
 
  import ko from 'knockout'
 
-ko.components.register('params', {
-  viewModel: class ParamsTest {
-    constructor({ t, next, params }) {
-      t.equal('foo', params.foo, 'parses param to ctx.params')
-      next()
-    }
-    dispose() {
-      ko.components.unregister('params')
-    }
+ ko.components.register('params', {
+   viewModel: class ParamsTest {
+     constructor({ t, next, params }) {
+       t.equal('foo', params.foo, 'parses param to ctx.params')
+       next()
+     }
+     dispose() {
+       ko.components.unregister('params')
+     }
   }
-})
+ })
 
-export default { '/params/:foo': 'params' }
+ export default { '/params/:foo': 'params' }

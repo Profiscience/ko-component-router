@@ -6,7 +6,6 @@ const issues = [
   '127'
 ]
 
-
 ko.components.register('issues', {
   template: `
     <div data-bind="if: test">

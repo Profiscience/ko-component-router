@@ -58,10 +58,11 @@ ko.components.register('before-navigate-callbacks', {
       ko.components.register('nested-child', {
         viewModel(ctx) {
           ctx.addBeforeNavigateCallback((done) => {
-          setTimeout(() => {
-            hit = true
-            done()
-          }, 200)})
+            setTimeout(() => {
+              hit = true
+              done()
+            }, 200)
+          })
         }
       })
 

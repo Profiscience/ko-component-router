@@ -240,7 +240,7 @@ class Router {
 
     const { pathname, search, hash = '' } = el
     const path = (pathname + search + hash).replace(new RegExp(routers[0].base, 'i'), '')
-    
+
     const isValidRoute = Router.hasRoute(path)
     const isCrossOrigin = !Router.sameOrigin(el.href)
     const isDoubleClick = 1 !== Router.which(e)

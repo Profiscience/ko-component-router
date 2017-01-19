@@ -137,7 +137,7 @@ ko.components.register('middleware', {
           next()
         }
       })
-      
+
       ko.components.register('object', {
         viewModel: (ctx) => {
           ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)

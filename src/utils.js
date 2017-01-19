@@ -74,22 +74,22 @@ function generatorify(fn) {
   return isGenerator(fn)
     ? fn
     : function(...args) {
-        let count = 1, ret
-        return {
-          async next() {
-            switch (count++) {
-              case 1:
-                ret = await promisify(fn)(...args) || false
-                return ret && ret.beforeRender
+      let count = 1, ret
+      return {
+        async next() {
+          switch (count++) {
+          case 1:
+            ret = await promisify(fn)(...args) || false
+            return ret && ret.beforeRender
                   ? await promisify(ret.beforeRender)()
                   : ret
-              case 2: return ret && await promisify(ret.afterRender)()
-              case 3: return ret && await promisify(ret.beforeDispose)()
-              case 4: return ret && await promisify(ret.afterDispose)()
-            }
+          case 2: return ret && await promisify(ret.afterRender)()
+          case 3: return ret && await promisify(ret.beforeDispose)()
+          case 4: return ret && await promisify(ret.afterDispose)()
           }
         }
       }
+    }
 }
 
 // function generatorify(fn) {
@@ -113,7 +113,9 @@ function promisify(_fn = () => {}) {
   return async (...args) => {
     const fn = () =>
       _fn.length === args.length + 1
-        ? new Promise((r) => { _fn(...args, r) })
+        ? new Promise((r) => {
+          _fn(...args, r)
+        })
         : _fn(...args)
 
     const ret = fn()
@@ -121,5 +123,5 @@ function promisify(_fn = () => {}) {
     return isThenable(ret)
       ? await ret
       : ret
-    }
+  }
 }
