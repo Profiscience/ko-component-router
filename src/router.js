@@ -74,7 +74,7 @@ class Router {
     }
 
     const path = Router.getPath(url)
-    const route = this.resolvePath(path)
+    const route = this.resolveRoute(path)
 
     if (!route) {
       return false
@@ -143,7 +143,7 @@ class Router {
     return true
   }
 
-  resolvePath(path) {
+  resolveRoute(path) {
     let matchingRouteWithFewestDynamicSegments
     let fewestMatchingSegments = Infinity
 
@@ -226,7 +226,7 @@ class Router {
   }
 
   static onclick(e) {
-    if (e.defaultPrevented || e.target.dataset.external) {
+    if (e.defaultPrevented) {
       return
     }
 
@@ -238,6 +238,10 @@ class Router {
       return
     }
 
+    const { pathname, search, hash = '' } = el
+    const path = (pathname + search + hash).replace(new RegExp(routers[0].base, 'i'), '')
+    
+    const isValidRoute = Router.hasRoute(path)
     const isCrossOrigin = !Router.sameOrigin(el.href)
     const isDoubleClick = 1 !== Router.which(e)
     const isDownload = el.hasAttribute('download')
@@ -247,11 +251,8 @@ class Router {
     const hasModifier = e.metaKey || e.ctrlKey || e.shiftKey
     const hasOtherTarget = el.hasAttribute('target')
 
-    const { pathname, search, hash = '' } = el
-    const path = (pathname + search + hash).replace(new RegExp(routers[0].base, 'i'), '')
-
-    if (
-      isCrossOrigin ||
+    if (!isValidRoute ||
+        isCrossOrigin ||
         isDoubleClick ||
         isDownload ||
         isEmptyHash ||
@@ -263,13 +264,6 @@ class Router {
     }
 
     Router.update(path)
-      .then((navigated) => {
-        if (!navigated) {
-          e.target.dataset.external = true
-          e.target.dispatchEvent(new e.constructor(e.type, e))
-        }
-      })
-
     e.preventDefault()
   }
 
@@ -300,6 +294,10 @@ class Router {
 
   static getPath(url) {
     return Router.parseUrl(url).pathname
+  }
+
+  static hasRoute(path) {
+    return !isUndefined(Router.head.resolveRoute(Router.getPath(path)))
   }
 
   static sameOrigin(href) {
