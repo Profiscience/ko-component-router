@@ -12,6 +12,11 @@ Object.assign | [Link](https://developer.mozilla.org/en-US/docs/Web/JavaScript/R
 Object.entries | [Link](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries#Browser_compatibility) | [object.entries](https://github.com/es-shims/object.entries)
 pushState/replaceState | [Link](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Browser_compatibility) | [html5-history-api](https://github.com/devote/HTML5-History-API)
 
+If using the above HTML5 history polyfill, make sure you configure the polyfill after loading. The polyfill needs to have the `!` path prefix registered by calling:
+```javascript
+window.history.setup('/', '!/', null);
+```
+
 # Basic Usage
 
 If a picture is worth 1k words, code is worth 1M...
