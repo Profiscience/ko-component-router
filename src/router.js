@@ -73,6 +73,7 @@ class Router {
       args.with = {}
     }
 
+    const { search, hash } = Router.parseUrl(url)
     const path = Router.getPath(url)
     const route = this.resolveRoute(path)
 
@@ -98,9 +99,6 @@ class Router {
 
       this.isNavigating(true)
     }
-
-    const currentUrl = Router.canonicalizePath(location.pathname + location.search + location.hash)
-    const { search, hash } = Router.parseUrl(currentUrl)
 
     history[args.push ? 'pushState' : 'replaceState'](
       history.state,
