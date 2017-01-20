@@ -41,6 +41,11 @@ Adds a function to be executed before the page is navigated away from. Callbacks
 are executed LIFO. Async callbacks should use the optional `done` parameter
 to continue to the next callback (if any), or navigation.
 
+#### ctx.queue(promise)
+Only available in `beforeRender` [middleware](./middleware.md), this function
+queues a promise and allows middleware to continue running, but still resolves
+before the page is rendered.
+
 A callback may prevent navigation by
 - returning `false`
 - returning a promise that a) is rejected or b) resolves `false`
