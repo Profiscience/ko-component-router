@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "Component-based routing for KnockoutJS",
   "author": "Casey Webb <notcaseywebb@gmail.com>",
   "license": "WTFPL",
@@ -49,7 +49,7 @@
     "chokidar": "^1.6.1",
     "coveralls": "^2.11.9",
     "cross-spawn": "^5.0.1",
-    "eslint": "^3.0.1",    
+    "eslint": "^3.0.1",
     "eslint-config-profiscience": "^1.2.0",
     "filesize": "^3.3.0",
     "isparta-loader": "^2.0.0",

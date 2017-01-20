@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+none :tada:
+
+## 4.3.0
+
 ### Added
  - Router.setConfig
  - Router.useRoutes
