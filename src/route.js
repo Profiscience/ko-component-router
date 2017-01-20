@@ -98,6 +98,9 @@ export default class Route {
       return await sequence(afterDisposes)
     }
 
+    const queue = []
+    ctx.queue = (promise) => queue.push(promise)
+
     const [appBeforeRender, appDownstream] = runMiddleware(Router.middleware, ctx)
 
     afterRenders.push(appDownstream)
@@ -113,6 +116,9 @@ export default class Route {
     afterDisposes.unshift(routeDownstream)
 
     await routeBeforeRender
+    await Promise.all(queue)
+
+    delete ctx.queue
   }
 
   static createRoutes(routes) {

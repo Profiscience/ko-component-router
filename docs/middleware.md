@@ -71,7 +71,10 @@ but I __highly__ discourage it. There is a better way... keep reading...
 
 Middleware functions are passed 2 arguments:
 - `ctx`: the ctx object passed into the viewmodel
-- `done`: an optional callback for async functions; promises are also supported, and encouraged
+- `done`: an optional callback for async functions\*; promises are also supported, and encouraged
+
+\*that should wait for completion before continuing middleware, otherwise use
+`ctx.queue()`
 
 Let's look at some example logging middleware...
 
@@ -97,7 +100,9 @@ your data calls out of the viewmodel...
 
 In the viewmodel for the `user` component, `ctx.user` will contain the user. Since
 we're returning a promise, the next middleware (in this case the component setter)
-will not be executed until after the call has completed.
+will not be executed until after the call has completed. If you wished to continue
+middleware execution immediately, but still ensure any asynchronous operations
+have completed before render, you could use `ctx.queue`.
 
 Let's see how we can take some finer control. As has been the theme, you've got options...
 

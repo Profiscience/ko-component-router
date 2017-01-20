@@ -11,6 +11,7 @@ import './history'
 import './force-update'
 import './with'
 import './middleware'
+import './queue'
 import './before-navigate-callbacks'
 import './element'
 import './passthrough'
@@ -25,6 +26,7 @@ const tests = [
   'anchor',
   'binding',
   'middleware',
+  'queue',
   'before-navigate-callbacks',
   'element',
   'passthrough',
