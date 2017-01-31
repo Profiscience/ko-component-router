@@ -39,6 +39,9 @@ Top-most router
 #### Router.tail
 Deepest router
 
+#### Router.initialized
+Promise that resolves `Router.head` after initialization
+
 #### Router.setConfig({ base = '', hashbang = false })
 Sets router configuration
 

@@ -4,15 +4,17 @@ import { isUndefined } from './utils'
 
 ko.bindingHandlers.path = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
-    // allow adjacent routers to initialize
-    ko.tasks.schedule(() => ko.applyBindingsToNode(el, {
-      attr: {
-        href: ko.pureComputed(() => resolveHref(bindingCtx, ko.unwrap(valueAccessor())))
-      },
-      css: {
-        'active-path': ko.pureComputed(() => isActivePath(bindingCtx, ko.unwrap(valueAccessor())))
-      }
-    }))
+    Router.initialized.then(() => {
+      // allow adjacent routers to initialize
+      ko.tasks.schedule(() => ko.applyBindingsToNode(el, {
+        attr: {
+          href: ko.pureComputed(() => resolveHref(bindingCtx, ko.unwrap(valueAccessor())))
+        },
+        css: {
+          'active-path': ko.pureComputed(() => isActivePath(bindingCtx, ko.unwrap(valueAccessor())))
+        }
+      }))
+    })
   }
 }
 
