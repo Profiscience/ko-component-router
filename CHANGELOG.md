@@ -2,7 +2,14 @@
 
 ## [Unreleased]
 
-none :tada:
+### Added
+ - Router.initialized
+
+## 4.3.1
+
+### Fixed
+ - Navigating to url w/ query or hash wiped out said query or hash
+
 
 ## 4.3.0
 
