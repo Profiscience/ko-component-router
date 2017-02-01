@@ -79,12 +79,7 @@ export default class Route {
     const beforeDisposes = []
     const afterDisposes = []
 
-    this.runAfterRender = async () => {
-      if (ctx.$child) {
-        await ctx.$child.route.runAfterRender()
-      }
-      return await sequence(afterRenders)
-    }
+    this.runAfterRender = async () => await sequence(afterRenders)
     this.runBeforeDispose = async () => {
       if (ctx.$child) {
         await ctx.$child.route.runBeforeDispose()
