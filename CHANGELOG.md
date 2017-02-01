@@ -5,6 +5,10 @@
 ### Added
  - Router.initialized
 
+### Fixed
+ - afterRender middleware in child routers being ran twice
+
+
 ## 4.3.1
 
 ### Fixed
