@@ -8,6 +8,7 @@ const events = {
   popstate: 'popstate'
 }
 
+const onInit = []
 const routers = []
 
 class Router {
@@ -33,7 +34,7 @@ class Router {
         : Object.assign(accum, { [k]: v }),
       {})
 
-    this.update(this.getPathFromLocation(), false)
+    this.update(this.getPathFromLocation(), false).then(() => onInit.forEach((r) => r(this)))
   }
 
   get base() {
@@ -206,6 +207,14 @@ class Router {
 
   static get tail() {
     return routers[routers.length - 1]
+  }
+
+  static get initialized() {
+    if (routers.length === 0) {
+      return new Promise((resolve) => onInit.push(resolve))
+    } else {
+      return Promise.resolve(Router.head)
+    }
   }
 
   static async update(...args) {
