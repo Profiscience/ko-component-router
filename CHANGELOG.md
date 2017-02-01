@@ -2,11 +2,17 @@
 
 ## [Unreleased]
 
+none! :tada:
+
+
+## 4.4.0
+
 ### Added
  - Router.initialized
 
 ### Fixed
  - afterRender middleware in child routers being ran twice
+ - path binding not usable from <ko-component-router> parent component when wrapped — #157
 
 
 ## 4.3.1
