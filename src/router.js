@@ -39,7 +39,7 @@ class Router {
 
   get base() {
     return this.isRoot
-      ? (Router.config.hashbang ? '/#!' : '') + Router.config.base
+      ? Router.config.base + (Router.config.hashbang ? '/#!' : '')
       : this.$parent.base + this.$parent.ctx.pathname
   }
 
@@ -164,7 +164,8 @@ class Router {
 
   getPathFromLocation() {
     const path = location.pathname + location.search + location.hash
-    return path.replace(new RegExp(this.base, 'i'), '')
+    const baseWithOrWithoutHashbangRegexp = this.base.replace('#!', '#?!?')
+    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
   }
 
   dispose() {
