@@ -12,6 +12,7 @@
     "watch": "node scripts/watch.js",
     "test": "node scripts/test.js",
     "lint": "eslint --max-warnings=0 src/ test/ scripts/",
+    "start": "webpack-dev-server --config examples/webpack.config.js",
     "prepublish": "npm run build"
   },
   "main": "dist/ko-component-router.js",
@@ -72,6 +73,7 @@
     "rollup-plugin-node-resolve": "^2.0.0",
     "tape": "^4.4.0",
     "uglify-js": "^2.7.5",
-    "webpack": "^1.14.0"
+    "webpack": "^1.14.0",
+    "webpack-dev-server": "^1.16.3"
   }
 }
