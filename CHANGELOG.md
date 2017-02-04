@@ -4,7 +4,11 @@
 
 ### Added
  - examples! :beers:
- 
+
+### Fixed
+ - Basepath not working correctly with hashbang (appended instead of prepended) — #156
+ - Landing on `/` in hashbang mode did not redirect to `/#!/`
+
 
 ## 4.4.0
 
