@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+:tada:
+
+
+## 4.4.1
+
 ### Added
  - examples! :beers:
 
