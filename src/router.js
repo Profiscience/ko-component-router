@@ -116,12 +116,10 @@ class Router {
     }))
 
     if (fromCtx) {
-      await fromCtx.route.runBeforeDispose()
+      await fromCtx.runBeforeDispose()
     }
 
-    await toCtx.route.runBeforeRender(toCtx)
-
-    const fromCtxChildRoute = fromCtx && fromCtx.$child && fromCtx.$child.route
+    await toCtx.runBeforeRender()
 
     this.ctx = toCtx
     this.component(false)
@@ -130,12 +128,10 @@ class Router {
     ko.tasks.runEarly()
 
     if (fromCtx) {
-      if (fromCtxChildRoute) {
-        await fromCtxChildRoute.runAfterDispose()
-      }
-      await fromCtx.route.runAfterDispose()
+      await fromCtx.runAfterDispose()
     }
-    await toCtx.route.runAfterRender()
+
+    await toCtx.runAfterRender()
 
     this.isNavigating(false)
 
@@ -173,7 +169,7 @@ class Router {
     if (this.isRoot) {
       document.removeEventListener(events.click, Router.onclick, false)
       window.removeEventListener(events.popstate, Router.onpopstate, false)
-      this.ctx.route.runBeforeDispose().then(() => this.ctx.route.runAfterDispose())
+      this.ctx.runBeforeDispose().then(() => this.ctx.runAfterDispose())
     }
   }
 
