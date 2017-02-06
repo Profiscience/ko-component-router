@@ -94,9 +94,6 @@ export default class Context {
   }
 
   async runAfterDispose() {
-    if (this.$child) {
-      await this.$child.runAfterDispose()
-    }
     await sequence(this._afterDisposeCallbacks)
     await this.flushQueue()
   }
