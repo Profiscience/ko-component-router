@@ -1,6 +1,6 @@
 import pathtoRegexp from 'path-to-regexp'
 import Router from './router'
-import { flatMap, isArray, isFunction, isPlainObject, isString, runMiddleware, sequence } from './utils'
+import { flatMap, isArray, isFunction, isPlainObject, isString } from './utils'
 
 export default class Route {
   constructor(path, middleware) {
@@ -72,48 +72,6 @@ export default class Route {
     }
 
     return [params, path.replace(new RegExp(childPath + '$'), ''), childPath]
-  }
-
-  async runBeforeRender(ctx) {
-    const afterRenders = []
-    const beforeDisposes = []
-    const afterDisposes = []
-
-    this.runAfterRender = async () => await sequence(afterRenders)
-    this.runBeforeDispose = async () => {
-      if (ctx.$child) {
-        await ctx.$child.route.runBeforeDispose()
-      }
-      return await sequence(beforeDisposes)
-    }
-    this.runAfterDispose = async () => {
-      if (ctx.$child) {
-        await ctx.$child.route.runAfterDispose()
-      }
-      return await sequence(afterDisposes)
-    }
-
-    const queue = []
-    ctx.queue = (promise) => queue.push(promise)
-
-    const [appBeforeRender, appDownstream] = runMiddleware(Router.middleware, ctx)
-
-    afterRenders.push(appDownstream)
-    beforeDisposes.push(appDownstream)
-    afterDisposes.push(appDownstream)
-
-    await appBeforeRender
-
-    const [routeBeforeRender, routeDownstream] = runMiddleware(this.middleware, ctx)
-
-    afterRenders.push(routeDownstream)
-    beforeDisposes.unshift(routeDownstream)
-    afterDisposes.unshift(routeDownstream)
-
-    await routeBeforeRender
-    await Promise.all(queue)
-
-    delete ctx.queue
   }
 
   static createRoutes(routes) {
