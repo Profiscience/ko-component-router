@@ -5,6 +5,12 @@
 :tada:
 
 
+## 4.4.2
+
+### Fixed
+ - Navigating to same route w/ different params caused issues w/ middleware execution order — #164
+
+
 ## 4.4.1
 
 ### Added
