@@ -5,6 +5,13 @@
 :tada:
 
 
+## 4.4.3
+
+### Fixed
+ - querystring and hash being wiped out in child routes on popstate
+ - child afterDispose middleware not being called
+
+
 ## 4.4.2
 
 ### Fixed
