@@ -5,6 +5,12 @@
 :tada:
 
 
+## 4.4.4
+
+### Fixed
+ - deeply nested child afterDispose middleware not being called
+
+
 ## 4.4.3
 
 ### Fixed

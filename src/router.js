@@ -119,9 +119,9 @@ class Router {
       await fromCtx.runBeforeDispose()
     }
 
-    // $child will become unaccessible after the component is torn down
+    // $children will become unaccessible after the component is torn down
     // so a reference must be saved
-    const fromCtxChild = fromCtx && fromCtx.$child && fromCtx.$child
+    const fromCtxChildren = fromCtx && fromCtx.$children.reverse()
 
     await toCtx.runBeforeRender()
 
@@ -132,7 +132,7 @@ class Router {
     ko.tasks.runEarly()
 
     if (fromCtx) {
-      if (fromCtxChild) {
+      for (const fromCtxChild of fromCtxChildren) {
         await fromCtxChild.runAfterDispose()
       }
       await fromCtx.runAfterDispose()
