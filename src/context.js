@@ -36,7 +36,7 @@ export default class Context {
   }
 
   get $children() {
-    return this.router.$children.map((r) => r.ctx)
+    return this.router.$children.filter((r) => !isUndefined(r.ctx)).map((r) => r.ctx)
   }
 
   get element() {
