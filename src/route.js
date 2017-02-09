@@ -1,6 +1,6 @@
 import pathtoRegexp from 'path-to-regexp'
 import Router from './router'
-import { flatMap, isArray, isFunction, isPlainObject, isString } from './utils'
+import { flatMap, isArray, isFunction, isPlainObject, isString, isUndefined } from './utils'
 
 export default class Route {
   constructor(path, config) {
@@ -10,21 +10,10 @@ export default class Route {
     this.middleware = middleware
     this.children = children
 
-    if (this.children) {
-      this.path = this.path.replace(/\/?!?$/, '/!')
-      if (!this.component) {
-        this.component = 'ko-component-router'
-      }
-    }
+    const [keys, regexp] = Route.parsePath(path, !isUndefined(children))
 
-    if (this.path[this.path.length - 1] === '!') {
-      this.path = this.path.replace('!', ':__child_path__(.*)?')
-    } else {
-      this.path = this.path.replace(/\(?\*\)?/, '(.*)')
-    }
-
-    this._keys = []
-    this._regexp = pathtoRegexp(this.path, this._keys)
+    this._keys = keys
+    this._regexp = regexp
   }
 
   matches(path) {
@@ -96,5 +85,22 @@ export default class Route {
     }, [])
 
     return [component, middleware, children]
+  }
+
+  static parsePath(path, hasChildren) {
+    if (hasChildren) {
+      path = path.replace(/\/?!?$/, '/!')
+    }
+
+    if (path[path.length - 1] === '!') {
+      path = path.replace('!', ':__child_path__(.*)?')
+    } else {
+      path = path.replace(/\(?\*\)?/, '(.*)')
+    }
+
+    const keys = []
+    const regexp = pathtoRegexp(path, keys)
+
+    return [keys, regexp]
   }
 }
