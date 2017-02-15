@@ -4,6 +4,8 @@ import { isUndefined } from './utils'
 
 ko.bindingHandlers.path = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
+    const activePathCSSClass = allBindings.get('pathActiveClass') || Router.config.activePathCSSClass
+
     Router.initialized.then(() => {
       // allow adjacent routers to initialize
       ko.tasks.schedule(() => ko.applyBindingsToNode(el, {
@@ -11,7 +13,7 @@ ko.bindingHandlers.path = {
           href: ko.pureComputed(() => resolveHref(bindingCtx, ko.unwrap(valueAccessor())))
         },
         css: {
-          'active-path': ko.pureComputed(() => isActivePath(bindingCtx, ko.unwrap(valueAccessor())))
+          [activePathCSSClass]: ko.pureComputed(() => isActivePath(bindingCtx, ko.unwrap(valueAccessor())))
         }
       }))
     })

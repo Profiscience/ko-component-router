@@ -42,7 +42,7 @@ Deepest router
 #### Router.initialized
 Promise that resolves `Router.head` after initialization
 
-#### Router.setConfig({ base = '', hashbang = false })
+#### Router.setConfig({ base = '', hashbang = false, activePathCSSClass = 'active-path' })
 Sets router configuration
 
 #### Router.use(fn)
@@ -70,6 +70,10 @@ Base path that the router is active under
 
 #### Router.config.hashbang = false
 Using hashbang routing
+
+#### Router.config.activePathCSSClass = 'active-path'
+CSS class to add to elements with a path binding that resolves to the current
+page — useful for styling navbars and tabs.
 
 #### Router.middleware = []
 Global middleware

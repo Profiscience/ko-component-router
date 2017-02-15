@@ -70,7 +70,7 @@ class Test {
   }
 
   runTest(test) {
-    Router.config = { base: '', hashbang: false }
+    Router.config = { base: '', hashbang: false, activePathCSSClass: 'active-path' }
     Router.middleware = []
     Router.plugins = []
     Router.routes = {}

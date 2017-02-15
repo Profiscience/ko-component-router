@@ -180,12 +180,15 @@ class Router {
     }
   }
 
-  static setConfig({ base, hashbang }) {
+  static setConfig({ base, hashbang, activePathCSSClass }) {
     if (base) {
       Router.config.base = base
     }
     if (hashbang) {
       Router.config.hashbang = hashbang
+    }
+    if (activePathCSSClass) {
+      Router.config.activePathCSSClass = activePathCSSClass
     }
   }
 
@@ -326,7 +329,7 @@ class Router {
   }
 }
 
-Router.config = { base: '', hashbang: false }
+Router.config = { base: '', hashbang: false, activePathCSSClass: 'active-path' }
 Router.middleware = []
 Router.plugins = []
 Router.routes = {}

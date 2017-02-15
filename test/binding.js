@@ -3,6 +3,7 @@ import $ from 'jquery'
 
 ko.components.register('binding', {
   template: `
+    <a id="custom-class" data-bind="path: '/a', pathActiveClass: 'custom-active-class'"></a>
     <a id="outer-relative" data-bind="path: '/a'"></a>
     <a id="outer-absolute" data-bind="path: '//a'"></a>
     <a id="outer-deep" data-bind="path: '/a/a'"></a>
@@ -32,6 +33,7 @@ ko.components.register('binding', {
             t.equals('/a', $('#nested-relative-up').attr('href'))
             t.equals('/a', $('#nested-absolute').attr('href'))
 
+            t.ok($('#custom-class').hasClass('custom-active-class'))
             t.ok($('#outer-relative').hasClass('active-path'))
             t.ok($('#inner-relative').hasClass('active-path'))
             t.ok($('#nested-relative').hasClass('active-path'))
