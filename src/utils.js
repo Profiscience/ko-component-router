@@ -109,7 +109,7 @@ function generatorify(fn) {
 //       }
 // }
 
-function promisify(_fn = () => {}) {
+function promisify(_fn = noop) {
   return async (...args) => {
     const fn = () =>
       _fn.length === args.length + 1
@@ -124,4 +124,8 @@ function promisify(_fn = () => {}) {
       ? await ret
       : ret
   }
+}
+
+function noop() {
+ // do nothing
 }

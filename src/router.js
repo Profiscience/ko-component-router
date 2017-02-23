@@ -245,10 +245,10 @@ class Router {
     }
 
     let el = e.target
-    while (el && 'A' !== el.nodeName) {
+    while (el && el.nodeName !== 'A') {
       el = el.parentNode
     }
-    if (!el || 'A' !== el.nodeName) {
+    if (!el || el.nodeName !== 'A') {
       return
     }
 
@@ -257,7 +257,7 @@ class Router {
 
     const isValidRoute = Router.hasRoute(path)
     const isCrossOrigin = !Router.sameOrigin(el.href)
-    const isDoubleClick = 1 !== Router.which(e)
+    const isDoubleClick = Router.which(e) !== 1
     const isDownload = el.hasAttribute('download')
     const isEmptyHash = el.getAttribute('href') === '#'
     const isMailto = (el.getAttribute('href') || '').indexOf('mailto:') === 0
@@ -325,7 +325,7 @@ class Router {
 
   static which(e) {
     e = e || window.event
-    return null === e.which ? e.button : e.which
+    return e.which === null ? e.button : e.which
   }
 }
 

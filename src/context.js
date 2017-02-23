@@ -58,7 +58,7 @@ export default class Context {
   }
 
   async flushQueue() {
-    return Promise.all(this._queue).then(() => this._queue = [])
+    return await Promise.all(this._queue).then(() => (this._queue = []))
   }
 
   async runBeforeRender() {
