@@ -4,7 +4,8 @@ const path = require('path')
 
 module.exports = {
   entry: {
-    hashbang: path.resolve(__dirname, './hashbang/index.js')
+    'hashbang': path.resolve(__dirname, './hashbang/index.js'),
+    'path-binding': path.resolve(__dirname, './path-binding/index.js')
   },
   output: {
     publicPath: '/dist/',
