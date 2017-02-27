@@ -1,0 +1,28 @@
+<div class="card" style="width: 20rem;">
+  <div class="card-block">
+    <h4 class="card-title">
+      <a data-bind="text: user.name, path: '/' + user.id"></a>
+    </h4>
+    <small>
+      <i class="fa fa-envelope"></i>
+      &nbsp;
+      <span class="text-muted" data-bind="text: user.email"></span>
+    </small>
+    <br>
+    <small>
+      <i class="fa fa-phone"></i>
+      &nbsp;
+      <span class="text-muted" data-bind="text: user.phoneNumber"></span>
+    </small>
+    <br>
+    <br>
+    <small>
+      <a data-bind="path: '/' + user.id + '/edit'">
+        Edit
+      </a>
+      <a data-bind="click: $component.destroy" href="#">
+        Delete
+      </a>
+    </small>
+  </div>
+</div>

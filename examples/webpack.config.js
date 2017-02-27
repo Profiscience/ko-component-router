@@ -5,6 +5,7 @@ const path = require('path')
 module.exports = {
   entry: {
     'hashbang': path.resolve(__dirname, './hashbang/index.js'),
+    'mvc': path.resolve(__dirname, './mvc/index.js'),
     'path-binding': path.resolve(__dirname, './path-binding/index.js')
   },
   output: {
@@ -12,11 +13,10 @@ module.exports = {
     filename: '[name].js'
   },
   devServer: {
-    contentBase: __dirname,
-    hot: true
+    contentBase: __dirname
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
         loader: 'babel-loader',
@@ -26,7 +26,16 @@ module.exports = {
         options: {
           cacheDirectory: true
         }
+      },
+      {
+        test: /\.html$/,
+        loader: 'html-loader'
       }
     ]
+  },
+  resolve: {
+    alias: {
+      'ko-component-router': path.resolve(__dirname, '../dist/modules')
+    }
   }
 }
