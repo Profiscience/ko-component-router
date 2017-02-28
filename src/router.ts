@@ -1,4 +1,4 @@
-import ko from 'knockout'
+import * as ko from 'knockout'
 import Context from './context'
 import Route from './route'
 import { isBool, isUndefined } from './utils'
@@ -12,6 +12,18 @@ const onInit = []
 const routers = []
 
 class Router {
+  static config;
+  static middleware;
+  static plugins;
+  static routes;
+  component;
+  isNavigating;
+  routes;
+  isRoot;
+  passthrough;
+  depth;
+  ctx;
+
   constructor(params) {
     this.component = ko.observable()
     this.isNavigating = ko.observable(true)

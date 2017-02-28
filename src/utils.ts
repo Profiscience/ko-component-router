@@ -1,4 +1,4 @@
-import _isPlainObject from 'is-plain-object'
+import _isPlainObject = require('is-plain-object')
 
 export function isArray(arr) {
   return typeof arr.splice === 'function'
@@ -109,7 +109,7 @@ function generatorify(fn) {
 //       }
 // }
 
-function promisify(_fn = noop) {
+function promisify(_fn: any = noop) {
   return async (...args) => {
     const fn = () =>
       _fn.length === args.length + 1

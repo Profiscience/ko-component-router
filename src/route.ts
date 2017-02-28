@@ -1,8 +1,15 @@
-import pathtoRegexp from 'path-to-regexp'
+import pathtoRegexp = require('path-to-regexp')
 import Router from './router'
 import { flatMap, isArray, isFunction, isPlainObject, isString, isUndefined } from './utils'
 
 export default class Route {
+  path;
+  component;
+  middleware;
+  children;
+  _keys;
+  _regexp;
+
   constructor(path, config) {
     const [component, middleware, children] = Route.parseConfig(config)
     this.path = path

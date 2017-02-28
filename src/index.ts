@@ -1,4 +1,4 @@
-import ko from 'knockout'
+import * as ko from 'knockout'
 import Router from './router'
 import './binding'
 
@@ -13,7 +13,7 @@ ko.components.register('ko-component-router', {
     </div>`
 })
 
-ko.bindingHandlers.__ko_component_router__ = {
+ko.bindingHandlers['__ko_component_router__'] = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
     const $router = bindingCtx.$rawData
 
@@ -47,3 +47,5 @@ function unwrapParams(params) {
 }
 
 export default Router
+
+module.exports = exports['default'];

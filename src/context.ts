@@ -2,6 +2,17 @@ import Router from './router'
 import { isUndefined, runMiddleware, sequence } from './utils'
 
 export default class Context {
+  fullPath;
+  router;
+  pathname;
+  canonicalPath;
+  route;
+  _queue;
+  _beforeNavigateCallbacks;
+  _afterRenderCallbacks;
+  _beforeDisposeCallbacks;
+  _afterDisposeCallbacks;
+
   constructor(params) {
     Object.assign(this, params)
 

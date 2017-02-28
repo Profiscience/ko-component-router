@@ -1,8 +1,8 @@
-import ko from 'knockout'
+import * as ko from 'knockout'
 import Router from './router'
 import { isUndefined } from './utils'
 
-ko.bindingHandlers.path = {
+ko.bindingHandlers['path'] = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
     const activePathCSSClass = allBindings.get('pathActiveClass') || Router.config.activePathCSSClass
 
