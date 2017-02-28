@@ -38,6 +38,9 @@
     "knockout": "^3.3.0"
   },
   "devDependencies": {
+    "@types/knockout": "^3.4.39",
+    "@types/node": "^7.0.5",
+    "@types/path-to-regexp": "^1.0.29",
     "babel-core": "^6.21.0",
     "babel-loader": "^6.2.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
@@ -69,9 +72,12 @@
     "regenerator-runtime": "^0.10.0",
     "rimraf": "^2.5.4",
     "rollup": "^0.41.1",
+    "rollup-plugin-alias": "^1.2.0",
     "rollup-plugin-commonjs": "^7.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
     "tape": "^4.4.0",
+    "tslib": "^1.6.0",
+    "typescript": "^2.2.1",
     "uglify-js": "^2.7.5",
     "webpack": "^1.14.0",
     "webpack-dev-server": "^2.4.0"
