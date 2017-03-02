@@ -13,7 +13,7 @@ import _static from './static'
 
 const paths = [
   '/basic',
-  '/params/foo',
+  '/params/foo/bar/baz',
   '/nested/a',
   '/similar/foo/bar',
   '/ambiguous/a/b/c',

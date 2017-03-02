@@ -9,6 +9,7 @@
    viewModel: class ParamsTest {
      constructor({ t, next, params }) {
        t.equal('foo', params.foo, 'parses param to ctx.params')
+       t.equal('baz', params.baz, 'parses param to ctx.params')
        next()
      }
      dispose() {
@@ -17,4 +18,4 @@
   }
  })
 
- export default { '/params/:foo': 'params' }
+ export default { '/params/:foo/bar/:baz': 'params' }
