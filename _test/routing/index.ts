@@ -1,23 +1,23 @@
 import ko from 'knockout'
 import { extend, mapValues } from 'lodash'
 
-import Router from '../../dist/modules'
+import Router from '../../src'
 
 import init from './init'
 import basic from './basic'
-import params from './params'
-import nested from './nested'
-import similar from './similar'
-import ambiguous from './ambiguous'
-import _static from './static'
+// import params from './params'
+// import nested from './nested'
+// import similar from './similar'
+// import ambiguous from './ambiguous'
+// import _static from './static'
 
 const paths = [
   '/basic',
-  '/params/foo',
-  '/nested/a',
-  '/similar/foo/bar',
-  '/ambiguous/a/b/c',
-  '/static'
+  // '/params/foo',
+  // '/nested/a',
+  // '/similar/foo/bar',
+  // '/ambiguous/a/b/c',
+  // '/static'
 ]
 
 ko.components.register('routing', {

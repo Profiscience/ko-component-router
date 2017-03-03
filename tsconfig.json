@@ -3,7 +3,7 @@
     "importHelpers": true,
     "moduleResolution": "node",
     "target": "es5",
-    "module": "commonjs",
+    "module": "es2015",
     "sourceMap": true,
     "declaration": true,
     "rootDir": "./src",
@@ -28,7 +28,6 @@
     "dist",
     "examples",
     "scripts",
-    "test",
     "node_modules"
   ]
 }

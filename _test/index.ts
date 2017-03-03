@@ -2,36 +2,36 @@ import $ from 'jquery'
 import ko from 'knockout'
 import tape from 'tape'
 
-import Router from '../dist/modules'
+import Router from '../src'
 
-import './anchor'
-import './binding'
+// import './anchor'
+// import './binding'
 import './routing'
-import './history'
-import './force-update'
-import './with'
-import './middleware'
-import './queue'
-import './before-navigate-callbacks'
-import './element'
-import './passthrough'
-import './plugins'
-import './issues'
+// import './history'
+// import './force-update'
+// import './with'
+// import './middleware'
+// import './queue'
+// import './before-navigate-callbacks'
+// import './element'
+// import './passthrough'
+// import './plugins'
+// import './issues'
 
 const tests = [
   'routing',
-  'history',
-  'force-update',
-  'with',
-  'anchor',
-  'binding',
-  'middleware',
-  'queue',
-  'before-navigate-callbacks',
-  'element',
-  'passthrough',
-  'plugins',
-  'issues'
+  // 'history',
+  // 'force-update',
+  // 'with',
+  // 'anchor',
+  // 'binding',
+  // 'middleware',
+  // 'queue',
+  // 'before-navigate-callbacks',
+  // 'element',
+  // 'passthrough',
+  // 'plugins',
+  // 'issues'
 ]
 
 ko.components.loaders.unshift({

@@ -1,5 +1,5 @@
 import ko from 'knockout'
-import Router from '../../dist/modules'
+import Router from '../../src'
 
 ko.components.register('nested', {
   template: '<ko-component-router params="routes: routes"></ko-component-router>',
