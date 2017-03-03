@@ -8,74 +8,105 @@ const events = {
   popstate: 'popstate'
 }
 
-const onInit = []
-const routers = []
+const onInit: Array<Function> = []
+const routers: Array<Router> = []
+
+export interface Middleware {
+  (ctx: Context, done?: () => any): {
+    beforeRender?:  (done?: () => any) => Promise<any>
+    afterRender?:   (done?: () => any) => Promise<any>
+    beforeDispose?: (done?: () => any) => Promise<any>
+    afterDispose?:  (done?: () => any) => Promise<any>
+  }
+}
+
+export interface Plugin {
+  (routeConfig: any): Routes
+}
+
+export interface Routes {
+  [name: string]: string | Middleware | Routes | Array<string|Middleware|Routes>
+}
 
 class Router {
-  static config;
-  static middleware;
-  static plugins;
-  static routes;
-  component;
-  isNavigating;
-  routes;
-  isRoot;
-  passthrough;
-  depth;
-  ctx;
+  static config: {
+    base?:                string
+    hashbang?:            boolean
+    activePathCSSClass?:  string
+  } = {
+    base:               '',
+    hashbang:           false,
+    activePathCSSClass: 'active-path'
+  }
 
-  constructor(params) {
-    this.component = ko.observable()
+  static middleware:  Array<Middleware>
+  static plugins:     Array<Plugin>
+  static routes:      Routes
+
+  component:      KnockoutObservable<string>
+  isNavigating:   KnockoutObservable<boolean>
+  routes:         Array<Route>
+  isRoot:         boolean
+  passthrough:    Object
+  depth:          number
+  ctx:            Context
+
+  constructor() {
+    this.component = ko.observable(null)
     this.isNavigating = ko.observable(true)
-    this.routes = Route.createRoutes(params.routes || {})
 
     Router.link(this)
 
     if (this.isRoot) {
-      Router.setConfig(params)
-      this.routes.push(...Route.createRoutes(Router.routes))
+      this.routes = Route.createRoutes(Router.routes)
       document.addEventListener(events.click, Router.onclick)
       window.addEventListener(events.popstate, Router.onpopstate)
     } else if (this.$parent.ctx.route.children) {
-      this.routes.push(...this.$parent.ctx.route.children)
+      this.routes = this.$parent.ctx.route.children
     }
-
-    this.passthrough = Object.entries(params).reduce((accum, [k, v]) =>
-      k === 'base' || k === 'hashbang' || k === 'routes'
-        ? accum
-        : Object.assign(accum, { [k]: v }),
-      {})
 
     this.update(this.getPathFromLocation(), false).then(() => onInit.forEach((r) => r(this)))
   }
 
-  get base() {
+  get base(): string {
     return this.isRoot
       ? Router.config.base + (Router.config.hashbang ? '/#!' : '')
       : this.$parent.base + this.$parent.ctx.pathname
   }
 
-  get $parent() {
+  get $root(): Router {
+    return routers[0]
+  }
+
+  get $parent(): Router {
     return routers[this.depth - 1]
   }
 
-  get $parents() {
+  get $parents(): Array<Router> {
     return routers.slice(0, this.depth).reverse()
   }
 
-  get $child() {
+  get $child(): Router {
     return routers[this.depth + 1]
   }
 
-  get $children() {
+  get $children(): Array<Router> {
     return routers.slice(this.depth + 1)
   }
 
-  async update(url, args) {
+  async update(
+    url: string,
+    _args?: boolean | {
+      push?:  boolean
+      force?: boolean
+      with?:  Object
+    }): Promise<boolean> {
+
     const fromCtx = this.ctx
+    let args
 
     if (isBool(args)) {
-      args = { push: args }
+      args = { push: _args as boolean }
     } else if (isUndefined(args)) {
       args = {}
     }
@@ -138,7 +169,7 @@ class Router {
     await toCtx.runBeforeRender()
 
     this.ctx = toCtx
-    this.component(false)
+    this.component(null)
     ko.tasks.runEarly()
     this.component(this.ctx.route.component)
     ko.tasks.runEarly()
@@ -157,7 +188,7 @@ class Router {
     return true
   }
 
-  resolveRoute(path) {
+  private resolveRoute(path: string): Route {
     let matchingRouteWithFewestDynamicSegments
     let fewestMatchingSegments = Infinity
 
@@ -177,7 +208,7 @@ class Router {
     return matchingRouteWithFewestDynamicSegments
   }
 
-  getPathFromLocation() {
+  private getPathFromLocation(): string {
     const path = location.pathname + location.search + location.hash
     const baseWithOrWithoutHashbangRegexp = this.base.replace('#!', '#?!?')
     return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
@@ -192,7 +223,11 @@ class Router {
     }
   }
 
-  static setConfig({ base, hashbang, activePathCSSClass }) {
+  static setConfig({ base, hashbang, activePathCSSClass }: {
+    base?:                string
+    hashbang?:            boolean
+    activePathCSSClass?:  string
+  }) {
     if (base) {
       Router.config.base = base
     }
@@ -204,31 +239,31 @@ class Router {
     }
   }
 
-  static use(...fns) {
+  static use(...fns: Array<Middleware>) {
     Router.middleware.push(...fns)
   }
 
-  static usePlugin(...fns) {
+  static usePlugin(...fns: Array<Plugin>) {
     Router.plugins.push(...fns)
   }
 
-  static useRoutes(routes) {
+  static useRoutes(routes: { [route: string]: any }) {
     Object.assign(Router.routes, routes)
   }
 
-  static get(i) {
+  static get(i: number): Router {
     return routers[i]
   }
 
-  static get head() {
+  static get head(): Router {
     return routers[0]
   }
 
-  static get tail() {
+  static get tail(): Router {
     return routers[routers.length - 1]
   }
 
-  static get initialized() {
+  static get initialized(): Promise<Router> {
     if (routers.length === 0) {
       return new Promise((resolve) => onInit.push(resolve))
     } else {
@@ -236,22 +271,27 @@ class Router {
     }
   }
 
-  static async update(...args) {
-    return await routers[0].update(...args)
+  static async update(
+    url: string,
+    _args?: boolean | {
+      push?:  boolean
+      force?: boolean
+      with?:  Object
+    }): Promise<boolean> {
+    return await routers[0].update(url, _args)
   }
 
-  static link(router) {
+  private static link(router) {
     router.depth = routers.length
     router.isRoot = router.depth === 0
     routers.push(router)
-    router.$root = routers[0]
   }
 
-  static unlink() {
+  private static unlink() {
     routers.pop()
   }
 
-  static onclick(e) {
+  private static onclick(e) {
     if (e.defaultPrevented) {
       return
     }
@@ -293,16 +333,16 @@ class Router {
     e.preventDefault()
   }
 
-  static onpopstate(e) {
+  private static onpopstate(e) {
     Router.update(routers[0].getPathFromLocation(), false)
     e.preventDefault()
   }
 
-  static canonicalizePath(path) {
+  private static canonicalizePath(path) {
     return path.replace(new RegExp('/?#?!?/?'), '/')
   }
 
-  static parseUrl(url) {
+  private static parseUrl(url) {
     const parser = document.createElement('a')
     const b = routers[0].base.toLowerCase()
     if (b && url.toLowerCase().indexOf(b) === 0) {
@@ -318,15 +358,15 @@ class Router {
     }
   }
 
-  static getPath(url) {
+  private static getPath(url) {
     return Router.parseUrl(url).pathname
   }
 
-  static hasRoute(path) {
+  private static hasRoute(path) {
     return !isUndefined(Router.head.resolveRoute(Router.getPath(path)))
   }
 
-  static sameOrigin(href) {
+  private static sameOrigin(href) {
     const { hostname, port, protocol } = location
     let origin = protocol + '//' + hostname
     if (port) {
@@ -335,15 +375,10 @@ class Router {
     return href && href.indexOf(origin) === 0
   }
 
-  static which(e) {
+  private static which(e): number {
     e = e || window.event
     return e.which === null ? e.button : e.which
   }
 }
-
-Router.config = { base: '', hashbang: false, activePathCSSClass: 'active-path' }
-Router.middleware = []
-Router.plugins = []
-Router.routes = {}
 
 export default Router

@@ -11,7 +11,7 @@ const nodeResolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
 const alias = require('rollup-plugin-alias')
 
-const src = path.resolve(__dirname, '../../src')
+// const src = path.resolve(__dirname, '../../src')
 const dist = path.resolve(__dirname, '../../dist')
 const modules = path.resolve(__dirname, '../../dist/modules')
 const node_modules = path.resolve(__dirname, '../../node_modules')
@@ -21,11 +21,11 @@ let cache
 mkdirp.sync(modules)
 
 function compile() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const tscProc = spawn('tsc')
     tscProc.stdout.on('data', (data) => {
-      console.log(`[tsc] ${data}`);
-    });
+      console.log(`[tsc] ${data}`)
+    })
     tscProc.stderr.on('data', (data) => {
       throw new Error('[tsc]', data.toString())
     })

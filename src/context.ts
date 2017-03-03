@@ -1,17 +1,19 @@
+import Route from './Route'
 import Router from './router'
 import { isUndefined, runMiddleware, sequence } from './utils'
 
 export default class Context {
-  fullPath;
-  router;
-  pathname;
-  canonicalPath;
-  route;
-  _queue;
-  _beforeNavigateCallbacks;
-  _afterRenderCallbacks;
-  _beforeDisposeCallbacks;
-  _afterDisposeCallbacks;
+  fullPath: string
+  router: Router
+  pathname: string
+  canonicalPath: string
+  route: Route
+
+  private _queue
+  private _beforeNavigateCallbacks
+  private _afterRenderCallbacks
+  private _beforeDisposeCallbacks
+  private _afterDisposeCallbacks
 
   constructor(params) {
     Object.assign(this, params)
@@ -30,32 +32,32 @@ export default class Context {
     this._beforeNavigateCallbacks.unshift(cb)
   }
 
-  get $parent() {
+  get $parent(): Context {
     return this.router.isRoot
       ? undefined
       : this.router.$parent.ctx
   }
 
-  get $parents() {
+  get $parents(): Array<Context> {
     return this.router.$parents.map((r) => r.ctx)
   }
 
-  get $child() {
+  get $child(): Context {
     return isUndefined(this.router.$child)
       ? undefined
       : this.router.$child.ctx
   }
 
-  get $children() {
+  get $children(): Array<Context> {
     return this.router.$children.filter((r) => !isUndefined(r.ctx)).map((r) => r.ctx)
   }
 
-  get element() {
+  get element(): Element {
     return document.getElementsByClassName('ko-component-router-view')[this.router.depth]
   }
 
-  async runBeforeNavigateCallbacks() {
-    let ctx = this
+  async runBeforeNavigateCallbacks(): Promise<boolean> {
+    let ctx: Context = this
     let callbacks = []
     while (ctx) {
       callbacks = [...ctx._beforeNavigateCallbacks, ...callbacks]
@@ -64,12 +66,12 @@ export default class Context {
     return await sequence(callbacks)
   }
 
-  queue(promise) {
+  private queue(promise) {
     this._queue.push(promise)
   }
 
-  async flushQueue() {
-    return await Promise.all(this._queue).then(() => (this._queue = []))
+  private async flushQueue() {
+    await Promise.all(this._queue).then(() => (this._queue = []))
   }
 
   async runBeforeRender() {
