@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "moduleResolution": "node",
     "target": "es5",
-    "module": "es2015",
+    "module": "umd",
     "sourceMap": true,
-    "declaration": true,
     "rootDir": "./src",
     "baseUrl": "./src",
-    "outDir": "./dist/modules",
+    "outDir": "/dist/umd",
     "lib": [
       "dom",
       "es5",
@@ -27,7 +27,8 @@
   "exclude": [
     "dist",
     "examples",
-    "scripts",
+    "modules",
+    "test",
     "node_modules"
   ]
 }

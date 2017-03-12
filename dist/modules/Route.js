@@ -1,4 +1,4 @@
-import { default as pathtoRegexp } from 'path-to-regexp';
+import pathtoRegexp from 'path-to-regexp';
 import { isFunction, isPlainObject, isString, isUndefined } from './utils';
 var Route = (function () {
     function Route(path, config) {

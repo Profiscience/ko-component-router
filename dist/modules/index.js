@@ -1,4 +1,4 @@
-import * as ko from 'knockout';
+import ko from 'knockout';
 import Router from './router';
 import './binding';
 ko.components.register('ko-component-router', {
@@ -20,4 +20,6 @@ ko.bindingHandlers['__ko_component_router__'] = {
     }
 };
 export default Router;
+export { default as Context } from './context';
+export { default as Route } from './route';
 //# sourceMappingURL=index.js.map

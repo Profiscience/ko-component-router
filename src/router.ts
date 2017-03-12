@@ -1,4 +1,4 @@
-import * as ko from 'knockout'
+import ko from 'knockout'
 import Context from './context'
 import Route, { RouteConfig } from './route'
 import { isArray, isBool, isUndefined, flatMap } from './utils'
@@ -28,7 +28,7 @@ export interface RouteMap {
   [name: string]: RouteConfig | Array<RouteConfig>
 }
 
-class Router {
+export default class Router {
   static config: {
     base?:                string
     hashbang?:            boolean
@@ -396,5 +396,3 @@ class Router {
     return e.which === null ? e.button : e.which
   }
 }
-
-export default Router

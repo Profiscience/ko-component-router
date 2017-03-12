@@ -1,5 +1,5 @@
 import * as tslib_1 from "tslib";
-import * as ko from 'knockout';
+import ko from 'knockout';
 import Context from './context';
 import Route from './route';
 import { isArray, isBool, isUndefined, flatMap } from './utils';
@@ -365,10 +365,10 @@ var Router = (function () {
     };
     return Router;
 }());
+export default Router;
 Router.config = {
     base: '',
     hashbang: false,
     activePathCSSClass: 'active-path'
 };
-export default Router;
 //# sourceMappingURL=router.js.map

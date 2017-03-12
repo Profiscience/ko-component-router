@@ -1,14 +1,14 @@
-import $ from 'jquery'
-import * as ko from 'knockout'
-import tape from 'tape'
+import ko from 'knockout'
+import tape, { Test } from 'tape'
 
 import './helpers/empty-template-loader'
+import './helpers/tape-browser-reporter'
 
 import Router from '../src'
 
 // import './anchor'
 // import './binding'
-import './routing'
+// import './routing'
 // import './history'
 // import './force-update'
 // import './with'
@@ -37,23 +37,13 @@ const tests = [
 ]
 
 
-class Test {
+class TestRunner {
   test: KnockoutObservable<string>
-  t
-  next
+  t: Test
+  next: Function
 
   constructor() {
-    this.test = ko.observable()
-
-    $('body').append(`
-      <div data-bind="if: test">
-        <div id="test-container" data-bind="component: {
-            name: test,
-            params: { t: t, next: next }
-        }"></div>
-      </div>
-    `)
-
+    this.test = ko.observable(null)
     this.runTests()
   }
 
@@ -65,18 +55,18 @@ class Test {
 
   async runTest(test) {
     // reset defaults
-    Router.config = { base: '', hashbang: false, activePathCSSClass: 'active-path' }
-    Router.middleware = []
-    Router.plugins = []
-    Router.routes = {}
+    // Router.config = { base: '', hashbang: false, activePathCSSClass: 'active-path' }
+    // Router.middleware = []
+    // Router.plugins = []
+    // Router.routes = {}
 
     return await new Promise((resolve) =>
       tape(test, (t) => {
-        this.t = test
+        this.t = t
         this.next = resolve
         this.test(test)
       }))
   }
 }
 
-$(() => ko.applyBindings(new Test()))
+ko.applyBindings(new TestRunner())

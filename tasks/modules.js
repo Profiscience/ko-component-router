@@ -1,12 +1,12 @@
 const path = require('path')
-const typescript = require('typescript')
-const typescriptConfig = require('../tsconfig.json')
+const spawn = require('cross-spawn')
 
-module.exports = function * (fly) {
-  yield fly.source(path.resolve(__dirname, '../src/*.ts'))
-    .run({ every: true }, function * ({ data }) {
-      typescript.transpile(data.toString(), typescriptConfig)
-      yield Promise.resolve()
-    })
-    .target(path.resolve(__dirname, '../dist/modules'))
+module.exports = function * () {
+  yield new Promise((resolve) => {
+    const tsc = spawn('tsc', [
+      '--module', 'es2015',
+      '--outDir', path.resolve(__dirname, '../dist/modules')
+    ])
+    tsc.on('close', resolve)
+  })
 }

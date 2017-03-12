@@ -1,8 +1,10 @@
 const path = require('path')
+const { extend } = require('lodash')
 const typescript = require('typescript')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
-const typescriptPlugin = require('rollup-plugin-typescript')
+const { default: typescriptPlugin } = require('rollup-plugin-ts')
+const { compilerOptions } = require('../tsconfig.json')
 
 let cache
 
@@ -12,7 +14,10 @@ module.exports = function * (fly) {
       rollup: {
         cache,
         plugins: [
-          typescriptPlugin({ typescript }),
+          typescriptPlugin({
+            typescript,
+            tsconfig: extend({}, compilerOptions, { sourceMap: false })
+          }),
           nodeResolve({
             preferBuiltins: false,
             // TODO why do I need to skip this external?
@@ -27,7 +32,12 @@ module.exports = function * (fly) {
         moduleName: 'ko.router',
         globals: {
           knockout: 'ko'
-        }
+        },
+
+        // ko.router.default === Router
+        // ko.router.Context === Context
+        // ko.router.Route === Route
+        exports: 'named'
       }
     })
     .concat({ output: 'ko-component-router.js' })

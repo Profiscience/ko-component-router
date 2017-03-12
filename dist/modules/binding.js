@@ -1,12 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var ko = require("knockout");
-var router_1 = require("./router");
-var utils_1 = require("./utils");
+import ko from 'knockout';
+import Router from './router';
+import { isUndefined } from './utils';
 ko.bindingHandlers['path'] = {
     init: function (el, valueAccessor, allBindings, viewModel, bindingCtx) {
-        var activePathCSSClass = allBindings.get('pathActiveClass') || router_1.default.config.activePathCSSClass;
-        router_1.default.initialized.then(function () {
+        var activePathCSSClass = allBindings.get('pathActiveClass') || Router.config.activePathCSSClass;
+        Router.initialized.then(function () {
+            // allow adjacent routers to initialize
             ko.tasks.schedule(function () {
                 return ko.applyBindingsToNode(el, {
                     attr: {
@@ -21,11 +20,10 @@ ko.bindingHandlers['path'] = {
         });
     }
 };
-function resolveHref(bindingCtx, _path) {
+export function resolveHref(bindingCtx, _path) {
     var _a = parsePathBinding(bindingCtx, _path), router = _a[0], path = _a[1];
     return router.base + path;
 }
-exports.resolveHref = resolveHref;
 function isActivePath(bindingCtx, _path) {
     var _a = parsePathBinding(bindingCtx, _path), router = _a[0], path = _a[1];
     return !router.isNavigating() && (router.ctx.pathname || '/') === ('/' + path.split('/')[1]);
@@ -51,11 +49,12 @@ function parsePathBinding(bindingCtx, path) {
     return [router, path];
 }
 function getRouter(bindingCtx) {
-    while (!utils_1.isUndefined(bindingCtx)) {
-        if (!utils_1.isUndefined(bindingCtx.$router)) {
+    while (!isUndefined(bindingCtx)) {
+        if (!isUndefined(bindingCtx.$router)) {
             return bindingCtx.$router;
         }
         bindingCtx = bindingCtx.$parentContext;
     }
-    return router_1.default.get(0);
+    return Router.get(0);
 }
+//# sourceMappingURL=binding.js.map

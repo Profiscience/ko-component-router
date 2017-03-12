@@ -1,8 +1,10 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('knockout')) :
-	typeof define === 'function' && define.amd ? define(['knockout'], factory) :
-	(global.ko = global.ko || {}, global.ko.router = factory(global.ko));
-}(this, (function (ko) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('knockout')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'knockout'], factory) :
+	(factory((global.ko = global.ko || {}, global.ko.router = global.ko.router || {}),global.ko));
+}(this, (function (exports,ko) { 'use strict';
+
+ko = 'default' in ko ? ko['default'] : ko;
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -1464,6 +1466,10 @@ ko.bindingHandlers['__ko_component_router__'] = {
     }
 };
 
-return Router$1;
+exports['default'] = Router$1;
+exports.Context = Context;
+exports.Route = Route;
+
+Object.defineProperty(exports, '__esModule', { value: true });
 
 })));

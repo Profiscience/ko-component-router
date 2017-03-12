@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>ko-component-router tests</title>
+</head>
+<body>
+  <div data-bind="if: test">
+    <div id="test-container" data-bind="component: {
+        name: test,
+        params: { t: t, next: next }
+    }"></div>
+  </div>
+  <script src="./bundle.js"></script>
+</body>
+</html>

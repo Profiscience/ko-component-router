@@ -1,4 +1,4 @@
-import { default as pathtoRegexp } from 'path-to-regexp'
+import pathtoRegexp from 'path-to-regexp'
 import Router, { RouteMap, Middleware } from './router'
 import { flatMap, isArray, isFunction, isPlainObject, isString, isUndefined } from './utils'
 

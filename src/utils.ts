@@ -112,7 +112,7 @@ function generatorify(fn) {
 //       }
 // }
 
-function promisify(_fn: any = noop) {
+function promisify(_fn: Function = noop) {
   return async (...args) => {
     const fn = () =>
       _fn.length === args.length + 1

@@ -1,97 +1,107 @@
-// eslint-disable-next-line
-console.info(`Usage:
-  --chrome    open in chrome
-  --firefox   open in firefox
-  --watch     keep alive and re-run on change
-
-  e.g. "npm test -- --chrome --watch"
-`)
-
+const http = require('http')
 const path = require('path')
-const { watch, chrome, firefox } = require('minimist')(process.argv.slice(2))
-const { Server } = require('karma')
+const { extend } = require('lodash')
+const connect = require('connect')
+const WebSocket = require('ws')
+const opn = require('opn')
+const serveStatic = require('serve-static')
+const bodyParser = require('body-parser')
+const typescript = require('typescript')
+const nodeResolve = require('rollup-plugin-node-resolve')
+const nodeBuiltins = require('rollup-plugin-node-builtins')
+const nodeGlobals = require('rollup-plugin-node-globals')
+const commonjs = require('rollup-plugin-commonjs')
+const json = require('rollup-plugin-json')
+const istanbul = require('rollup-plugin-istanbul')
+const { default: typescriptPlugin } = require('rollup-plugin-ts')
+const { compilerOptions } = require('../tsconfig.json')
 
-// const typescript = require('typescript')
-// const nodeResolve = require('rollup-plugin-node-resolve')
-// const commonjs = require('rollup-plugin-commonjs')
-// const typescriptPlugin = require('rollup-plugin-typescript')
-
-const browsers = []
-if (chrome) {
-  browsers.push('_Chrome')
-}
-if (firefox) {
-  browsers.push('_Firefox')
-}
-
-const reporters = ['dots', 'karma-typescript']
-
-const config = {
-  basePath: path.resolve(__dirname, '..'),
-
-  frameworks: ['tap', 'karma-typescript'],
-
-  files: [
-    // 'node_modules/regenerator-runtime/runtime.js',
-    'test/index.ts'
-  ],
-
-  preprocessors: {
-    '**/*.ts': 'karma-typescript'
-  },
-
-  browsers,
-
-  customLaunchers: {
-    _Chrome: {
-      base: 'Chrome',
-      flags: ['--incognito']
-    },
-    _Firefox: {
-      base: 'Firefox',
-      flags: ['-private']
-    },
-  },
-
-  autoWatch: watch,
-
-  singleRun: !watch,
-
-  reporters,
-
-  // coverageReporter: {
-  //   dir: 'coverage/',
-  //   reporters: [
-  //     { type: 'html', subdir: 'html' },
-  //     { type: 'lcovonly', subdir: '.', file: 'lcov.txt' }
-  //   ]
-  // },
-
-  // rollupPreprocessor: {
-  //   plugins: [
-  //     typescriptPlugin({ typescript }),
-  //     nodeResolve({
-  //       preferBuiltins: false,
-  //       // TODO why do I need to skip this external?
-  //       // skip: ['knockout']
-  //     }),
-  //     commonjs()
-  //   ]
-  // }
-}
-
-// compile().then(() => {
-//   const server = new Server(config, (code) => process.exit(code)) // eslint-disable-line
-// server.start()
-// })
+let cache
 
 module.exports = function * (fly) {
-  const server = new Server(config, (code) => process.exit(code))
+  yield fly.source(path.resolve(__dirname, '../test/index.ts'))
+    .rollup({
+      rollup: {
+        cache,
+        plugins: [
+          json(),
+          commonjs({
+            namedExports: {
+              knockout: [
+                'applyBindings',
+                'applyBindingsToNode',
+                'bindingHandlers',
+                'components',
+                'observable',
+                'pureComputed',
+                'tasks',
+                'unwrap'
+              ]
+            }
+          }),
+          nodeGlobals(),
+          nodeBuiltins({
+            crypto: true
+          }),
+          typescriptPlugin({
+            typescript,
+            tsconfig: extend({}, compilerOptions, {
+              target: 'es6',
+              rootDir: './',
+              baseUrl: './'
+            })
+          }),
+          istanbul({
+            include: [
+              'src/**/*.js'
+            ]
+          }),
+          nodeResolve({
+            preferBuiltins: true
+          })
+        ]
+      },
+      bundle: {
+        format: 'iife',
+        sourceMap: 'inline'
+      }
+    })
 
-  if (watch) {
-    yield fly.watch()
-  } else {
-    server.start()
-    yield new Promise((resolve) => server.on('run_complete', resolve))
-  }
+    .run({ every: false }, function * ([file]) {
+      const app = connect()
+      let resolve
+
+      app.use(bodyParser.urlencoded({ extended: false }))
+      app.use(serveStatic(path.resolve(__dirname, '../test')))
+      app.use('/bundle.js', (req, res) => {
+        res.write(file.data, (err) => {
+          res.end()
+        })
+      })
+      app.use('/done', (req, res) => {
+        resolve()
+        res.end()
+      })
+
+      const server = http.createServer(app)
+
+      const wss = new WebSocket.Server({ server })
+
+      wss.on('connection', (ws) => {
+        ws.on('message', (message) => {
+          console.log('received: %s', message)
+        })
+
+        ws.send('something')
+      })
+
+      server.listen(9876, () => {
+        console.log('Listening on %d', server.address().port)
+      })
+
+      // opn('http://localhost:9876')
+
+      yield new Promise((_resolve) => (resolve = _resolve))
+    })
+    .target(path.resolve(__dirname, '../dist'))
 }
