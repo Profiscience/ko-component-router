@@ -71,7 +71,7 @@ module.exports = {
               }),
               istanbul({
                 include: [
-                  'src/**/*.js'
+                  path.resolve(__dirname, '../src/**/*.js')
                 ]
               }),
               nodeResolve({
@@ -125,7 +125,9 @@ module.exports = {
     io.on('connection', (ws) => {
       ws.on('tap', (message) => {
         process.stdout.write(message)
-        parserStream.write(message)
+        if (parserStream) {
+          parserStream.write(message)
+        }
       })
 
       ws.on('err', (message) => {
