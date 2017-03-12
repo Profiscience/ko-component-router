@@ -1,22 +1,20 @@
 const http = require('http')
 const path = require('path')
-const { extend } = require('lodash')
 const { red } = require('chalk')
 const parser = require('tap-parser')
+const istanbul = require('istanbul')
+const remap = require('remap-istanbul')
 const connect = require('connect')
 const socket = require('socket.io')
 const opn = require('opn')
 const serveStatic = require('serve-static')
 const bodyParser = require('body-parser')
-const typescript = require('typescript')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const nodeBuiltins = require('rollup-plugin-node-builtins')
 const nodeGlobals = require('rollup-plugin-node-globals')
 const commonjs = require('rollup-plugin-commonjs')
 const json = require('rollup-plugin-json')
-const istanbul = require('rollup-plugin-istanbul')
-const { default: typescriptPlugin } = require('rollup-plugin-ts')
-const { compilerOptions } = require('../tsconfig.json')
+const rollupIstanbul = require('rollup-plugin-istanbul')
 
 let cache, bundle, io, singleRun
 
@@ -24,7 +22,7 @@ module.exports = {
   * test(fly) {
     singleRun = true
 
-    yield fly.serial(['test:build', 'test:serve'])
+    yield fly.serial(['modules', 'test:build', 'test:serve'])
   },
   * 'test:watch'(fly) {
     singleRun = false
@@ -39,61 +37,53 @@ module.exports = {
     ])
   },
   * 'test:build'(fly) {
-    yield fly.source(path.resolve(__dirname, '../test/index.ts'))
-        .rollup({
-          rollup: {
-            cache,
-            plugins: [
-              json(),
-              commonjs({
-                namedExports: {
-                  knockout: [
-                    'applyBindings',
-                    'applyBindingsToNode',
-                    'bindingHandlers',
-                    'components',
-                    'observable',
-                    'pureComputed',
-                    'tasks',
-                    'unwrap'
-                  ]
-                }
-              }),
-              nodeGlobals(),
-              nodeBuiltins(),
-              typescriptPlugin({
-                typescript,
-                tsconfig: extend({}, compilerOptions, {
-                  target: 'es6',
-                  rootDir: './',
-                  baseUrl: './'
-                })
-              }),
-              istanbul({
-                include: [
-                  path.resolve(__dirname, '../src/**/*.js')
+    yield fly.source(path.resolve(__dirname, '../test/index.js'))
+      .rollup({
+        rollup: {
+          cache,
+          plugins: [
+            json(),
+            commonjs({
+              namedExports: {
+                knockout: [
+                  'applyBindings',
+                  'applyBindingsToNode',
+                  'bindingHandlers',
+                  'components',
+                  'observable',
+                  'pureComputed',
+                  'tasks',
+                  'unwrap'
                 ]
-              }),
-              nodeResolve({
-                preferBuiltins: true
-              })
-            ]
-          },
-          bundle: {
-            format: 'iife',
-            sourceMap: 'inline'
-          }
-        })
-        .run({ every: false }, function * ([{ data: _bundle }]) {
-          // store bundle in memory for server
-          bundle = _bundle
+              }
+            }),
+            nodeGlobals(),
+            nodeBuiltins(),
+            rollupIstanbul({
+              include: [
+                'dist/**/*'
+              ]
+            }),
+            nodeResolve({
+              preferBuiltins: true
+            })
+          ]
+        },
+        bundle: {
+          format: 'iife'
+        }
+      })
+      .run({ every: false }, function * ([{ data: _bundle }]) {
+        // store bundle in memory for server
+        bundle = _bundle
 
-          if (io) {
-            io.emit('rebuild', { for: 'everyone' })
-          }
+        if (io) {
+          io.emit('rebuild', { for: 'everyone' })
+        }
 
-          yield Promise.resolve()
-        })
+        yield Promise.resolve()
+      })
+      .target(path.resolve(__dirname, '../dist'))
   },
   * 'test:serve'() {
     const app = connect()
@@ -138,13 +128,26 @@ module.exports = {
         }
       })
 
-      if (singleRun) {
-        ws.on('end', () => {
-          if (parserStream) {
-            parserStream.end()
-          }
+      ws.on('end', (coverage) => {
+        const collector = new istanbul.Collector()
+        const reporter = new istanbul.Reporter(null, path.resolve(__dirname, '../coverage'))
+        const sync = false
+
+        collector.add(coverage)
+        reporter.add('json')
+        reporter.write(collector, sync, () => {
+          remap(path.resolve(__dirname, '../coverage/coverage-final.json'), {
+            'html': path.resolve(__dirname, '../coverage/html'),
+            'lcovonly': path.resolve(__dirname, '../coverage/lcov.info')
+          }).then(() => {
+            if (parserStream) {
+              parserStream.end()
+            }
+          }).catch((err) => {
+            throw new Error(err)
+          })
         })
-      }
+      })
     })
 
     server.listen(9876, () => {

@@ -1,7 +1,7 @@
-import * as ko from 'knockout'
-import { concat, extend, mapValues } from 'lodash-es'
+import ko from 'knockout'
+import { concat, extend } from 'lodash-es'
 
-import Router from '../../src'
+import Router from '../../dist/modules'
 
 import * as init from './init'
 
@@ -39,7 +39,7 @@ ko.components.register('routing', {
     async runTests(t) {
       for (const path of paths) {
         await new Promise((resolve) => {
-          Router.update(path, { with: { t, done: resolve }})
+          Router.update(path, { with: { t, done: resolve } })
         })
       }
     }

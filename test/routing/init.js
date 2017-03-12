@@ -1,4 +1,4 @@
-import * as ko from 'knockout'
+import ko from 'knockout'
 
 ko.components.register('init', {
   viewModel: class RoutingInitializationTest {

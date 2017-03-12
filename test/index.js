@@ -1,12 +1,10 @@
 import ko from 'knockout'
-import tape, { Test } from 'tape'
+import tape from 'tape'
 
 import './helpers/empty-template-loader'
 import './helpers/tape-browser-reporter'
 import './helpers/error-reporter'
 import './helpers/rebuild-reloader'
-
-import Router from '../src'
 
 // import './anchor'
 // import './binding'
@@ -39,10 +37,6 @@ const tests = [
 ]
 
 class TestRunner {
-  test: KnockoutObservable<string>
-  t: Test
-  done: Function
-
   constructor() {
     this.test = ko.observable(null)
     this.runTests()
