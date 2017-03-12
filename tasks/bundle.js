@@ -40,10 +40,10 @@ module.exports = function * (fly) {
         exports: 'named'
       }
     })
-    .concat({ output: 'ko-component-router.js' })
+    .rename({ basename: 'ko-component-router', extname: '.js' })
     .target(path.resolve(__dirname, '../dist'))
 
     .uglify()
-    .concat({ output: 'ko-component-router.min.js' })
+    .rename({ suffix: '.min' })
     .target(path.resolve(__dirname, '../dist'))
 }

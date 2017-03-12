@@ -8,7 +8,6 @@ const connect = require('connect')
 const socket = require('socket.io')
 const opn = require('opn')
 const serveStatic = require('serve-static')
-const bodyParser = require('body-parser')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const nodeBuiltins = require('rollup-plugin-node-builtins')
 const nodeGlobals = require('rollup-plugin-node-globals')
@@ -101,7 +100,6 @@ module.exports = {
 
     io = socket(server)
 
-    app.use(bodyParser.urlencoded({ extended: false }))
     app.use(serveStatic(path.resolve(__dirname, '../test')))
     app.use('/bundle.js', (req, res) => {
       res.write(bundle, (err) => {
