@@ -3,12 +3,14 @@ import tape, { Test } from 'tape'
 
 import './helpers/empty-template-loader'
 import './helpers/tape-browser-reporter'
+import './helpers/error-reporter'
+import './helpers/rebuild-reloader'
 
 import Router from '../src'
 
 // import './anchor'
 // import './binding'
-// import './routing'
+import './routing'
 // import './history'
 // import './force-update'
 // import './with'
@@ -36,11 +38,10 @@ const tests = [
   // 'issues'
 ]
 
-
 class TestRunner {
   test: KnockoutObservable<string>
   t: Test
-  next: Function
+  done: Function
 
   constructor() {
     this.test = ko.observable(null)
@@ -63,7 +64,10 @@ class TestRunner {
     return await new Promise((resolve) =>
       tape(test, (t) => {
         this.t = t
-        this.next = resolve
+        this.done = () => {
+          t.end()
+          resolve()
+        }
         this.test(test)
       }))
   }

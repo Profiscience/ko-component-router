@@ -15,19 +15,18 @@ export interface RouteMap {
     [name: string]: RouteConfig | Array<RouteConfig>;
 }
 export default class Router {
+    static middleware: Array<Middleware>;
+    static plugins: Array<Plugin>;
+    static routes: RouteMap;
     static config: {
         base?: string;
         hashbang?: boolean;
         activePathCSSClass?: string;
     };
-    static middleware: Array<Middleware>;
-    static plugins: Array<Plugin>;
-    static routes: RouteMap;
     component: KnockoutObservable<string>;
     isNavigating: KnockoutObservable<boolean>;
     routes: Array<Route>;
     isRoot: boolean;
-    passthrough: Object;
     depth: number;
     ctx: Context;
     constructor();
@@ -40,7 +39,9 @@ export default class Router {
     update(url: string, _args?: boolean | {
         push?: boolean;
         force?: boolean;
-        with?: Object;
+        with?: {
+            [prop: string]: any;
+        };
     }): Promise<boolean>;
     private resolveRoute(path);
     private getPathFromLocation();
@@ -62,7 +63,9 @@ export default class Router {
     static update(url: string, _args?: boolean | {
         push?: boolean;
         force?: boolean;
-        with?: Object;
+        with?: {
+            [prop: string]: any;
+        };
     }): Promise<boolean>;
     private static link(router);
     private static unlink();

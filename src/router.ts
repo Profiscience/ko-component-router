@@ -29,6 +29,9 @@ export interface RouteMap {
 }
 
 export default class Router {
+  static middleware:  Array<Middleware>   = []
+  static plugins:     Array<Plugin>       = []
+  static routes:      RouteMap            = {}
   static config: {
     base?:                string
     hashbang?:            boolean
@@ -39,15 +42,10 @@ export default class Router {
     activePathCSSClass: 'active-path'
   }
 
-  static middleware:  Array<Middleware>
-  static plugins:     Array<Plugin>
-  static routes:      RouteMap
-
   component:      KnockoutObservable<string>
   isNavigating:   KnockoutObservable<boolean>
   routes:         Array<Route>
   isRoot:         boolean
-  passthrough:    Object
   depth:          number
   ctx:            Context
 
@@ -99,17 +97,20 @@ export default class Router {
     _args?: boolean | {
       push?:  boolean
       force?: boolean
-      with?:  Object
+      with?:  { [prop: string]: any }
     }): Promise<boolean> {
 
     const fromCtx = this.ctx
     let args
 
-    if (isBool(args)) {
+    if (isBool(_args)) {
       args = { push: _args as boolean }
-    } else if (isUndefined(args)) {
+    } else if (isUndefined(_args)) {
       args = {}
+    } else {
+      args = _args
     }
+
     if (isUndefined(args.push)) {
       args.push = true
     }
@@ -150,7 +151,7 @@ export default class Router {
       this.base + path + search + hash
     )
 
-    const toCtx = new Context(Object.assign({}, args.with, this.passthrough, {
+    const toCtx = new Context(Object.assign({}, args.with, {
       router: this,
       params,
       route,
@@ -276,7 +277,7 @@ export default class Router {
     _args?: boolean | {
       push?:  boolean
       force?: boolean
-      with?:  Object
+      with?:  { [prop: string]: any }
     }): Promise<boolean> {
     return await routers[0].update(url, _args)
   }

@@ -6,9 +6,9 @@
     "target": "es5",
     "module": "umd",
     "sourceMap": true,
-    "rootDir": "./src",
-    "baseUrl": "./src",
-    "outDir": "./dist/umd",
+    "rootDir": "..",
+    "baseUrl": "..",
+    "outDir": "../dist/test",
     "lib": [
       "dom",
       "es5",
@@ -26,7 +26,6 @@
   },
   "exclude": [
     "dist",
-    "test",
     "examples",
     "node_modules"
   ]

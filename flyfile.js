@@ -1,7 +1,9 @@
+const { extend } = require('lodash')
+
+extend(exports, require('./tasks/test'))
 exports.bundle = require('./tasks/bundle')
 exports.modules = require('./tasks/modules')
 exports.stats = require('./tasks/stats')
-exports.test = require('./tasks/test')
 exports.typings = require('./tasks/typings')
 exports.umd = require('./tasks/umd')
 

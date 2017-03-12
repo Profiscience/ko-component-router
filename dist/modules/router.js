@@ -76,11 +76,14 @@ var Router = (function () {
                 switch (_c.label) {
                     case 0:
                         fromCtx = this.ctx;
-                        if (isBool(args)) {
+                        if (isBool(_args)) {
                             args = { push: _args };
                         }
-                        else if (isUndefined(args)) {
+                        else if (isUndefined(_args)) {
                             args = {};
+                        }
+                        else {
+                            args = _args;
                         }
                         if (isUndefined(args.push)) {
                             args.push = true;
@@ -112,7 +115,7 @@ var Router = (function () {
                         _c.label = 5;
                     case 5:
                         history[args.push ? 'pushState' : 'replaceState'](history.state, document.title, this.base + path + search + hash);
-                        toCtx = new Context(Object.assign({}, args.with, this.passthrough, {
+                        toCtx = new Context(Object.assign({}, args.with, {
                             router: this,
                             params: params,
                             route: route,
@@ -366,6 +369,9 @@ var Router = (function () {
     return Router;
 }());
 export default Router;
+Router.middleware = [];
+Router.plugins = [];
+Router.routes = {};
 Router.config = {
     base: '',
     hashbang: false,

@@ -7,9 +7,10 @@
   <div data-bind="if: test">
     <div id="test-container" data-bind="component: {
         name: test,
-        params: { t: t, next: next }
+        params: { t: t, done: done }
     }"></div>
   </div>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="./bundle.js"></script>
 </body>
 </html>

@@ -87,11 +87,14 @@
                     switch (_c.label) {
                         case 0:
                             fromCtx = this.ctx;
-                            if (utils_1.isBool(args)) {
+                            if (utils_1.isBool(_args)) {
                                 args = { push: _args };
                             }
-                            else if (utils_1.isUndefined(args)) {
+                            else if (utils_1.isUndefined(_args)) {
                                 args = {};
+                            }
+                            else {
+                                args = _args;
                             }
                             if (utils_1.isUndefined(args.push)) {
                                 args.push = true;
@@ -123,7 +126,7 @@
                             _c.label = 5;
                         case 5:
                             history[args.push ? 'pushState' : 'replaceState'](history.state, document.title, this.base + path + search + hash);
-                            toCtx = new context_1.default(Object.assign({}, args.with, this.passthrough, {
+                            toCtx = new context_1.default(Object.assign({}, args.with, {
                                 router: this,
                                 params: params,
                                 route: route,
@@ -376,6 +379,9 @@
         };
         return Router;
     }());
+    Router.middleware = [];
+    Router.plugins = [];
+    Router.routes = {};
     Router.config = {
         base: '',
         hashbang: false,
