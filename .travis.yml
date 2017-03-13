@@ -3,6 +3,8 @@ node_js:
   - stable
 addons:
   firefox: latest
+env:
+  - TRAVIS=true
 cache:
   yarn: true
   directories:
