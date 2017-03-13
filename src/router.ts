@@ -95,7 +95,7 @@ export default class Router {
 
   async update(
     url: string,
-    _args?: boolean | {
+    _args: boolean | {
       push?:  boolean
       force?: boolean
       with?:  { [prop: string]: any }
@@ -380,12 +380,15 @@ export default class Router {
     return flatMap(castArray(config), (rc) => {
       const routeConfig = reduce(
         Router.plugins,
-        (accum, plugin: Plugin) => accum.concat(castArray<RouteConfig>(plugin(rc)))
+        (accum, plugin: Plugin) => {
+          const prc = plugin(rc)
+          return isUndefined(prc) ? accum : accum.concat(castArray<RouteConfig>(prc))
+        }
         , []
       )
       return routeConfig.length > 0
         ? routeConfig
-        : castArray(config)
+        : rc
     })
   }
 
