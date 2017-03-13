@@ -1,7 +1,7 @@
+import { isArray, isBoolean, isPlainObject, isUndefined, castArray, extend, extendWith, flatMap, map, mapValues, reduce } from 'lodash-es'
 import ko from 'knockout'
 import Context from './context'
 import Route, { RouteConfig } from './route'
-import { isArray, isBool, isUndefined, flatMap } from './utils'
 
 const events = {
   click: document.ontouchstart ? 'touchstart' : 'click',
@@ -21,17 +21,18 @@ export interface Middleware {
 }
 
 export interface Plugin {
-  (routeConfig: any): RouteMap
+  (routeConfig: any): RouteConfig
 }
 
 export interface RouteMap {
-  [name: string]: RouteConfig | Array<RouteConfig>
+  [name: string]: Array<RouteConfig>
 }
 
 export default class Router {
+  private static routes: RouteMap = {}
+  
   static middleware:  Array<Middleware>   = []
   static plugins:     Array<Plugin>       = []
-  static routes:      RouteMap            = {}
   static config: {
     base?:                string
     hashbang?:            boolean
@@ -103,7 +104,7 @@ export default class Router {
     const fromCtx = this.ctx
     let args
 
-    if (isBool(_args)) {
+    if (isBoolean(_args)) {
       args = { push: _args as boolean }
     } else if (isUndefined(_args)) {
       args = {}
@@ -189,32 +190,6 @@ export default class Router {
     return true
   }
 
-  private resolveRoute(path: string): Route {
-    let matchingRouteWithFewestDynamicSegments
-    let fewestMatchingSegments = Infinity
-
-    for (const rn in this.routes) {
-      const r = this.routes[rn]
-      if (r.matches(path)) {
-        if (r.keys.length === 0) {
-          return r
-        } else if (fewestMatchingSegments === Infinity ||
-          (r.keys.length < fewestMatchingSegments && r.keys[0].pattern !== '.*')) {
-          fewestMatchingSegments = r.keys.length
-          matchingRouteWithFewestDynamicSegments = r
-        }
-      }
-    }
-
-    return matchingRouteWithFewestDynamicSegments
-  }
-
-  private getPathFromLocation(): string {
-    const path = location.pathname + location.search + location.hash
-    const baseWithOrWithoutHashbangRegexp = this.base.replace('#!', '#?!?')
-    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
-  }
-
   dispose() {
     Router.unlink()
     if (this.isRoot) {
@@ -229,15 +204,11 @@ export default class Router {
     hashbang?:            boolean
     activePathCSSClass?:  string
   }) {
-    if (base) {
-      Router.config.base = base
-    }
-    if (hashbang) {
-      Router.config.hashbang = hashbang
-    }
-    if (activePathCSSClass) {
-      Router.config.activePathCSSClass = activePathCSSClass
-    }
+    extendWith(Router.config, {
+      base,
+      hashbang,
+      activePathCSSClass
+    }, (_default, v) => isUndefined(v) ? _default : v)
   }
 
   static use(...fns: Array<Middleware>) {
@@ -249,7 +220,7 @@ export default class Router {
   }
 
   static useRoutes(routes: { [route: string]: any }) {
-    Object.assign(Router.routes, routes)
+    extend(Router.routes, Router.normalizeRoutes(routes))
   }
 
   static get(i: number): Router {
@@ -280,6 +251,32 @@ export default class Router {
       with?:  { [prop: string]: any }
     }): Promise<boolean> {
     return await routers[0].update(url, _args)
+  }
+
+  private resolveRoute(path: string): Route {
+    let matchingRouteWithFewestDynamicSegments
+    let fewestMatchingSegments = Infinity
+
+    for (const rn in this.routes) {
+      const r = this.routes[rn]
+      if (r.matches(path)) {
+        if (r.keys.length === 0) {
+          return r
+        } else if (fewestMatchingSegments === Infinity ||
+          (r.keys.length < fewestMatchingSegments && r.keys[0].pattern !== '.*')) {
+          fewestMatchingSegments = r.keys.length
+          matchingRouteWithFewestDynamicSegments = r
+        }
+      }
+    }
+
+    return matchingRouteWithFewestDynamicSegments
+  }
+
+  private getPathFromLocation(): string {
+    const path = location.pathname + location.search + location.hash
+    const baseWithOrWithoutHashbangRegexp = this.base.replace('#!', '#?!?')
+    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
   }
 
   private static link(router) {
@@ -367,19 +364,28 @@ export default class Router {
     return !isUndefined(Router.head.resolveRoute(Router.getPath(path)))
   }
 
-  private static createRoutes(config): Array<Route> {
-    return Object.entries(Router.routes).map(([r, c]) => new Route(r, Router.runPlugins(c)))
+  private static createRoutes(routes: RouteMap): Array<Route> {
+    return map(routes, (config, path) => new Route(path, config))
   }
 
-  private static runPlugins(config): RouteConfig {
-    return flatMap(isArray(config) ? config : [config], (m) => {
-      const middleware = Router.plugins.reduce((ms, p) => {
-        const _m = p(m)
-        return _m ? ms.concat(isArray(_m) ? _m : [_m]) : ms
-      }, [])
-      return middleware.length > 0
-        ? middleware
-        : m
+  private static normalizeRoutes(routes: { [route: string]: any }): RouteMap {
+    return mapValues(routes, (c) =>
+      map(Router.runPlugins(c), (routeConfig) =>
+        isPlainObject(routeConfig)
+          ? Router.normalizeRoutes(routeConfig as RouteMap)
+          : routeConfig))
+  }
+
+  private static runPlugins(config): Array<RouteConfig> {
+    return flatMap(castArray(config), (rc) => {
+      const routeConfig = reduce(
+        Router.plugins,
+        (accum, plugin: Plugin) => accum.concat(castArray<RouteConfig>(plugin(rc)))
+        , []
+      )
+      return routeConfig.length > 0
+        ? routeConfig
+        : castArray(config)
     })
   }
 

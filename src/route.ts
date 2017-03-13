@@ -1,6 +1,6 @@
+import { isArray, isFunction, isPlainObject, isString, isUndefined, flatMap, map, reduce } from 'lodash-es'
 import pathtoRegexp from 'path-to-regexp'
 import Router, { RouteMap, Middleware } from './router'
-import { flatMap, isArray, isFunction, isPlainObject, isString, isUndefined } from './utils'
 
 export type RouteConfig = string | RouteMap | Middleware
 
@@ -13,7 +13,7 @@ export default class Route {
 
   private regexp: RegExp
 
-  constructor(path: string, config: RouteConfig | Array<RouteConfig>) {
+  constructor(path: string, config: Array<RouteConfig>) {
     const [component, middleware, children] = Route.parseConfig(config)
     this.path = path
     this.component = component
@@ -64,9 +64,10 @@ export default class Route {
     let component: string
     let children: Array<Route>
 
-    const middleware = config
-      .reduce((
-        ms: Array<Middleware>,
+    const middleware = reduce(
+      config,
+      (
+        accum: Array<Middleware>,
         m: string | RouteMap | Middleware
       ) => {
         if (isString(m)) {
@@ -74,15 +75,15 @@ export default class Route {
           component = m
         } else if (isPlainObject(m)) {
           m = m as RouteMap
-          children = Object.entries(m).map(([r, m]) => new Route(r, m))
+          children = map(m, (routeConfig, path) => new Route(path, routeConfig))
           if (!component) {
             component = 'ko-component-router'
           }
         } else if (isFunction(m)) {
           m = m as Middleware
-          ms.push(m)
+          accum.push(m)
         }
-      return ms
+      return accum
     }, [])
 
     return [component, middleware, children]

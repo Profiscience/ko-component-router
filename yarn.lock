@@ -6,6 +6,16 @@
   version "3.4.40"
   resolved "https://registry.yarnpkg.com/@types/knockout/-/knockout-3.4.40.tgz#5610286f18d0fbacac7dd9019b6e750355ed1055"
 
+"@types/lodash-es@^4.14.4":
+  version "4.14.4"
+  resolved "https://registry.yarnpkg.com/@types/lodash-es/-/lodash-es-4.14.4.tgz#b874a1c39dd59b28089ac05f13ab8df73a21b23b"
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.55"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.55.tgz#75d7d4eba020ee4103d4cbd0f2a3ef5db8f7534f"
+
 "@types/path-to-regexp@^1.0.29":
   version "1.0.29"
   resolved "https://registry.yarnpkg.com/@types/path-to-regexp/-/path-to-regexp-1.0.29.tgz#61428c3738cd1dcee1571316dd7d02d13aac6e62"

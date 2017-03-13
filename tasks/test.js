@@ -29,9 +29,10 @@ module.exports = {
     yield fly.start('test:build')
     fly.start('test:serve')
     yield fly.watch([
-      path.resolve(__dirname, '../test/**/*.ts'),
+      path.resolve(__dirname, '../test/**/*.js'),
       path.resolve(__dirname, '../src/**/*.ts'),
     ], [
+      'modules',  
       'test:build'
     ])
   },
@@ -130,7 +131,7 @@ module.exports = {
         const collector = new istanbul.Collector()
         const reporter = new istanbul.Reporter(null, path.resolve(__dirname, '../coverage'))
         const sync = false
-
+      
         collector.add(coverage)
         reporter.add('json')
         reporter.write(collector, sync, () => {

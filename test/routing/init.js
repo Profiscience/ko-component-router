@@ -12,9 +12,7 @@ ko.components.register('init', {
   }
 })
 
-export const paths = [
-  '/init'
-]
+export const path = '/init'
 
 export const routes = {
   '/init': 'init'

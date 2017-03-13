@@ -36,12 +36,12 @@ class User {
 }
 
 ko.components.register('app', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: App
 })
 
 ko.components.register('user', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: User
 })
 
@@ -69,7 +69,7 @@ class App {
 }
 
 ko.components.register('app', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: App
 })
 
@@ -105,7 +105,7 @@ class App {
 }
 
 ko.components.register('app', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: App
 })
 

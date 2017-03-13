@@ -39,7 +39,7 @@ ko.components.register('app', {
       }
     }
   },
-  template: '<ko-component-router params="routes: routes"></ko-component-router>'
+  template: '<ko-component-router></ko-component-router>'
 })
 
 // define component

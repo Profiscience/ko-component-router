@@ -1,11 +1,10 @@
 import ko from 'knockout'
-import { flatMap, extend } from 'lodash-es'
+import { extend, map } from 'lodash-es'
 
 import Router from '../../dist/modules'
 
 import * as init from './init'
 import * as basic from './basic'
-
 import * as params from './params'
 import * as nested from './nested'
 import * as similar from './similar'
@@ -20,20 +19,13 @@ const tests = [
   ambiguous
 ]
 
-// const paths = [
-//   // '/params/foo',
-//   // '/nested/a',
-//   // '/similar/foo/bar',
-//   // '/ambiguous/a/b/c'
-// ]
-
-const paths = flatMap(tests, 'paths')
+const paths = map(tests, 'path')
 
 ko.components.register('routing', {
   template: '<ko-component-router></ko-component-router>',
   viewModel: class RoutingTestSuite {
     constructor({ t, done }) {
-      Router.useRoutes(extend({}, flatMap(tests, 'routes')))
+      Router.useRoutes(extend({}, ...map(tests, 'routes')))
       ko.tasks.schedule(() => this.runTests(t).then(done))
     }
 

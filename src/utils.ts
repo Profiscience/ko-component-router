@@ -1,35 +1,7 @@
+import { isFunction, isUndefined, noop } from 'lodash-es'
 import { Middleware } from './router'
 
 export type AsyncCallback = (done?: Function) => void | Promise<any>
-
-export { default as isPlainObject } from 'is-plain-object'
-
-export function isArray(arr) {
-  return typeof arr.splice === 'function'
-}
-
-export function isBool(x) {
-  return typeof x === 'boolean'
-}
-
-export function isString(x) {
-  return typeof x === 'string'
-}
-
-export function isFunction(x) {
-  return typeof x === 'function'
-}
-
-export function isUndefined(x) {
-  return typeof x === 'undefined'
-}
-
-export function flatMap(arr, fn) {
-  return arr.reduce((flattened, x) => {
-    const v = fn(x)
-    return flattened.concat(isArray(v) ? v : [v])
-  }, [])
-}
 
 export function runMiddleware(middleware: Array<Middleware>, ...args): [
   Promise<any>,
@@ -72,7 +44,7 @@ function isThenable(x) {
   return !isUndefined(x) && isFunction(x.then)
 }
 
-// ts why u no haz generators?? babel why ur generators so $$$?????
+// ts why u no haz async generators?? babel why ur generators so $$$?????
 function generatorify(fn) {
   return isGenerator(fn)
     ? fn
@@ -127,8 +99,4 @@ function promisify(_fn: Function = noop) {
       ? await ret
       : ret
   }
-}
-
-function noop() {
- // do nothing
 }

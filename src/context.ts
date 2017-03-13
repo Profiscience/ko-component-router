@@ -1,6 +1,7 @@
+import { isUndefined } from 'lodash-es'
 import Route from './Route'
 import Router from './router'
-import { AsyncCallback, isUndefined, runMiddleware, sequence } from './utils'
+import { AsyncCallback, runMiddleware, sequence } from './utils'
 
 export default class Context {
   fullPath: string

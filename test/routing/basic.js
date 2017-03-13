@@ -12,9 +12,7 @@ ko.components.register('basic', {
   }
 })
 
-export const paths = [
-  '/basic'
-]
+export const path = '/basic'
 
 export const routes = {
   '/basic': 'basic'
