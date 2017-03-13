@@ -6,7 +6,7 @@ module.exports = function * () {
     const tsc = spawn('tsc', [
       '--module', 'umd',
       '--outDir', path.resolve(__dirname, '../dist/umd')
-    ])
+    ], { stdio: 'inherit' })
     tsc.on('close', resolve)
   })
 }

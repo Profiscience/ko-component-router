@@ -6,7 +6,7 @@ module.exports = function * () {
     const tsc = spawn('tsc', [
       '--declaration', 'true',
       '--declarationDir', path.resolve(__dirname, '../dist/typings')
-    ])
+    ], { stdio: 'inherit' })
     tsc.on('close', resolve)
   })
 }
