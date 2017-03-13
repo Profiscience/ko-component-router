@@ -7,7 +7,7 @@ const istanbul = require('istanbul')
 const remap = require('remap-istanbul')
 const connect = require('connect')
 const socket = require('socket.io')
-// const opn = require('opn')
+const opn = require('opn')
 const serveStatic = require('serve-static')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const nodeBuiltins = require('rollup-plugin-node-builtins')
@@ -155,14 +155,9 @@ module.exports = {
     })
 
     server.listen(9876, () => {
-      // eslint-disable-next-line
-      console.log('Listening on %d', server.address().port)
-      console.log(`Launching ${process.env.TRAVIS ? 'Firefox' : 'Chrome'}...`)
-
-      if (process.env.TRAVIS) {
-        spawn('firefox', ['localhost:9876'], { stdio: 'inherit' })
-      }
-      // opn('http://localhost:9876', { app: process.env.TRAVIS ? 'firefox' : 'chrome' })
+      console.log('Listening on %d', server.address().port) // eslint-disable-line
+      console.log(`Launching ${process.env.TRAVIS ? 'Firefox' : 'Chrome'}...`) // eslint-disable-line
+      opn('http://localhost:9876', { app: process.env.TRAVIS ? 'firefox' : 'chrome' })
     })
 
     yield new Promise((_resolve) => (resolve = _resolve))
