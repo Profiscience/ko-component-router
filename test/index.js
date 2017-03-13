@@ -11,30 +11,28 @@ import './helpers/ko-overwrite-component-registration'
 import './anchor'
 import './binding'
 import './routing'
-// import './history'
-// import './force-update'
-// import './with'
+import './history'
+import './force-update'
+import './with'
 // import './middleware'
-// import './queue'
-// import './before-navigate-callbacks'
-// import './element'
-// import './passthrough'
-// import './plugins'
+import './queue'
+import './before-navigate-callbacks'
+import './element'
+import './plugins'
 // import './issues'
 
 const tests = [
   'routing',
-  // 'history',
-  // 'force-update',
-  // 'with',
+  'history',
+  'force-update',
+  'with',
   'anchor',
   'binding',
   // 'middleware',
   // 'queue',
-  // 'before-navigate-callbacks',
-  // 'element',
-  // 'passthrough',
-  // 'plugins',
+  'before-navigate-callbacks',
+  'element',
+  'plugins',
   // 'issues'
 ]
 
