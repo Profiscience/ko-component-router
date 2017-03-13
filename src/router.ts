@@ -3,14 +3,6 @@ import ko from 'knockout'
 import Context from './context'
 import Route, { RouteConfig } from './route'
 
-const events = {
-  click: document.ontouchstart ? 'touchstart' : 'click',
-  popstate: 'popstate'
-}
-
-const onInit: Array<Function> = []
-const routers: Array<Router> = []
-
 export interface Middleware {
   (ctx: Context, done?: () => any): {
     beforeRender?:  (done?: () => any) => Promise<any>
@@ -30,7 +22,17 @@ export interface RouteMap {
 
 export default class Router {
   private static routes: RouteMap = {}
+  private static events: {
+    click: string,
+    popstate: string
+  } = {
+    click:  document.ontouchstart ? 'touchstart' : 'click',
+    popstate: 'popstate' 
+  }
   
+  static head:        Router
+  static tail:        Router
+  static onInit:      Array<Function>     = []
   static middleware:  Array<Middleware>   = []
   static plugins:     Array<Plugin>       = []
   static config: {
@@ -43,28 +45,49 @@ export default class Router {
     activePathCSSClass: 'active-path'
   }
 
+  $parent?:       Router
+  $child?:        Router
   component:      KnockoutObservable<string>
   isNavigating:   KnockoutObservable<boolean>
   routes:         Array<Route>
   isRoot:         boolean
-  depth:          number
   ctx:            Context
+  bound:          boolean
 
-  constructor() {
+  constructor(
+    url: string,
+    $parentRouter?: Router,
+    $parentCtx?: Context,
+    _with: { [k: string]: any } = {}
+  ) {
     this.component = ko.observable(null)
     this.isNavigating = ko.observable(true)
-
-    Router.link(this)
-
+    this.isRoot = isUndefined($parentRouter)
+    this.routes = this.isRoot
+      ? Router.createRoutes(Router.routes)
+      : $parentCtx.route.children
+    
     if (this.isRoot) {
-      this.routes = Router.createRoutes(Router.routes)
-      document.addEventListener(events.click, Router.onclick)
-      window.addEventListener(events.popstate, Router.onpopstate)
-    } else if (this.$parent.ctx.route.children) {
-      this.routes = this.$parent.ctx.route.children
+      Router.head = this
+      document.addEventListener(Router.events.click, Router.onclick)
+      window.addEventListener(Router.events.popstate, Router.onpopstate)
+    } else {
+      this.$parent = $parentRouter
+      this.routes = $parentCtx.route.children
     }
+    
+    const path = Router.getPath(url)
 
-    this.update(this.getPathFromLocation(), false).then(() => onInit.forEach((r) => r(this)))
+    this.ctx = new Context(this, path, _with)
+    
+    if (this.isRoot) {
+      this.ctx.runBeforeRender()
+        .then(() => {
+          this.ctx.render()
+          return this.ctx.runAfterRender()
+        })
+        .then(() => this.isNavigating(false))
+    }
   }
 
   get base(): string {
@@ -74,23 +97,27 @@ export default class Router {
   }
 
   get $root(): Router {
-    return routers[0]
-  }
-
-  get $parent(): Router {
-    return routers[this.depth - 1]
+    return Router.head
   }
 
   get $parents(): Array<Router> {
-    return routers.slice(0, this.depth).reverse()
-  }
-
-  get $child(): Router {
-    return routers[this.depth + 1]
+    const parents = []
+    let r = this.$parent
+    while (r) {
+      parents.push(r)
+      r = r.$parent
+    }
+    return parents
   }
 
   get $children(): Array<Router> {
-    return routers.slice(this.depth + 1)
+    const children = []
+    let r = this.$child
+    while (r) {
+      children.push(r)
+      r = r.$child
+    }
+    return children
   }
 
   async update(
@@ -100,10 +127,7 @@ export default class Router {
       force?: boolean
       with?:  { [prop: string]: any }
     }): Promise<boolean> {
-
-    const fromCtx = this.ctx
     let args
-
     if (isBoolean(_args)) {
       args = { push: _args as boolean }
     } else if (isUndefined(_args)) {
@@ -111,7 +135,6 @@ export default class Router {
     } else {
       args = _args
     }
-
     if (isUndefined(args.push)) {
       args.push = true
     }
@@ -119,67 +142,49 @@ export default class Router {
       args.with = {}
     }
 
+    const fromCtx = this.ctx
     const { search, hash } = Router.parseUrl(url)
     const path = Router.getPath(url)
     const route = this.resolveRoute(path)
+    const [params, pathname, childPath] = route.parse(path)
+    const samePage = this.ctx.pathname === pathname
 
-    if (!route) {
+    if (this.$child && samePage && !args.force) {
+      return await this.$child.update(childPath + search + hash, args)
+    }
+
+    const toCtx = new Context(this, path, args.with)
+
+    if (!toCtx.route) {
       return false
     }
 
-    const [params, pathname, childPath] = route.parse(path)
-
-    if (fromCtx && fromCtx.pathname === pathname && !args.force) {
-      if (this.$child) {
-        return await this.$child.update(childPath + search + hash, args)
-      } else {
-        return false
-      }
+    const shouldNavigate = await fromCtx.runBeforeNavigateCallbacks()
+    if (shouldNavigate === false) {
+      return false
     }
+
+    this.isNavigating(true)
 
     if (fromCtx) {
-      const shouldNavigate = await fromCtx.runBeforeNavigateCallbacks()
-      if (shouldNavigate === false) {
-        return false
-      }
-
-      this.isNavigating(true)
+      await fromCtx.runBeforeDispose()
     }
-
+    
     history[args.push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
       this.base + path + search + hash
     )
 
-    const toCtx = new Context(Object.assign({}, args.with, {
-      router: this,
-      params,
-      route,
-      path,
-      pathname
-    }))
-
-    if (fromCtx) {
-      await fromCtx.runBeforeDispose()
-    }
-
-    // $children will become unaccessible after the component is torn down
-    // so a reference must be saved
-    const fromCtxChildren = fromCtx && fromCtx.$children.reverse()
-
     await toCtx.runBeforeRender()
 
     this.ctx = toCtx
+
     this.component(null)
     ko.tasks.runEarly()
-    this.component(this.ctx.route.component)
-    ko.tasks.runEarly()
+    toCtx.render()
 
     if (fromCtx) {
-      for (const fromCtxChild of fromCtxChildren) {
-        await fromCtxChild.runAfterDispose()
-      }
       await fromCtx.runAfterDispose()
     }
 
@@ -190,12 +195,31 @@ export default class Router {
     return true
   }
 
+  resolveRoute(path: string): Route {
+    let matchingRouteWithFewestDynamicSegments
+    let fewestMatchingSegments = Infinity
+
+    for (const rn in this.routes) {
+      const r = this.routes[rn]
+      if (r.matches(path)) {
+        if (r.keys.length === 0) {
+          return r
+        } else if (fewestMatchingSegments === Infinity ||
+          (r.keys.length < fewestMatchingSegments && r.keys[0].pattern !== '.*')) {
+          fewestMatchingSegments = r.keys.length
+          matchingRouteWithFewestDynamicSegments = r
+        }
+      }
+    }
+
+    return matchingRouteWithFewestDynamicSegments
+  }
+
   dispose() {
-    Router.unlink()
     if (this.isRoot) {
-      document.removeEventListener(events.click, Router.onclick, false)
-      window.removeEventListener(events.popstate, Router.onpopstate, false)
-      this.ctx.runBeforeDispose().then(() => this.ctx.runAfterDispose())
+      document.removeEventListener(Router.events.click, Router.onclick, false)
+      window.removeEventListener(Router.events.popstate, Router.onpopstate, false)
+      // this.ctx.runBeforeDispose().then(() => this.ctx.runAfterDispose())
     }
   }
 
@@ -224,20 +248,16 @@ export default class Router {
   }
 
   static get(i: number): Router {
-    return routers[i]
-  }
-
-  static get head(): Router {
-    return routers[0]
-  }
-
-  static get tail(): Router {
-    return routers[routers.length - 1]
+    let router = Router.head
+    while (i > 0) {
+      router = router.$child
+    }
+    return router
   }
 
   static get initialized(): Promise<Router> {
-    if (routers.length === 0) {
-      return new Promise((resolve) => onInit.push(resolve))
+    if (!Router.head) {
+      return new Promise((resolve) => Router.onInit.push(resolve))
     } else {
       return Promise.resolve(Router.head)
     }
@@ -250,43 +270,7 @@ export default class Router {
       force?: boolean
       with?:  { [prop: string]: any }
     }): Promise<boolean> {
-    return await routers[0].update(url, _args)
-  }
-
-  private resolveRoute(path: string): Route {
-    let matchingRouteWithFewestDynamicSegments
-    let fewestMatchingSegments = Infinity
-
-    for (const rn in this.routes) {
-      const r = this.routes[rn]
-      if (r.matches(path)) {
-        if (r.keys.length === 0) {
-          return r
-        } else if (fewestMatchingSegments === Infinity ||
-          (r.keys.length < fewestMatchingSegments && r.keys[0].pattern !== '.*')) {
-          fewestMatchingSegments = r.keys.length
-          matchingRouteWithFewestDynamicSegments = r
-        }
-      }
-    }
-
-    return matchingRouteWithFewestDynamicSegments
-  }
-
-  private getPathFromLocation(): string {
-    const path = location.pathname + location.search + location.hash
-    const baseWithOrWithoutHashbangRegexp = this.base.replace('#!', '#?!?')
-    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
-  }
-
-  private static link(router) {
-    router.depth = routers.length
-    router.isRoot = router.depth === 0
-    routers.push(router)
-  }
-
-  private static unlink() {
-    routers.pop()
+    return await Router.head.update(url, _args)
   }
 
   private static onclick(e) {
@@ -303,7 +287,7 @@ export default class Router {
     }
 
     const { pathname, search, hash = '' } = el
-    const path = (pathname + search + hash).replace(new RegExp(routers[0].base, 'i'), '')
+    const path = (pathname + search + hash).replace(new RegExp(Router.head.base, 'i'), '')
 
     const isValidRoute = Router.hasRoute(path)
     const isCrossOrigin = !Router.sameOrigin(el.href)
@@ -331,8 +315,14 @@ export default class Router {
     e.preventDefault()
   }
 
+  static getPathFromLocation() {
+    const path = location.pathname + location.search + location.hash;
+    const baseWithOrWithoutHashbangRegexp = Router.config.base.replace("#!", "#?!?");
+    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, "i"), "");
+  }
+
   private static onpopstate(e) {
-    Router.update(routers[0].getPathFromLocation(), false)
+    Router.update(Router.getPathFromLocation(), false)
     e.preventDefault()
   }
 
@@ -340,9 +330,9 @@ export default class Router {
     return path.replace(new RegExp('/?#?!?/?'), '/')
   }
 
-  private static parseUrl(url) {
+  private static parseUrl(url: string) {
     const parser = document.createElement('a')
-    const b = routers[0].base.toLowerCase()
+    const b = Router.head.base.toLowerCase()
     if (b && url.toLowerCase().indexOf(b) === 0) {
       url = url.replace(new RegExp(b, 'i'), '') || '/'
     }

@@ -52,12 +52,13 @@ export default class Route {
       const v = matches[i] || ''
       if (k.name === '__child_path__') {
         childPath = '/' + v
+        path = path.replace(new RegExp(childPath + '$'), '')
       } else {
         params[k.name] = v
       }
     }
 
-    return [params, path.replace(new RegExp(childPath + '$'), ''), childPath]
+    return [params, path, childPath]
   }
 
   static parseConfig(config): [string, Array<Middleware>, Array<Route>] {

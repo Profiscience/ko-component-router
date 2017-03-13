@@ -23,17 +23,17 @@ import './plugins'
 
 const tests = [
   'routing',
-  'history',
-  'force-update',
-  'with',
-  'anchor',
-  'binding',
-  // 'middleware',
-  // 'queue',
-  'before-navigate-callbacks',
-  'element',
-  'plugins',
-  // 'issues'
+  // 'history',
+  // 'force-update',
+  // 'with',
+  // 'anchor',
+  // 'binding',
+  // // 'middleware',
+  // // 'queue',
+  // 'before-navigate-callbacks',
+  // 'element',
+  // 'plugins',
+  // // 'issues'
 ]
 
 class TestRunner {

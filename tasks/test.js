@@ -37,6 +37,10 @@ module.exports = {
     ])
   },
   * 'test:build'(fly) {
+    if (io) {
+      io.emit('rebuild:started', { for: 'everyone' })
+    }
+
     yield fly.source(path.resolve(__dirname, '../test/index.js'))
       .rollup({
         rollup: {
@@ -78,7 +82,7 @@ module.exports = {
         bundle = _bundle
 
         if (io) {
-          io.emit('rebuild', { for: 'everyone' })
+          io.emit('rebuild:finished', { for: 'everyone' })
         }
 
         yield Promise.resolve()

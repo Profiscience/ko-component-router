@@ -11,7 +11,6 @@ import * as similar from './similar'
 import * as ambiguous from './ambiguous'
 
 const tests = [
-  init,
   basic,
   params,
   nested,
@@ -22,11 +21,21 @@ const tests = [
 const paths = map(tests, 'path')
 
 ko.components.register('routing', {
-  template: '<ko-component-router></ko-component-router>',
+  template: '<ko-component-router params="t: t, done: done"></ko-component-router>',
   viewModel: class RoutingTestSuite {
     constructor({ t, done }) {
+      Router.useRoutes(init.routes)
+      history.pushState(null, null, init.path)
       Router.useRoutes(extend({}, ...map(tests, 'routes')))
-      ko.tasks.schedule(() => this.runTests(t).then(done))
+
+      let resolve      
+      new Promise((_resolve) => resolve = _resolve)
+        .then(() => {
+          this.runTests(t).then(done)
+        })
+      
+      this.t = t
+      this.done = () => resolve()
     }
 
     async runTests(t) {
