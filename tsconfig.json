@@ -18,7 +18,9 @@
       "es2017.object"
     ],
     "types": [
-      "node"
+      "knockout",
+      "lodash-es",
+      "path-to-regexp"
     ],
     "typeRoots": [
       "node_modules/@types"
