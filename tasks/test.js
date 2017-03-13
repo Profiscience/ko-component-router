@@ -156,10 +156,9 @@ module.exports = {
     server.listen(9876, () => {
       // eslint-disable-next-line
       console.log('Listening on %d', server.address().port)
+      console.log(`Launching ${process.env.TRAVIS ? 'Firefox' : 'Chrome'}...`)
+      opn('http://localhost:9876', { app: process.env.TRAVIS ? 'firefox' : 'chrome' })
     })
-
-    console.log(`Opening in ${process.env.TRAVIS ? 'firefox' : 'chrome'}`)
-    opn('http://localhost:9876', { app: process.env.TRAVIS ? 'firefox' : 'chrome' })
 
     yield new Promise((_resolve) => (resolve = _resolve))
   }
