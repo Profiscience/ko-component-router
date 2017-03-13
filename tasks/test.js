@@ -158,6 +158,7 @@ module.exports = {
       console.log('Listening on %d', server.address().port)
     })
 
+    console.log(`Opening in ${process.env.TRAVIS ? 'firefox' : 'chrome'}`)
     opn('http://localhost:9876', { app: process.env.TRAVIS ? 'firefox' : 'chrome' })
 
     yield new Promise((_resolve) => (resolve = _resolve))
