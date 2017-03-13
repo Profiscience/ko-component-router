@@ -6,9 +6,6 @@ ko.components.register('init', {
       t.pass('initializes')
       done()
     }
-    dispose() {
-      ko.components.unregister('init')
-    }
   }
 })
 

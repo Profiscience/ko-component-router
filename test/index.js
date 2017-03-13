@@ -1,13 +1,15 @@
 import ko from 'knockout'
 import tape from 'tape'
 
-import './helpers/empty-template-loader'
+import Router from '../dist/modules'
+
 import './helpers/tape-browser-reporter'
 import './helpers/error-reporter'
 import './helpers/rebuild-reloader'
+import './helpers/ko-overwrite-component-registration'
 
-// import './anchor'
-// import './binding'
+import './anchor'
+import './binding'
 import './routing'
 // import './history'
 // import './force-update'
@@ -25,8 +27,8 @@ const tests = [
   // 'history',
   // 'force-update',
   // 'with',
-  // 'anchor',
-  // 'binding',
+  'anchor',
+  'binding',
   // 'middleware',
   // 'queue',
   // 'before-navigate-callbacks',
@@ -50,11 +52,8 @@ class TestRunner {
 
   async runTest(test) {
     // reset defaults
-    // Router.config = { base: '', hashbang: false, activePathCSSClass: 'active-path' }
-    // Router.middleware = []
-    // Router.plugins = []
-    // Router.routes = {}
-
+    history.pushState(null, null, '/')
+    
     return await new Promise((resolve) =>
       tape(test, (t) => {
         this.t = t

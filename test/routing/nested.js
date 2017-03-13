@@ -68,14 +68,6 @@ ko.components.register('nested', {
         }
       })
     }
-
-    dispose() {
-      ko.components.unregister('nested')
-      ko.components.unregister('root')
-      ko.components.unregister('a')
-      ko.components.unregister('b')
-      ko.components.unregister('c')
-    }
   }
 })
 

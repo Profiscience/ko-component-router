@@ -22,11 +22,6 @@ ko.components.register('ambiguous', {
         }
       })
     }
-
-    dispose() {
-      ko.components.unregister('wrong')
-      ko.components.unregister('right')
-    }
   }
 })
 

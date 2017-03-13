@@ -6,9 +6,6 @@ ko.components.register('basic', {
       t.pass('navigates to basic route')
       done()
     }
-    dispose() {
-      ko.components.unregister('basic')
-    }
   }
 })
 

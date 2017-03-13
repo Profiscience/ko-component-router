@@ -6,9 +6,6 @@ ko.components.register('similar', {
       t.notOk(params.foo, 'should use most restrictive route')
       done()
     }
-    dispose() {
-      ko.components.unregister('similar')
-    }
   }
 })
 

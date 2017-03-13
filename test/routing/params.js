@@ -11,9 +11,6 @@ ko.components.register('params', {
       t.equal('foo', params.foo, 'parses param to ctx.params')
       done()
     }
-    dispose() {
-      ko.components.unregister('params')
-    }
   }
 })
 
