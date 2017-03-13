@@ -1,6 +1,6 @@
-import { isArray, isFunction, isPlainObject, isString, isUndefined, flatMap, map, reduce } from 'lodash-es'
 import pathtoRegexp from 'path-to-regexp'
 import Router, { RouteMap, Middleware } from './router'
+import { isArray, isFunction, isPlainObject, isString, isUndefined, flatMap, map, reduce } from './utils'
 
 export type RouteConfig = string | RouteMap | Middleware
 

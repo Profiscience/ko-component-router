@@ -1,6 +1,6 @@
-import { isUndefined } from 'lodash-es'
 import ko from 'knockout'
 import Router from './router'
+import { isUndefined } from './utils'
 
 ko.bindingHandlers['path'] = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {

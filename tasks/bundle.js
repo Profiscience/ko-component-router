@@ -3,6 +3,7 @@ const { extend } = require('lodash')
 const typescript = require('typescript')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
+const buble = require('rollup-plugin-buble')
 const { default: typescriptPlugin } = require('rollup-plugin-ts')
 const { compilerOptions } = require('../tsconfig.json')
 
@@ -40,6 +41,7 @@ module.exports = function * (fly) {
         exports: 'named'
       }
     })
+
     .rename({ basename: 'ko-component-router', extname: '.js' })
     .target(path.resolve(__dirname, '../dist'))
 

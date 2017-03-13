@@ -1,7 +1,7 @@
-import { isArray, isBoolean, isPlainObject, isUndefined, castArray, extend, extendWith, flatMap, map, mapValues, reduce } from 'lodash-es'
 import ko from 'knockout'
 import Context from './context'
 import Route, { RouteConfig } from './route'
+import { isArray, isBoolean, isPlainObject, isUndefined, castArray, extend, extendWith, flatMap, map, mapValues, reduce } from './utils'
 
 export interface Middleware {
   (ctx: Context, done?: () => any): {

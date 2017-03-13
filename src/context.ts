@@ -1,8 +1,7 @@
-import { isUndefined, extend, map, reduce } from 'lodash-es'
 import ko from 'knockout'
 import Route from './Route'
 import Router, { Middleware } from './router'
-import { AsyncCallback, isGenerator, isThenable, promisify, sequence } from './utils'
+import { AsyncCallback, isGenerator, isThenable, isUndefined, extend, map, promisify, reduce, sequence } from './utils'
 
 export default class Context {
   router: Router
@@ -163,7 +162,7 @@ export default class Context {
     const callbacks = middleware.map((fn) => {
       const runner = Context.generatorify(fn)(...args)
       const run: AsyncCallback = async () => {
-        let ret = runner.next();
+        let ret = runner.next()
         ret = isThenable(ret)
           ? await ret
           : ret.value

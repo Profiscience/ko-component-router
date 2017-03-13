@@ -73,8 +73,6 @@
     "tap-parser": "^5.3.3",
     "tape": "caseyWebb/tape",
     "tslib": "^1.6.0",
-    "tslint": "^4.5.1",
-    "tslint-eslint-rules": "^3.4.0",
     "typescript": "^2.2.1"
   }
 }
