@@ -24,7 +24,9 @@ ko.components.register('middleware', {
           (ctx) => {
             t.ok(ctx, 'middleware is ran with ctx as first argument')
           },
-          () => { Router.update('/async') }
+          () => {
+            Router.update('/async')
+          }
         ],
 
         '/async': [
@@ -132,7 +134,7 @@ ko.components.register('middleware', {
       ko.components.register('generator', {
         viewModel: class {
           constructor(ctx) {
-            ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
+            ctx.addBeforeNavigateCallback(() => (ctx.beforeNavigateHit = true))
           }
         }
       })
@@ -140,7 +142,7 @@ ko.components.register('middleware', {
       ko.components.register('object', {
         viewModel: class {
           constructor(ctx) {
-            ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
+            ctx.addBeforeNavigateCallback(() => (ctx.beforeNavigateHit = true))
           }
         }
       })

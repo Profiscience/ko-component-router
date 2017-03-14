@@ -10,17 +10,17 @@ ko.components.register('plugins', {
       history.replaceState(null, null, '/component')
 
       Router.usePlugin(
-        function(route) {
+        (route) => {
           if (route.component) {
             return route.component
           }
         },
-        function(route) {
+        (route) => {
           if (route.data) {
             return isPlainObject(route.data)
               ? Object.entries(route.data).map(([k, v]) =>
                 (ctx) => v.then((_v) => merge(ctx, { data: { [k]: _v } })))
-              : (ctx) => route.data.then((v) => ctx.data = v)
+              : (ctx) => route.data.then((v) => (ctx.data = v))
           }
         }
       )

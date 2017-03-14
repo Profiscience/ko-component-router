@@ -16,10 +16,12 @@ ko.components.register('binding', {
       history.replaceState(null, null, '/a/a')
 
       Router.useRoutes({
-        '/a': ['a',
+        '/a': [
+          'a',
           {
             '/a': 'a-inner'
-          }]
+          }
+        ]
       })
 
       ko.components.register('a', {

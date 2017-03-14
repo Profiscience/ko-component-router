@@ -10,8 +10,6 @@ ko.components.register('basepath', {
   `,
   viewModel: class BasePath {
     constructor({ t, done }) {
-      let count = 0
-
       Router.setConfig({
         base: '/base'
       })
@@ -43,7 +41,7 @@ ko.components.register('basepath', {
 
       ko.components.register('bar', {
         viewModel: class {
-          constructor(ctx) {
+          constructor() {
             t.pass('navigates correctly with basepath')
             t.equals('/base/bar/bar', location.pathname, 'uses basepath in url on update')
 

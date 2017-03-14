@@ -11,10 +11,12 @@ ko.components.register('before-navigate-callbacks', {
         '/sync': 'sync',
         '/async-callback': 'async-callback',
         '/async-promise': 'async-promise',
-        '/nested': ['nested',
+        '/nested': [
+          'nested',
           {
             '/': 'nested-child'
-          }]
+          }
+        ]
       })
 
       ko.components.register('empty', {})

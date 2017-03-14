@@ -12,7 +12,7 @@ ko.components.register('redirect', {
       history.pushState(null, null, '/notfoo')
 
       Router.use(
-        (ctx) => ({
+        () => ({
           beforeRender() {
             fooPre.beforeRender = true
           },
@@ -59,7 +59,7 @@ ko.components.register('redirect', {
         '/foo': 'foo',
         '/notbar': [
           'notbar',
-          (ctx) => ({
+          () => ({
             beforeRender() {
               barPre.beforeRender = true
             },
@@ -76,7 +76,7 @@ ko.components.register('redirect', {
           (ctx) => {
             ctx.redirect('/bar')
           },
-          (ctx) => ({
+          () => ({
             beforeRender() {
               t.fail('beforeRender middleware after redirect in route middleware should not be executed')
             },
@@ -101,7 +101,7 @@ ko.components.register('redirect', {
           }
         }
       })
-            
+
       ko.components.register('notbar', {
         viewModel: class {
           constructor() {

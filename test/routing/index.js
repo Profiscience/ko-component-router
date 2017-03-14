@@ -28,12 +28,12 @@ ko.components.register('routing', {
       history.pushState(null, null, init.path)
       Router.useRoutes(extend({}, ...map(tests, 'routes')))
 
-      let resolve      
-      new Promise((_resolve) => resolve = _resolve)
+      let resolve
+      new Promise((_resolve) => (resolve = _resolve))
         .then(() => {
           this.runTests(t).then(done)
         })
-      
+
       this.t = t
       this.done = () => resolve()
     }

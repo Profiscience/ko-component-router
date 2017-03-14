@@ -1,11 +1,10 @@
 import ko from 'knockout'
+import $ from 'jquery'
 import tape from 'tape'
 
-import Router from '../dist/modules'
-
-import './helpers/tape-browser-reporter'
-import './helpers/error-reporter'
-import './helpers/rebuild-reloader'
+// import './helpers/tape-browser-reporter'
+// import './helpers/error-reporter'
+// import './helpers/rebuild-reloader'
 import './helpers/ko-overwrite-component-registration'
 
 import './anchor'
@@ -42,6 +41,15 @@ const tests = [
 
 class TestRunner {
   constructor() {
+    $('body').append(`
+      <pre><code id="output"></code></pre>
+      <div data-bind="if: test">
+        <div id="test-container" data-bind="component: {
+            name: test,
+            params: { t: t, done: done }
+        }"></div>
+      </div>
+    `)
     this.test = ko.observable(null)
     this.runTests()
   }
@@ -54,7 +62,7 @@ class TestRunner {
 
   async runTest(test) {
     history.pushState(null, null, '/')
-    
+
     return await new Promise((resolve) =>
       tape(test, (t) => {
         this.t = t

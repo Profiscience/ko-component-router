@@ -10,8 +10,6 @@ ko.components.register('hashbang', {
   `,
   viewModel: class Hashbang {
     constructor({ t, done }) {
-      let count = 0
-
       Router.setConfig({
         hashbang: true,
         base: '/base'
@@ -44,7 +42,7 @@ ko.components.register('hashbang', {
 
       ko.components.register('bar', {
         viewModel: class {
-          constructor(ctx) {
+          constructor() {
             t.pass('navigates correctly with hashbang')
             t.true(location.href.indexOf('/base/#!/bar/bar') > -1, 'uses hash in url on update')
 
