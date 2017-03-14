@@ -73,6 +73,7 @@
     "rollup-plugin-ts": "^0.1.0",
     "tape": "caseyWebb/tape",
     "tslib": "^1.6.0",
-    "typescript": "^2.2.1"
+    "typescript": "^2.2.1",
+    "typescript-eslint-parser": "^2.0.0"
   }
 }
