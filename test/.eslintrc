@@ -1,6 +1,0 @@
-{
-  "globals": {
-    "io": true,
-    "__coverage__": true
-  }
-}
