@@ -11,14 +11,19 @@ export { default as isPlainObject } from 'lodash-es/isPlainObject'
 export { default as isString } from 'lodash-es/isString'
 export { default as isUndefined } from 'lodash-es/isUndefined'
 export { default as castArray } from 'lodash-es/castArray'
+export { default as concat } from 'lodash-es/concat'
 export { default as extend } from 'lodash-es/extend'
 export { default as extendWith } from 'lodash-es/extendWith'
+export { default as filter } from 'lodash-es/filter'
 export { default as flatMap } from 'lodash-es/flatMap'
 export { default as map } from 'lodash-es/map'
 export { default as mapValues } from 'lodash-es/mapValues'
 export { default as reduce } from 'lodash-es/reduce'
 
-export type AsyncCallback = (done?: Function) => void | Promise<any>
+export type AsyncCallback = {
+  (done?: () => void): Promise<any> | void
+  _executed: boolean
+}
 
 export async function sequence(callbacks: AsyncCallback[], ...args) {
   for (const _fn of callbacks) {
@@ -26,6 +31,28 @@ export async function sequence(callbacks: AsyncCallback[], ...args) {
       return false
     }
   }
+}
+
+export function traversePath(router, path) {
+  if (path.indexOf('//') === 0) {
+    path = path.replace('//', '/')
+
+    while (!router.isRoot) {
+      router = router.$parent
+    }
+  } else {
+    if (path.indexOf('./') === 0) {
+      path = path.replace('./', '/')
+      router = router.$child
+    }
+
+    while (path && path.match(/\/?\.\./i) && !router.isRoot) {
+      router = router.$parent
+      path = path.replace(/\/?\.\./i, '')
+    }
+  }
+
+  return { router, path }
 }
 
 export function isGenerator(x) {

@@ -1,7 +1,18 @@
 import ko from 'knockout'
 import Route from './Route'
 import Router, { Middleware } from './router'
-import { AsyncCallback, isGenerator, isThenable, isUndefined, extend, map, promisify, reduce, sequence } from './utils'
+import {
+  AsyncCallback,
+  isGenerator, isThenable, isUndefined,
+  concat,
+  extend,
+  filter,
+  map,
+  promisify,
+  reduce,
+  sequence,
+  traversePath
+} from './utils'
 
 export default class Context {
   router: Router
@@ -16,11 +27,11 @@ export default class Context {
   // full path w/o base
   canonicalPath: string
 
-  private _redirect:                  string
-  private _queue:                     Array<Promise<any>>  = []
-  private _beforeNavigateCallbacks:   Array<AsyncCallback> = []
-  private _appMiddlewareCallbacks:    Array<AsyncCallback> = []
-  private _routeMiddlewareCallbacks:  Array<AsyncCallback> = []
+  private _redirect:                   string
+  private _queue:                      Array<Promise<any>>  = []
+  private _beforeNavigateCallbacks:    Array<AsyncCallback> = []
+  private _appMiddlewareDownstream:    Array<AsyncCallback> = []
+  private _routeMiddlewareDownstream:  Array<AsyncCallback> = []
 
   constructor(router: Router, path: string, _with: { [key: string]: any } = {}) {
     const route = router.resolveRoute(path)
@@ -103,11 +114,10 @@ export default class Context {
   }
 
   async runBeforeRender(flush = true) {
-    this._appMiddlewareCallbacks = Context.runMiddleware(Router.middleware, this)
-    await sequence(this._appMiddlewareCallbacks, this)
+    this._appMiddlewareDownstream = Context.runMiddleware(Router.middleware, this)
+    this._routeMiddlewareDownstream = Context.runMiddleware(this.route.middleware, this)
 
-    this._routeMiddlewareCallbacks = Context.runMiddleware(this.route.middleware, this)
-    await sequence(this._routeMiddlewareCallbacks, this)
+    await sequence(concat(this._appMiddlewareDownstream, this._routeMiddlewareDownstream))
 
     if (this.$child) {
       await this.$child.runBeforeRender(false)
@@ -118,13 +128,19 @@ export default class Context {
   }
 
   async runAfterRender(flush = true) {
-    await sequence(this._appMiddlewareCallbacks, this)
-    await sequence(this._routeMiddlewareCallbacks, this)
+    await sequence(filter(concat(
+      this._appMiddlewareDownstream,
+      this._routeMiddlewareDownstream
+    ), (fn) => fn._executed))
     if (this.$child) {
       await this.$child.runAfterRender(false)
     }
     if (flush) {
       await this.flushQueue()
+    }
+    if (this._redirect) {
+      const { router, path } = traversePath(this.router, this._redirect)
+      await router.update(path)
     }
   }
 
@@ -132,8 +148,10 @@ export default class Context {
     if (this.$child) {
       await this.$child.runBeforeDispose(false)
     }
-    await sequence(this._routeMiddlewareCallbacks, this)
-    await sequence(this._appMiddlewareCallbacks, this)
+    await sequence(filter(concat(
+      this._routeMiddlewareDownstream,
+      this._appMiddlewareDownstream
+    ), (fn) => fn._executed))
     if (flush) {
       await this.flushQueue()
     }
@@ -143,8 +161,10 @@ export default class Context {
     if (this.$child) {
       await this.$child.runAfterDispose(false)
     }
-    await sequence(this._routeMiddlewareCallbacks, this)
-    await sequence(this._appMiddlewareCallbacks, this)
+    await sequence(filter(concat(
+      this._routeMiddlewareDownstream,
+      this._appMiddlewareDownstream
+    ), (fn) => fn._executed))
     if (flush) {
       await this.flushQueue()
     }
@@ -153,16 +173,17 @@ export default class Context {
   private static runMiddleware(middleware: Middleware[], ctx: Context): Array<AsyncCallback> {
     return map(middleware, (fn) => {
       const runner = Context.generatorify(fn)(ctx)
-      const run: AsyncCallback = async () => {
+      const run = async () => {
         let ret = runner.next() || {}
         if (isThenable(ret)) {
           await ret
         } else if (isThenable(ret.value)) {
           await ret.value
         }
-        return true
+        (run as AsyncCallback)._executed = true
+        return isUndefined(ctx._redirect)
       }
-      return run
+      return run as AsyncCallback
     })
   }
 

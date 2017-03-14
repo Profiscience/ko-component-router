@@ -1,14 +1,21 @@
 import ko from 'knockout'
 import Context from './context'
 import Route, { RouteConfig } from './route'
-import { isArray, isBoolean, isPlainObject, isUndefined, castArray, extend, extendWith, flatMap, map, mapValues, reduce } from './utils'
+import {
+  AsyncCallback,
+  isArray, isBoolean, isPlainObject, isUndefined,
+  castArray,
+  extend, extendWith,
+  flatMap, map, mapValues,
+  reduce
+} from './utils'
 
 export interface Middleware {
   (ctx: Context, done?: () => any): {
-    beforeRender?:  (done?: () => any) => Promise<any>
-    afterRender?:   (done?: () => any) => Promise<any>
-    beforeDispose?: (done?: () => any) => Promise<any>
-    afterDispose?:  (done?: () => any) => Promise<any>
+    beforeRender?:  AsyncCallback
+    afterRender?:   AsyncCallback
+    beforeDispose?: AsyncCallback
+    afterDispose?:  AsyncCallback
   }
 }
 
