@@ -2,9 +2,6 @@ import ko from 'knockout'
 import $ from 'jquery'
 import tape from 'tape'
 
-// import './helpers/tape-browser-reporter'
-// import './helpers/error-reporter'
-// import './helpers/rebuild-reloader'
 import './helpers/ko-overwrite-component-registration'
 
 import './anchor'
@@ -20,7 +17,6 @@ import './queue'
 import './redirect'
 import './before-navigate-callbacks'
 import './plugins'
-// import './issues'
 
 const tests = [
   'routing',
@@ -35,8 +31,7 @@ const tests = [
   'queue',
   'redirect',
   'before-navigate-callbacks',
-  'plugins',
-  // 'issues'
+  'plugins'
 ]
 
 class TestRunner {
