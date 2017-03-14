@@ -305,6 +305,12 @@ export default class Router {
     return await Router.head.update(url, _args)
   }
 
+  static getPathFromLocation(): string {
+    const path = location.pathname + location.search + location.hash
+    const baseWithOrWithoutHashbangRegexp = Router.config.base.replace('#!', '#?!?')
+    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
+  }
+
   private static onclick(e) {
     if (e.defaultPrevented) {
       return
@@ -345,12 +351,6 @@ export default class Router {
 
     Router.update(path)
     e.preventDefault()
-  }
-
-  static getPathFromLocation() {
-    const path = location.pathname + location.search + location.hash
-    const baseWithOrWithoutHashbangRegexp = Router.config.base.replace('#!', '#?!?')
-    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
   }
 
   private static onpopstate(e) {
