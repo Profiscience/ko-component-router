@@ -1,10 +1,11 @@
 import pathtoRegexp from 'path-to-regexp'
-import Router, { RouteMap, Middleware } from './router'
-import { isArray, isFunction, isPlainObject, isString, isUndefined, flatMap, map, reduce } from './utils'
+import { RouteMap, Middleware } from './router'
+import { isFunction, isPlainObject, isString, isUndefined, map, reduce } from './utils'
 
 export type RouteConfig = string | RouteMap | Middleware
 
 export default class Route {
+  /* eslint-disable */
   path:       string
   component:  string
   middleware: Array<Middleware>
@@ -12,6 +13,7 @@ export default class Route {
   keys
 
   private regexp: RegExp
+  /* eslint-enable */
 
   constructor(path: string, config: Array<RouteConfig>) {
     const [component, middleware, children] = Route.parseConfig(config)
@@ -84,8 +86,8 @@ export default class Route {
           m = m as Middleware
           accum.push(m)
         }
-      return accum
-    }, [])
+        return accum
+      }, [])
 
     return [component, middleware, children]
   }

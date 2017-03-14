@@ -3,13 +3,14 @@ import Context from './context'
 import Route, { RouteConfig } from './route'
 import {
   AsyncCallback,
-  isArray, isBoolean, isPlainObject, isUndefined,
+  isBoolean, isPlainObject, isUndefined,
   castArray,
   extend, extendWith,
   flatMap, map, mapValues,
   reduce
 } from './utils'
 
+/* eslint-disable */
 export interface Middleware {
   (ctx: Context, done?: () => any): {
     beforeRender?:  AsyncCallback
@@ -26,8 +27,10 @@ export interface Plugin {
 export interface RouteMap {
   [name: string]: Array<RouteConfig>
 }
+/* eslint-enable */
 
 export default class Router {
+  /* eslint-disable */
   private static onInit: Array<Function> = []
   private static routes: RouteMap = {}
   private static events: {
@@ -35,9 +38,9 @@ export default class Router {
     popstate: string
   } = {
     click:  document.ontouchstart ? 'touchstart' : 'click',
-    popstate: 'popstate' 
+    popstate: 'popstate'
   }
-  
+
   static head:        Router
   static tail:        Router
   static middleware:  Array<Middleware>   = []
@@ -62,6 +65,7 @@ export default class Router {
   isRoot:         boolean
   ctx:            Context
   bound:          boolean
+  /* eslint-enable */
 
   constructor(
     url: string,
@@ -75,7 +79,7 @@ export default class Router {
     this.routes = this.isRoot
       ? Router.createRoutes(Router.routes)
       : $parentCtx.route.children
-    
+
     if (this.isRoot) {
       Router.head = this
       document.addEventListener(Router.events.click, Router.onclick)
@@ -84,11 +88,11 @@ export default class Router {
       this.$parent = $parentRouter
       this.routes = $parentCtx.route.children
     }
-    
+
     const path = Router.getPath(url)
 
     this.ctx = new Context(this, path, _with)
-    
+
     if (this.isRoot) {
       this.ctx.runBeforeRender()
         .then(() => {
@@ -97,12 +101,13 @@ export default class Router {
         })
         .then(() => {
           this.isNavigating(false)
+          const resolveRouter = (router) => (resolve) => resolve(router)
           let router = this as Router
           // static
-          map(Router.onInit, (resolve) => resolve(router))
+          map(Router.onInit, resolveRouter(router))
           while (router) {
             // instance
-            map(router.onInit, (resolve) => resolve(router))
+            map(router.onInit, resolveRouter(router))
             router = router.$child
           }
         })
@@ -150,9 +155,9 @@ export default class Router {
   async update(
     url: string,
     _args: boolean | {
-      push?:  boolean
+      push?: boolean
       force?: boolean
-      with?:  { [prop: string]: any }
+      with?: { [prop: string]: any }
     }): Promise<boolean> {
     let args
     if (isBoolean(_args)) {
@@ -173,7 +178,7 @@ export default class Router {
     const { search, hash } = Router.parseUrl(url)
     const path = Router.getPath(url)
     const route = this.resolveRoute(path)
-    const [params, pathname, childPath] = route.parse(path)
+    const [, pathname, childPath] = route.parse(path)
     const samePage = this.ctx.pathname === pathname
 
     if (this.$child && samePage && !args.force) {
@@ -194,7 +199,7 @@ export default class Router {
     this.isNavigating(true)
 
     await fromCtx.runBeforeDispose()
-    
+
     history[args.push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
@@ -213,7 +218,7 @@ export default class Router {
     await fromCtx.runAfterDispose()
 
     toCtx.render()
-    
+
     await toCtx.runAfterRender()
 
     this.isNavigating(false)
@@ -245,7 +250,7 @@ export default class Router {
     if (this.isRoot) {
       document.removeEventListener(Router.events.click, Router.onclick, false)
       window.removeEventListener(Router.events.popstate, Router.onpopstate, false)
-      delete Router.head
+      delete Router.head // eslint-disable-line
       // this.ctx.runBeforeDispose().then(() => this.ctx.runAfterDispose())
     }
   }
@@ -259,9 +264,9 @@ export default class Router {
   }
 
   static setConfig({ base, hashbang, activePathCSSClass }: {
-    base?:                string
-    hashbang?:            boolean
-    activePathCSSClass?:  string
+    base?: string
+    hashbang?: boolean
+    activePathCSSClass?: string
   }) {
     extendWith(Router.config, {
       base,
@@ -284,7 +289,7 @@ export default class Router {
 
   static get(i: number): Router {
     let router = Router.head
-    while (i > 0) {
+    while (i-- > 0) {
       router = router.$child
     }
     return router
@@ -293,9 +298,9 @@ export default class Router {
   static async update(
     url: string,
     _args?: boolean | {
-      push?:  boolean
+      push?: boolean
       force?: boolean
-      with?:  { [prop: string]: any }
+      with?: { [prop: string]: any }
     }): Promise<boolean> {
     return await Router.head.update(url, _args)
   }
@@ -343,9 +348,9 @@ export default class Router {
   }
 
   static getPathFromLocation() {
-    const path = location.pathname + location.search + location.hash;
-    const baseWithOrWithoutHashbangRegexp = Router.config.base.replace("#!", "#?!?");
-    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, "i"), "");
+    const path = location.pathname + location.search + location.hash
+    const baseWithOrWithoutHashbangRegexp = Router.config.base.replace('#!', '#?!?')
+    return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
   }
 
   private static onpopstate(e) {
@@ -389,7 +394,7 @@ export default class Router {
     return mapValues(routes, (c) =>
       map(Router.runPlugins(c), (routeConfig) =>
         isPlainObject(routeConfig)
-          ? Router.normalizeRoutes(routeConfig as RouteMap)
+          ? Router.normalizeRoutes(routeConfig as RouteMap) // eslint-disable-line
           : routeConfig))
   }
 

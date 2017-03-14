@@ -15,7 +15,7 @@ ko.components.register('ko-component-router', {
     </div>`
 })
 
-ko.bindingHandlers['__ko_component_router__'] = {
+ko.bindingHandlers.__ko_component_router__ = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
 
     const $router = bindingCtx.$rawData

@@ -30,6 +30,7 @@ module.exports = {
       frameworks: ['tap'],
 
       files: [
+        { pattern: 'dist/modules/**/*.js', included: false },
         'test/index.js'
       ],
 

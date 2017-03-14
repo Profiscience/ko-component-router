@@ -1,20 +1,19 @@
 import ko from 'knockout'
-import Route from './Route'
-import Router, { Middleware } from './router'
+import Route from './Route'                               // eslint-disable-line
+import Router, { Middleware } from './router'             // eslint-disable-line
 import {
-  AsyncCallback,
+  AsyncCallback,                                          // eslint-disable-line
   isGenerator, isThenable, isUndefined,
   concat,
   extend,
-  filter,
   map,
   promisify,
-  reduce,
   sequence,
   traversePath
 } from './utils'
 
 export default class Context {
+  /* eslint-disable */
   _redirect: string
   router: Router
   route: Route
@@ -32,11 +31,12 @@ export default class Context {
   private _beforeNavigateCallbacks:    Array<AsyncCallback> = []
   private _appMiddlewareDownstream:    Array<AsyncCallback> = []
   private _routeMiddlewareDownstream:  Array<AsyncCallback> = []
+  /* eslint-enable */
 
   constructor(router: Router, path: string, _with: { [key: string]: any } = {}) {
     const route = router.resolveRoute(path)
     const [params, pathname, childPath] = route.parse(path)
-    
+
     extend(this, {
       router,
       route,
@@ -45,10 +45,10 @@ export default class Context {
       pathname
     }, _with)
 
-    this.router.ctx = this        
+    this.router.ctx = this
     this.fullPath = this.router.base + this.pathname
     this.canonicalPath = this.fullPath.replace(new RegExp(Router.head.base, 'i'), '')
-    
+
     if (childPath) {
       this.router.$child = new Router(childPath, this.router, this)
     } else {
@@ -89,7 +89,7 @@ export default class Context {
   }
 
   async runBeforeNavigateCallbacks(): Promise<boolean> {
-    let ctx: Context = this
+    let ctx: Context = this                               // eslint-disable-line
     let callbacks = []
     while (ctx) {
       callbacks = [...ctx._beforeNavigateCallbacks, ...callbacks]
@@ -100,13 +100,15 @@ export default class Context {
   }
 
   private async flushQueue() {
-    const thisQueue = Promise.all(this._queue).then(() => { this._queue = [] })
+    const thisQueue = Promise.all(this._queue).then(() => {
+      this._queue = []
+    })
     const childQueues = map(this.$children, (c) => c.flushQueue())
     await Promise.all<Promise<void>>([thisQueue, ...childQueues])
   }
 
   render() {
-    let ctx: Context = this
+    let ctx: Context = this                               // eslint-disable-line
 
     while (ctx) {
       if (isUndefined(ctx._redirect)) {
@@ -118,15 +120,15 @@ export default class Context {
   }
 
   async runBeforeRender(flush = true) {
-    let appMiddlewareDownstream = Context.runMiddleware(Router.middleware, this)
-    let routeMiddlewareDownstream = Context.runMiddleware(this.route.middleware, this)
+    const appMiddlewareDownstream = Context.runMiddleware(Router.middleware, this)
+    const routeMiddlewareDownstream = Context.runMiddleware(this.route.middleware, this)
 
     const { count: numAppMiddlewareRanPreRedirect } = await sequence(appMiddlewareDownstream)
     const { count: numRouteMiddlewareRanPreRedirect } = await sequence(routeMiddlewareDownstream)
 
     this._appMiddlewareDownstream = appMiddlewareDownstream.slice(0, numAppMiddlewareRanPreRedirect)
     this._routeMiddlewareDownstream = routeMiddlewareDownstream.slice(0, numRouteMiddlewareRanPreRedirect)
-    
+
     if (this.$child) {
       await this.$child.runBeforeRender(false)
     }
@@ -174,7 +176,7 @@ export default class Context {
       const runner = Context.generatorify(fn)(ctx)
       let beforeRender = true
       return async () => {
-        let ret = runner.next() || {}
+        const ret = runner.next() || {}
         if (isThenable(ret)) {
           await ret
         } else if (isThenable(ret.value)) {
@@ -230,5 +232,5 @@ export default class Context {
   //           yield ret
   //         }
   //       }
-  // }  
+  // }
   }

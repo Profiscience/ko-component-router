@@ -1,5 +1,3 @@
-import Router, { Middleware } from './router'
-
 import isFunction from 'lodash-es/isFunction'
 import isUndefined from 'lodash-es/isUndefined'
 import noop from 'lodash-es/noop'
@@ -20,7 +18,9 @@ export { default as map } from 'lodash-es/map'
 export { default as mapValues } from 'lodash-es/mapValues'
 export { default as reduce } from 'lodash-es/reduce'
 
+/* eslint-disable */
 export type AsyncCallback = (done?: () => void) => Promise<any> | void
+/* eslint-enable */
 
 export async function sequence(callbacks: AsyncCallback[], ...args): Promise<{
   count: number,
@@ -62,7 +62,7 @@ export function traversePath(router, path) {
 }
 
 export function isGenerator(x) {
-  return x.constructor.name === "GeneratorFunction"
+  return x.constructor.name === 'GeneratorFunction'
 }
 
 export function isThenable(x) {
@@ -83,5 +83,5 @@ export function promisify(_fn: Function = noop) {
     return isThenable(ret)
       ? await ret
       : ret
-  };
+  }
 }
