@@ -35,7 +35,8 @@
   ],
   "dependencies": {
     "lodash-es": "^4.17.4",
-    "path-to-regexp": "^1.2.1"
+    "path-to-regexp": "^1.2.1",
+    "tslib": "^1.6.0"
   },
   "peerDependencies": {
     "knockout": "^3.3.0"
@@ -72,7 +73,6 @@
     "rollup-plugin-node-resolve": "^2.0.0",
     "rollup-plugin-ts": "^0.1.0",
     "tape": "caseyWebb/tape",
-    "tslib": "^1.6.0",
     "typescript": "^2.2.1",
     "typescript-eslint-parser": "^2.0.0"
   }

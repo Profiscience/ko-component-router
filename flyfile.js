@@ -1,3 +1,5 @@
+'use strict'
+
 const { extend } = require('lodash')
 
 extend(exports, require('./tasks/test'))
