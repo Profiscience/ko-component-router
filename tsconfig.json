@@ -26,6 +26,9 @@
       "node_modules/@types"
     ]
   },
+  "filesGlob": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "dist",
     "test",
