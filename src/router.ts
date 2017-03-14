@@ -203,13 +203,17 @@ export default class Router {
 
     await toCtx.runBeforeRender()
 
+    if (isUndefined(toCtx._redirect)) {
+      this.component(null)
+      ko.tasks.runEarly()
+    }
+
     this.ctx = toCtx
 
-    this.component(null)
-    ko.tasks.runEarly()
-    toCtx.render()
-
     await fromCtx.runAfterDispose()
+
+    toCtx.render()
+    
     await toCtx.runAfterRender()
 
     this.isNavigating(false)

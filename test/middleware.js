@@ -1,4 +1,5 @@
 import ko from 'knockout'
+
 import Router from '../dist/modules'
 
 ko.components.register('middleware', {
@@ -143,6 +144,10 @@ ko.components.register('middleware', {
           }
         }
       })
+    }
+
+    dispose() {
+      Router.middleware = []
     }
   }
 })

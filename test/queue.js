@@ -47,8 +47,6 @@ ko.components.register('queue', {
           }
         }
       })
-
-      history.replaceState(null, null, '/')
     }
   }
 })

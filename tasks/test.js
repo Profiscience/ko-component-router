@@ -28,7 +28,9 @@ module.exports = {
     singleRun = false
 
     yield fly.start('test:build')
+
     fly.start('test:serve')
+
     yield fly.watch([
       path.resolve(__dirname, '../test/**/*.js'),
       path.resolve(__dirname, '../src/**/*.ts'),
@@ -75,7 +77,8 @@ module.exports = {
           ]
         },
         bundle: {
-          format: 'iife'
+          format: 'iife',
+          sourceMap: true
         }
       })
       .run({ every: false }, function * ([{ data: _bundle }]) {

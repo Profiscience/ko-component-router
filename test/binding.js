@@ -13,8 +13,6 @@ ko.components.register('binding', {
   `,
   viewModel: class BindingTest {
     constructor({ t, done }) {
-      const begin = location.href
-
       history.replaceState(null, null, '/a/a')
 
       Router.useRoutes({
@@ -44,8 +42,6 @@ ko.components.register('binding', {
               t.ok($('#inner-relative').hasClass('active-path'))
               t.ok($('#nested-relative').hasClass('active-path'))
               t.ok($('#outer-deep').hasClass('active-path'))
-
-              history.pushState(null, null, begin)
               done()
             })
           }

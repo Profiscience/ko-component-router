@@ -15,6 +15,7 @@ import {
 } from './utils'
 
 export default class Context {
+  _redirect: string
   router: Router
   route: Route
   params: { [k: string]: any }
@@ -27,7 +28,6 @@ export default class Context {
   // full path w/o base
   canonicalPath: string
 
-  private _redirect:                   string
   private _queue:                      Array<Promise<any>>  = []
   private _beforeNavigateCallbacks:    Array<AsyncCallback> = []
   private _appMiddlewareDownstream:    Array<AsyncCallback> = []
@@ -95,7 +95,8 @@ export default class Context {
       callbacks = [...ctx._beforeNavigateCallbacks, ...callbacks]
       ctx = ctx.$child
     }
-    return await sequence(callbacks)
+    const { success } = await sequence(callbacks)
+    return success
   }
 
   private async flushQueue() {
@@ -106,19 +107,26 @@ export default class Context {
 
   render() {
     let ctx: Context = this
+
     while (ctx) {
-      ctx.router.component(ctx.route.component)
+      if (isUndefined(ctx._redirect)) {
+        ctx.router.component(ctx.route.component)
+      }
       ctx = ctx.$child
     }
     ko.tasks.runEarly()
   }
 
   async runBeforeRender(flush = true) {
-    this._appMiddlewareDownstream = Context.runMiddleware(Router.middleware, this)
-    this._routeMiddlewareDownstream = Context.runMiddleware(this.route.middleware, this)
+    let appMiddlewareDownstream = Context.runMiddleware(Router.middleware, this)
+    let routeMiddlewareDownstream = Context.runMiddleware(this.route.middleware, this)
 
-    await sequence(concat(this._appMiddlewareDownstream, this._routeMiddlewareDownstream))
+    const { count: numAppMiddlewareRanPreRedirect } = await sequence(appMiddlewareDownstream)
+    const { count: numRouteMiddlewareRanPreRedirect } = await sequence(routeMiddlewareDownstream)
 
+    this._appMiddlewareDownstream = appMiddlewareDownstream.slice(0, numAppMiddlewareRanPreRedirect)
+    this._routeMiddlewareDownstream = routeMiddlewareDownstream.slice(0, numRouteMiddlewareRanPreRedirect)
+    
     if (this.$child) {
       await this.$child.runBeforeRender(false)
     }
@@ -128,10 +136,7 @@ export default class Context {
   }
 
   async runAfterRender(flush = true) {
-    await sequence(filter(concat(
-      this._appMiddlewareDownstream,
-      this._routeMiddlewareDownstream
-    ), (fn) => fn._executed))
+    await sequence(concat(this._appMiddlewareDownstream, this._routeMiddlewareDownstream))
     if (this.$child) {
       await this.$child.runAfterRender(false)
     }
@@ -140,7 +145,7 @@ export default class Context {
     }
     if (this._redirect) {
       const { router, path } = traversePath(this.router, this._redirect)
-      await router.update(path)
+      router.update(path)
     }
   }
 
@@ -148,10 +153,7 @@ export default class Context {
     if (this.$child) {
       await this.$child.runBeforeDispose(false)
     }
-    await sequence(filter(concat(
-      this._routeMiddlewareDownstream,
-      this._appMiddlewareDownstream
-    ), (fn) => fn._executed))
+    await sequence(concat(this._routeMiddlewareDownstream, this._appMiddlewareDownstream))
     if (flush) {
       await this.flushQueue()
     }
@@ -161,10 +163,7 @@ export default class Context {
     if (this.$child) {
       await this.$child.runAfterDispose(false)
     }
-    await sequence(filter(concat(
-      this._routeMiddlewareDownstream,
-      this._appMiddlewareDownstream
-    ), (fn) => fn._executed))
+    await sequence(concat(this._routeMiddlewareDownstream, this._appMiddlewareDownstream))
     if (flush) {
       await this.flushQueue()
     }
@@ -173,17 +172,23 @@ export default class Context {
   private static runMiddleware(middleware: Middleware[], ctx: Context): Array<AsyncCallback> {
     return map(middleware, (fn) => {
       const runner = Context.generatorify(fn)(ctx)
-      const run = async () => {
+      let beforeRender = true
+      return async () => {
         let ret = runner.next() || {}
         if (isThenable(ret)) {
           await ret
         } else if (isThenable(ret.value)) {
           await ret.value
         }
-        (run as AsyncCallback)._executed = true
-        return isUndefined(ctx._redirect)
+        if (beforeRender) {
+          // this should only block the sequence for the first call,
+          // and allow cleanup after the redirect
+          beforeRender = false
+          return isUndefined(ctx._redirect)
+        } else {
+          return true
+        }
       }
-      return run as AsyncCallback
     })
   }
 

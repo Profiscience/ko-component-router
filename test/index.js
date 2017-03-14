@@ -16,6 +16,7 @@ import './force-update'
 import './with'
 import './middleware'
 import './queue'
+import './redirect'
 import './before-navigate-callbacks'
 import './plugins'
 // import './issues'
@@ -29,6 +30,7 @@ const tests = [
   'binding',
   'middleware',
   'queue',
+  'redirect',
   'before-navigate-callbacks',
   'plugins',
   // 'issues'
@@ -47,7 +49,6 @@ class TestRunner {
   }
 
   async runTest(test) {
-    // reset defaults
     history.pushState(null, null, '/')
     
     return await new Promise((resolve) =>

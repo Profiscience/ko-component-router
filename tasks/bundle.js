@@ -3,7 +3,6 @@ const { extend } = require('lodash')
 const typescript = require('typescript')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
-const buble = require('rollup-plugin-buble')
 const { default: typescriptPlugin } = require('rollup-plugin-ts')
 const { compilerOptions } = require('../tsconfig.json')
 
@@ -20,9 +19,7 @@ module.exports = function * (fly) {
             tsconfig: extend({}, compilerOptions, { sourceMap: false })
           }),
           nodeResolve({
-            preferBuiltins: false,
-            // TODO why do I need to skip this external?
-            // skip: ['knockout']
+            preferBuiltins: false
           }),
           commonjs()
         ],

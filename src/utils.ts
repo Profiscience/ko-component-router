@@ -20,17 +20,23 @@ export { default as map } from 'lodash-es/map'
 export { default as mapValues } from 'lodash-es/mapValues'
 export { default as reduce } from 'lodash-es/reduce'
 
-export type AsyncCallback = {
-  (done?: () => void): Promise<any> | void
-  _executed: boolean
-}
+export type AsyncCallback = (done?: () => void) => Promise<any> | void
 
-export async function sequence(callbacks: AsyncCallback[], ...args) {
+export async function sequence(callbacks: AsyncCallback[], ...args): Promise<{
+  count: number,
+  success: boolean
+}> {
+  let count = 0
+  let success = true
   for (const _fn of callbacks) {
-    if (await promisify(_fn)(...args) === false) {
-      return false
+    count++
+    const ret = await promisify(_fn)(...args)
+    if (ret === false) {
+      success = false
+      break
     }
   }
+  return { count, success }
 }
 
 export function traversePath(router, path) {

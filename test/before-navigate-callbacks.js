@@ -1,4 +1,5 @@
 import ko from 'knockout'
+
 import Router from '../dist/modules'
 
 ko.components.register('before-navigate-callbacks', {
