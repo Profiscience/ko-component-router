@@ -1,9 +1,4 @@
 {
   "extends": "profiscience",
-  "parserOptions": {
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "modules": true
-    }
-  }
+  "parser": "typescript-eslint-parser"
 }
