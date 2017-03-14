@@ -1,3 +1,5 @@
+'use strict'
+
 const path = require('path')
 const { extend } = require('lodash')
 const typescript = require('typescript')

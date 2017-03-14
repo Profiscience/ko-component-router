@@ -1,3 +1,5 @@
+'use strict'
+
 const path = require('path')
 const { Server } = require('karma')
 const nodeResolve = require('rollup-plugin-node-resolve')

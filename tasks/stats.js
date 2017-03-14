@@ -1,3 +1,5 @@
+'use strict'
+
 const path = require('path')
 const { gzip } = require('zlib')
 const { each, padEnd, round } = require('lodash')
