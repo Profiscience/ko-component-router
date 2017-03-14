@@ -16,6 +16,7 @@ export default class Context {
   // full path w/o base
   canonicalPath: string
 
+  private _redirect:                  string
   private _queue:                     Array<Promise<any>>  = []
   private _beforeNavigateCallbacks:   Array<AsyncCallback> = []
   private _appMiddlewareCallbacks:    Array<AsyncCallback> = []
@@ -68,6 +69,14 @@ export default class Context {
     return map(this.router.$children, (r) => r.ctx)
   }
 
+  queue(promise) {
+    this._queue.push(promise)
+  }
+
+  redirect(path) {
+    this._redirect = path
+  }
+
   async runBeforeNavigateCallbacks(): Promise<boolean> {
     let ctx: Context = this
     let callbacks = []
@@ -76,10 +85,6 @@ export default class Context {
       ctx = ctx.$child
     }
     return await sequence(callbacks)
-  }
-
-  private queue(promise) {
-    this._queue.push(promise)
   }
 
   private async flushQueue() {
@@ -149,11 +154,13 @@ export default class Context {
     return map(middleware, (fn) => {
       const runner = Context.generatorify(fn)(ctx)
       const run: AsyncCallback = async () => {
-        let ret = runner.next()
-        ret = isThenable(ret)
-          ? await ret
-          : ret.value
-        return ret || true
+        let ret = runner.next() || {}
+        if (isThenable(ret)) {
+          await ret
+        } else if (isThenable(ret.value)) {
+          await ret.value
+        }
+        return true
       }
       return run
     })
