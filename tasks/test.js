@@ -102,6 +102,7 @@ module.exports = {
       parserStream = parser((results) => {
         if (singleRun) {
           resolve()
+          console.dir(results)
           process.exit(results.ok ? 0 : 1)
         }
       })

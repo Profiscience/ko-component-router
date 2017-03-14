@@ -9,8 +9,10 @@ import './helpers/rebuild-reloader'
 import './helpers/ko-overwrite-component-registration'
 
 import './anchor'
+import './basepath'
 import './binding'
 import './routing'
+import './hashbang'
 import './history'
 import './force-update'
 import './with'
@@ -23,6 +25,8 @@ import './plugins'
 
 const tests = [
   'routing',
+  'basepath',
+  'hashbang',
   'history',
   'force-update',
   'with',
