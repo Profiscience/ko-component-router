@@ -6,27 +6,43 @@ ko.components.register('queue', {
   template: '<ko-component-router></ko-component-router>',
   viewModel: class QueueTest {
     constructor({ t, done }) {
-      let queuedPromiseResolved = false
+      let queuedPromiseAResolved = false
+      let queuedPromiseBResolved = false
 
-      Router.useRoutes = {
-        '/': ['foo',
+      Router.useRoutes({
+        '/': [
           (ctx) =>
             ctx.queue(new Promise((resolve) => {
               setTimeout(() => {
-                queuedPromiseResolved = true
+                queuedPromiseAResolved = true
                 resolve()
               }, 1000)
             })),
           () => {
-            t.notOk(queuedPromiseResolved, 'queued promises let middleware continue')
+            t.notOk(queuedPromiseAResolved, 'queued promises let middleware continue')
+          },
+          {
+            '/': ['foo',
+              (ctx) =>
+                ctx.queue(new Promise((resolve) => {
+                  setTimeout(() => {
+                    queuedPromiseBResolved = true
+                    resolve()
+                  }, 1000)
+                })),
+              () => {
+                t.notOk(queuedPromiseAResolved, 'queued promises in parent router does not prevent child middleware from executing')
+              }
+            ]
           }
         ]
-      }
+      })
 
       ko.components.register('foo', {
         viewModel: class {
           constructor() {
-            t.ok(queuedPromiseResolved, 'queued promise resolves before component render')
+            t.ok(queuedPromiseAResolved, 'queued promise in parent router resolves before component render')
+            t.ok(queuedPromiseBResolved, 'queued promise in child router resolves before component render')
             done()
           }
         }

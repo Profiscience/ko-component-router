@@ -2,13 +2,9 @@ import ko from 'knockout'
 import Router from '../dist/modules'
 
 ko.components.register('middleware', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: class MiddlewareTest {
-    constructor({ t, next: _next }) {
-      const runner = this.runTests(_next)
-      const next = runner.next.bind(runner)
-
-      t.ok(Router, 'should attach Router.use after import for middleware')
+    constructor({ t, done }) {
 
       Router.use(function * (ctx) {
         ctx.beforeRenderGlobalMiddlewareHit = true
@@ -20,21 +16,21 @@ ko.components.register('middleware', {
         ctx.afterDisposeGlobalMiddlewareHit = true
       })
 
-      this.routes = {
-        '/': 'empty',
+      history.replaceState(null, null, '/sync')
 
+      Router.useRoutes({
         '/sync': [
           (ctx) => {
             t.ok(ctx, 'middleware is ran with ctx as first argument')
           },
-          () => next()
+          () => { Router.update('/async') }
         ],
 
         '/async': [
-          (ctx, next) => {
+          (ctx, _done) => {
             setTimeout(() => {
               ctx.waitOver = true
-              next()
+              _done()
             }, 200)
           },
           (ctx) => {
@@ -51,7 +47,7 @@ ko.components.register('middleware', {
             t.ok(ctx.waitOver, 'async middleware works with promise')
             ctx.waitOver = false
 
-            next()
+            Router.update('/generator')
           }
         ],
 
@@ -70,6 +66,8 @@ ko.components.register('middleware', {
             })
 
             t.ok(ctx.afterRenderGlobalMiddlewareHit, 'route after render middleware is called after global after render middleware')
+
+            Router.update('/object')
 
             yield
 
@@ -123,51 +121,28 @@ ko.components.register('middleware', {
             },
             afterRender() {
               t.ok(ctx.callbackWaitOver, 'object middleware works with callback')
+              done()
             }
           }),
           'object'
         ]
-      }
-
-      ko.components.register('empty', { })
+      })
 
       ko.components.register('generator', {
-        viewModel: (ctx) => {
-          ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
-          next()
+        viewModel: class {
+          constructor(ctx) {
+            ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
+          }
         }
       })
 
       ko.components.register('object', {
-        viewModel: (ctx) => {
-          ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
-          next()
+        viewModel: class {
+          constructor(ctx) {
+            ctx.addBeforeNavigateCallback(() => ctx.beforeNavigateHit = true)
+          }
         }
       })
-
-      next()
-    }
-
-    * async runTests(next) {
-      const begin = location.href
-
-      yield history.replaceState(null, null, '/sync')
-
-      yield Router.update('/async')
-      yield Router.update('/generator')
-      yield Router.update('/object')
-
-      Router.update('/').then(() => {
-        history.pushState(null, null, begin)
-        next()
-      })
-    }
-
-    dispose() {
-      ko.components.unregister('empty')
-      ko.components.unregister('generator')
-      ko.components.unregister('object')
-      ko.components.unregister('middleware')
     }
   }
 })

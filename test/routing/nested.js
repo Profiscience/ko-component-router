@@ -44,6 +44,9 @@ ko.components.register('nested', {
           constructor(ctx) {
             t.pass('works with implied router component (no specified component)')
 
+            t.equals(ctx.$root, Router.head.ctx, 'ctx.$root is Router.head.ctx')
+            t.equals(ctx.router.$root, Router.head, 'router.$root is Router.head')
+
             t.equals(Router.head.$parent, undefined, 'root router.$parent is undefined')
             t.equals(Router.head.ctx.$parent, undefined, 'root ctx.$parent is undefined')
 

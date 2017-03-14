@@ -10,5 +10,6 @@ tap.on('data', (m) => {
 })
 
 tap.on('end', (m) => {
-  socket.emit('end', __coverage__)
+  history.pushState(null, null, '/')
+  socket.emit('end', window.__coverage__ || {})
 })

@@ -1,33 +1,32 @@
 import ko from 'knockout'
+import $ from 'jquery'
 import Router from './router'
 import { isUndefined } from './utils'
 
 ko.bindingHandlers['path'] = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
     const activePathCSSClass = allBindings.get('pathActiveClass') || Router.config.activePathCSSClass
-
+    
     Router.initialized.then(() => {
-      // allow adjacent routers to initialize
-      ko.tasks.schedule(() => ko.applyBindingsToNode(el, {
+      const route = ko.pureComputed(() => parsePathBinding(bindingCtx, ko.unwrap(valueAccessor())))
+      ko.applyBindingsToNode(el, {
         attr: {
-          href: ko.pureComputed(() => resolveHref(bindingCtx, ko.unwrap(valueAccessor())))
+          href: ko.pureComputed(() => resolveHref(route()))
         },
         css: {
-          [activePathCSSClass]: ko.pureComputed(() => isActivePath(bindingCtx, ko.unwrap(valueAccessor())))
+          [activePathCSSClass]: ko.pureComputed(() => isActivePath(route()))
         }
-      }))
+      })
     })
   }
 }
 
-export function resolveHref(bindingCtx, _path) {
-  const [router, path] = parsePathBinding(bindingCtx, _path)
+export function resolveHref({ router, path }) {
   return router.base + path
 }
 
-function isActivePath(bindingCtx, _path) {
-  const [router, path] = parsePathBinding(bindingCtx, _path)
-  return !router.isNavigating() && (router.ctx.pathname || '/') === ('/' + path.split('/')[1])
+export function isActivePath({ router, path }) {
+  return (router.ctx.pathname || '/') === ('/' + path.split('/')[1])
 }
 
 function parsePathBinding(bindingCtx, path) {
@@ -51,7 +50,7 @@ function parsePathBinding(bindingCtx, path) {
     }
   }
 
-  return [router, path]
+  return { router, path }
 }
 
 function getRouter(bindingCtx) {
@@ -61,5 +60,5 @@ function getRouter(bindingCtx) {
     }
     bindingCtx = bindingCtx.$parentContext
   }
-  return Router.get(0)
+  return Router.head
 }

@@ -18,6 +18,13 @@ ko.components.register('history', {
 
       const begin = history.length
 
+      if (begin > 48) {
+        ko.components.register('a', {})
+        t.skip('Unable to test history.length b/c history.length is too long')
+        done()
+        return
+      }
+
       ko.components.register('a', {
         viewModel: class {
           constructor(ctx) {

@@ -156,9 +156,7 @@ module.exports = {
 
     server.listen(9876, () => {
       console.log('Listening on %d', server.address().port) // eslint-disable-line
-      console.log(`Launching ${process.env.TRAVIS ? 'Firefox' : 'Chrome'}...`) // eslint-disable-line
-      opn('http://localhost:9876', { app: true ? 'firefox' : 'google chrome' })
-        .catch((err) => console.error(err)) // eslint-disable-line
+      opn('http://localhost:9876').catch((err) => console.error(err)) // eslint-disable-line
     })
 
     yield new Promise((_resolve) => (resolve = _resolve))

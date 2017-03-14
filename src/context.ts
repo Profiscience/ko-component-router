@@ -16,11 +16,10 @@ export default class Context {
   // full path w/o base
   canonicalPath: string
 
-  private _queue:                   Array<Promise<any>>  = []
-  private _beforeNavigateCallbacks: Array<AsyncCallback> = []
-  private _afterRenderCallbacks:    Array<AsyncCallback> = []
-  private _beforeDisposeCallbacks:  Array<AsyncCallback> = []
-  private _afterDisposeCallbacks:   Array<AsyncCallback> = []
+  private _queue:                     Array<Promise<any>>  = []
+  private _beforeNavigateCallbacks:   Array<AsyncCallback> = []
+  private _appMiddlewareCallbacks:    Array<AsyncCallback> = []
+  private _routeMiddlewareCallbacks:  Array<AsyncCallback> = []
 
   constructor(router: Router, path: string, _with: { [key: string]: any } = {}) {
     const route = router.resolveRoute(path)
@@ -49,6 +48,10 @@ export default class Context {
     this._beforeNavigateCallbacks.unshift(cb)
   }
 
+  get $root() {
+    return this.router.$root.ctx
+  }
+
   get $parent() {
     return isUndefined(this.router.$parent) ? undefined : this.router.$parent.ctx
   }
@@ -64,10 +67,6 @@ export default class Context {
   get $children(): Array<Context> {
     return map(this.router.$children, (r) => r.ctx)
   }
-
-  // get element(): Element {
-  //   return document.getElementsByClassName('ko-component-router-view')[this.router.depth]
-  // }
 
   async runBeforeNavigateCallbacks(): Promise<boolean> {
     let ctx: Context = this
@@ -99,21 +98,11 @@ export default class Context {
   }
 
   async runBeforeRender(flush = true) {
-    const [appBeforeRender, appDownstream] = Context.runMiddleware(Router.middleware, this)
+    this._appMiddlewareCallbacks = Context.runMiddleware(Router.middleware, this)
+    await sequence(this._appMiddlewareCallbacks, this)
 
-    this._afterRenderCallbacks.push(appDownstream)
-    this._beforeDisposeCallbacks.push(appDownstream)
-    this._afterDisposeCallbacks.push(appDownstream)
-
-    await appBeforeRender
-
-    const [routeBeforeRender, routeDownstream] = Context.runMiddleware(this.route.middleware, this)
-
-    this._afterRenderCallbacks.push(routeDownstream)
-    this._beforeDisposeCallbacks.unshift(routeDownstream)
-    this._afterDisposeCallbacks.unshift(routeDownstream)
-   
-    await routeBeforeRender
+    this._routeMiddlewareCallbacks = Context.runMiddleware(this.route.middleware, this)
+    await sequence(this._routeMiddlewareCallbacks, this)
 
     if (this.$child) {
       await this.$child.runBeforeRender(false)
@@ -124,10 +113,11 @@ export default class Context {
   }
 
   async runAfterRender(flush = true) {
+    await sequence(this._appMiddlewareCallbacks, this)
+    await sequence(this._routeMiddlewareCallbacks, this)
     if (this.$child) {
       await this.$child.runAfterRender(false)
     }
-    await sequence(this._afterRenderCallbacks)
     if (flush) {
       await this.flushQueue()
     }
@@ -137,7 +127,8 @@ export default class Context {
     if (this.$child) {
       await this.$child.runBeforeDispose(false)
     }
-    await sequence(this._beforeDisposeCallbacks)
+    await sequence(this._routeMiddlewareCallbacks, this)
+    await sequence(this._appMiddlewareCallbacks, this)
     if (flush) {
       await this.flushQueue()
     }
@@ -147,20 +138,16 @@ export default class Context {
     if (this.$child) {
       await this.$child.runAfterDispose(false)
     }
-    await sequence(this._afterDisposeCallbacks)
+    await sequence(this._routeMiddlewareCallbacks, this)
+    await sequence(this._appMiddlewareCallbacks, this)
     if (flush) {
       await this.flushQueue()
     }
   }
 
-  private static runMiddleware(middleware: Middleware[], ...args): [
-    Promise<any>,
-    () => Promise<any>
-  ] {
-    const downstream = []
-
-    const callbacks = middleware.map((fn) => {
-      const runner = Context.generatorify(fn)(...args)
+  private static runMiddleware(middleware: Middleware[], ctx: Context): Array<AsyncCallback> {
+    return map(middleware, (fn) => {
+      const runner = Context.generatorify(fn)(ctx)
       const run: AsyncCallback = async () => {
         let ret = runner.next()
         ret = isThenable(ret)
@@ -168,27 +155,21 @@ export default class Context {
           : ret.value
         return ret || true
       }
-      downstream.push(run)
       return run
     })
-
-    return [
-      sequence(callbacks, ...args),
-      () => sequence(callbacks, ...args),
-    ]
   }
 
   // ts why u no haz async generators?? babel why ur generators so $$$?????
   private static generatorify(fn) {
     return isGenerator(fn)
       ? fn
-      : function(...args) {
+      : function(ctx) {
         let count = 1, ret
         return {
           async next() {
             switch (count++) {
             case 1:
-              ret = await promisify(fn)(...args) || false
+              ret = await promisify(fn)(ctx) || false
               return ret && ret.beforeRender
                     ? await promisify(ret.beforeRender)()
                     : ret

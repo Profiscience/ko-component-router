@@ -25,9 +25,10 @@ ko.components.register('binding', {
       })
 
       ko.components.register('a', {
+        synchronous: true,
         viewModel: class {
-          constructor() {
-            setTimeout(() => {
+          constructor(ctx) {
+            ctx.router.$child.initialized.then(() => {
               t.equals('/a', $('#outer-relative').attr('href'))
               t.equals('/a', $('#outer-absolute').attr('href'))
 
@@ -57,6 +58,7 @@ ko.components.register('binding', {
       })
 
       ko.components.register('a-inner', {
+        synchronous: true,
         template: `
           <a id="nested-relative" data-bind="path: '/a'"></a>
           <a id="nested-relative-up" data-bind="path: '../a'"></a>

@@ -21,6 +21,7 @@ export interface RouteMap {
 }
 
 export default class Router {
+  private static onInit: Array<Function> = []
   private static routes: RouteMap = {}
   private static events: {
     click: string,
@@ -32,7 +33,6 @@ export default class Router {
   
   static head:        Router
   static tail:        Router
-  static onInit:      Array<Function>     = []
   static middleware:  Array<Middleware>   = []
   static plugins:     Array<Plugin>       = []
   static config: {
@@ -44,6 +44,8 @@ export default class Router {
     hashbang:           false,
     activePathCSSClass: 'active-path'
   }
+
+  private onInit: Array<Function> = []
 
   $parent?:       Router
   $child?:        Router
@@ -86,7 +88,25 @@ export default class Router {
           this.ctx.render()
           return this.ctx.runAfterRender()
         })
-        .then(() => this.isNavigating(false))
+        .then(() => {
+          this.isNavigating(false)
+          let router = this as Router
+          // static
+          map(Router.onInit, (resolve) => resolve(router))
+          while (router) {
+            // instance
+            map(router.onInit, (resolve) => resolve(router))
+            router = router.$child
+          }
+        })
+    }
+  }
+
+  get initialized(): Promise<Router> {
+    if (this.isNavigating()) {
+      return new Promise((resolve) => this.onInit.push(resolve))
+    } else {
+      return Promise.resolve(this)
     }
   }
 
@@ -166,9 +186,7 @@ export default class Router {
 
     this.isNavigating(true)
 
-    if (fromCtx) {
-      await fromCtx.runBeforeDispose()
-    }
+    await fromCtx.runBeforeDispose()
     
     history[args.push ? 'pushState' : 'replaceState'](
       history.state,
@@ -184,10 +202,7 @@ export default class Router {
     ko.tasks.runEarly()
     toCtx.render()
 
-    if (fromCtx) {
-      await fromCtx.runAfterDispose()
-    }
-
+    await fromCtx.runAfterDispose()
     await toCtx.runAfterRender()
 
     this.isNavigating(false)
@@ -219,7 +234,16 @@ export default class Router {
     if (this.isRoot) {
       document.removeEventListener(Router.events.click, Router.onclick, false)
       window.removeEventListener(Router.events.popstate, Router.onpopstate, false)
+      delete Router.head
       // this.ctx.runBeforeDispose().then(() => this.ctx.runAfterDispose())
+    }
+  }
+
+  static get initialized(): Promise<Router> {
+    if (Router.head) {
+      return Promise.resolve(Router.head)
+    } else {
+      return new Promise((resolve) => this.onInit.push(resolve))
     }
   }
 
@@ -253,14 +277,6 @@ export default class Router {
       router = router.$child
     }
     return router
-  }
-
-  static get initialized(): Promise<Router> {
-    if (!Router.head) {
-      return new Promise((resolve) => Router.onInit.push(resolve))
-    } else {
-      return Promise.resolve(Router.head)
-    }
   }
 
   static async update(
