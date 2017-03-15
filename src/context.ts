@@ -163,10 +163,6 @@ export default class Context {
   async runAfterRender() {
     await sequence(concat(this._appMiddlewareDownstream, this._routeMiddlewareDownstream))
     await this.flushQueue()
-    if (this._redirect) {
-      const { router, path } = traversePath(this.router, this._redirect)
-      router.update(path)
-    }
   }
 
   async runBeforeDispose(flush = true) {

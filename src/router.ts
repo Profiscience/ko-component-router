@@ -7,7 +7,8 @@ import {
   castArray,
   extend, extendWith,
   flatMap, map, mapValues,
-  reduce
+  reduce,
+  traversePath
 } from './utils'
 
 /* eslint-disable */
@@ -41,7 +42,6 @@ export default class Router {
   }
 
   static head:        Router
-  static tail:        Router
   static onInit:      Array<Function>     = []
   static middleware:  Array<Middleware>   = []
   static plugins:     Array<Plugin>       = []
@@ -171,6 +171,12 @@ export default class Router {
     await fromCtx.runAfterDispose()
 
     toCtx.render()
+
+    if (!isUndefined(toCtx._redirect)) {
+      await toCtx.runAfterRender()
+      const { router: r, path: p } = traversePath(toCtx.router, toCtx._redirect)
+      r.update(p)
+    }
 
     return true
   }

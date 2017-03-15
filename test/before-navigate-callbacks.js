@@ -1,6 +1,6 @@
 import ko from 'knockout'
 
-import Router from '../dist/modules'
+import Router from '../dist/test'
 
 ko.components.register('before-navigate-callbacks', {
   template: '<ko-component-router></ko-component-router>',

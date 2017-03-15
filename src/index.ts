@@ -1,6 +1,6 @@
-import { map } from 'lodash-es'
 import ko from 'knockout'
 import Router from './router'
+import { map, traversePath } from './utils'
 import './binding'
 
 export default Router
@@ -50,9 +50,15 @@ function createViewModel(params) {
   if (router.isRoot) {
     router.ctx.runBeforeRender()
       .then(() => {
-        router.ctx.render()
-        map(Router.onInit, (resolve) => resolve(this))
-        return
+        if (router.ctx._redirect) {
+          router.ctx.runAfterRender().then(() => {
+            const { router: r, path: p } = traversePath(router, router.ctx._redirect)
+            r.update(p)
+          })
+        } else {
+          router.ctx.render()
+          map(Router.onInit, (resolve) => resolve(this))
+        }
       })
   }
 

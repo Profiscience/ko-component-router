@@ -1,6 +1,6 @@
 import ko from 'knockout'
 
-import Router from '../../dist/modules'
+import Router from '../../dist/test'
 
 ko.components.register('nested', {
   template: '<ko-component-router></ko-component-router>',
@@ -57,6 +57,8 @@ ko.components.register('nested', {
         viewModel: class {
           constructor(ctx) {
             t.pass('works with implied router component (no specified component)')
+
+            t.equals(ctx.$root.$child.router, Router.get(1), 'Router.get(n) works') 
 
             t.equals(ctx.$root, Router.head.ctx, 'ctx.$root is Router.head.ctx')
             t.equals(Router.head.ctx.$parent, undefined, 'root ctx.$parent is undefined')

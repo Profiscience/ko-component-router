@@ -1,6 +1,7 @@
 'use strict'
 
 const path = require('path')
+const spawn = require('cross-spawn')
 const { Server } = require('karma')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const nodeBuiltins = require('rollup-plugin-node-builtins')
@@ -9,19 +10,31 @@ const commonjs = require('rollup-plugin-commonjs')
 const json = require('rollup-plugin-json')
 const rollupIstanbul = require('rollup-plugin-istanbul')
 
-let cache, watch
+let cache, watch, coverage
 
 module.exports = {
   * test(fly) {
     watch = false
+    coverage = true
 
-    yield fly.serial(['modules', 'karma'])
+    yield fly.serial(['test:build', 'karma'])
   },
   * 'test:watch'(fly) {
+    coverage = false
     watch = true
 
-    yield fly.start('karma')
-    yield fly.watch(path.resolve(__dirname, '../src/**/*.ts'), 'modules')
+    yield fly.watch(path.resolve(__dirname, '../src/**/*.ts'), 'test:build')
+    yield fly.serial(['test:build', 'karma'])
+  },
+  * 'test:build'() {
+    yield new Promise((resolve) => {
+      const tsc = spawn('tsc', [
+        '--target', coverage ? 'es5' : 'es2017',
+        '--module', 'es2015',
+        '--outDir', path.resolve(__dirname, '../dist/test')
+      ], { stdio: 'inherit' })
+      tsc.on('close', resolve)
+    })
   },
   * karma() { // eslint-disable-line require-yield
     const config = {
@@ -30,7 +43,7 @@ module.exports = {
       frameworks: ['tap'],
 
       files: [
-        { pattern: 'dist/modules/**/*.js', included: false },
+        { pattern: 'dist/test/**/*.js', included: false },
         'test/index.js'
       ],
 
@@ -79,11 +92,6 @@ module.exports = {
           }),
           nodeGlobals(),
           nodeBuiltins(),
-          // rollupIstanbul({
-          //   include: [
-          //     'dist/**/*'
-          //   ]
-          // }),
           nodeResolve({
             preferBuiltins: true
           })
@@ -91,13 +99,22 @@ module.exports = {
         format: 'iife',
         sourceMap: 'inline'
       },
+    }
 
-      // remapIstanbulReporter: {
-      //   reports: {
-      //     lcovonly: 'coverage/lcov.info',
-      //     html: 'coverage/html'
-      //   }
-      // }
+    if (coverage) {
+      config.rollupPreprocessor.plugins.push(
+        rollupIstanbul({
+          include: [
+            'dist/**/*'
+          ]
+        }))
+
+      config.remapIstanbulReporter = {
+        reports: {
+          lcovonly: 'coverage/lcov.info',
+          html: 'coverage/html'
+        }
+      }
     }
 
     const server = new Server(config, (code) => process.exit(code))

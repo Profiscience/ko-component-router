@@ -1,7 +1,7 @@
 import ko from 'knockout'
 import $ from 'jquery'
 
-import Router from '../dist/modules'
+import Router from '../dist/test'
 
 ko.components.register('basepath', {
   template: `
@@ -29,12 +29,15 @@ ko.components.register('basepath', {
         viewModel: class {
           constructor(ctx) {
             t.pass('initializes with basepath')
-            t.equals('/base/foo/foo', location.pathname, 'uses basepath in url on init')
+            t.equals(location.pathname, '/base/foo/foo', 'uses basepath in url on init')
+            t.equals(ctx.canonicalPath, '/foo/foo', 'ctx.canonicalPath is correct')
+            t.equals(ctx.fullPath, '/base/foo/foo', 'ctx.fullPath is correct')
 
-            ctx.router.initialized.then(() => {
-              t.equals($('#foo-link').attr('href'), '/base/foo/foo', 'sets href correctly in path binding')
-              Router.update('/bar/bar')
-            })
+            ctx.router.initialized.then(() =>
+              ko.tasks.schedule(() => {
+                t.equals($('#foo-link').attr('href'), '/base/foo/foo', 'sets href correctly in path binding')
+                Router.update('/bar/bar')
+              }))
           }
         }
       })

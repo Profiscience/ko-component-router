@@ -1,6 +1,6 @@
 import ko from 'knockout'
 
-import Router from '../dist/modules'
+import Router from '../dist/test'
 
 ko.components.register('force-update', {
   template: '<ko-component-router></ko-component-router>',

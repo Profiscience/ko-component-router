@@ -1,7 +1,7 @@
 import ko from 'knockout'
 import $ from 'jquery'
 
-import Router from '../dist/modules'
+import Router from '../dist/test'
 
 ko.components.register('hashbang', {
   template: `
@@ -32,10 +32,10 @@ ko.components.register('hashbang', {
             t.pass('initializes with hashbang')
             t.true(location.href.indexOf('/base/#!/foo/foo') > -1, 'uses hash in url on init')
 
-            ctx.router.initialized.then(() => {
+            ctx.router.initialized.then(() => ko.tasks.schedule(() => {
               t.equals($('#foo-link').attr('href'), '/base/#!/foo/foo', 'sets href correctly in path binding')
               Router.update('/bar/bar')
-            })
+            }))
           }
         }
       })
