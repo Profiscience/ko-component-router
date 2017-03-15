@@ -26,10 +26,10 @@ const tests = [
   'force-update',
   'with',
   'anchor',
-  'binding',
+  // 'binding',
   'middleware',
   'queue',
-  'redirect',
+  // 'redirect',
   'before-navigate-callbacks',
   'plugins'
 ]

@@ -79,11 +79,11 @@ module.exports = {
           }),
           nodeGlobals(),
           nodeBuiltins(),
-          rollupIstanbul({
-            include: [
-              'dist/**/*'
-            ]
-          }),
+          // rollupIstanbul({
+          //   include: [
+          //     'dist/**/*'
+          //   ]
+          // }),
           nodeResolve({
             preferBuiltins: true
           })
@@ -92,12 +92,12 @@ module.exports = {
         sourceMap: 'inline'
       },
 
-      remapIstanbulReporter: {
-        reports: {
-          lcovonly: 'coverage/lcov.info',
-          html: 'coverage/html'
-        }
-      }
+      // remapIstanbulReporter: {
+      //   reports: {
+      //     lcovonly: 'coverage/lcov.info',
+      //     html: 'coverage/html'
+      //   }
+      // }
     }
 
     const server = new Server(config, (code) => process.exit(code))

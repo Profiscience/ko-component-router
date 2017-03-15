@@ -172,10 +172,6 @@ export default class Router {
 
     toCtx.render()
 
-    await toCtx.runAfterRender()
-
-    this.isNavigating(false)
-
     return true
   }
 
