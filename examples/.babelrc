@@ -1,4 +1,3 @@
 {
-  "presets": ["es2017"],
   "plugins": ["syntax-dynamic-import"]
 }

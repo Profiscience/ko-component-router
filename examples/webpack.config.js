@@ -5,6 +5,7 @@ const path = require('path')
 module.exports = {
   entry: {
     'hashbang': path.resolve(__dirname, './hashbang/index.js'),
+    'lazy-loading': path.resolve(__dirname, './lazy-loading/index.js'),
     'mvc': path.resolve(__dirname, './mvc/index.js'),
     'path-binding': path.resolve(__dirname, './path-binding/index.js')
   },
