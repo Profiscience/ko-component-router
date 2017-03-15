@@ -1,12 +1,33 @@
-import { random } from 'lodash-es'
+import ToProgress from 'toprogress'
 
-export default (loading) => function * () {
-  loading(true)
-  // fake a timeout. could be ajax or what have you,
-  yield randomTimeout()
-  loading(false)
-}
+let loadingBar, loadingBarInterval
 
-function randomTimeout() {
-  return new Promise((resolve) => setTimeout(resolve, random(5000)))
+export default (loading) => function * (ctx) {
+  // run once for top-most router
+  if (!loadingBar) {
+    // toggle overlay (observable passed in)
+    loading(true)
+
+    // start loading bar
+    loadingBar = new ToProgress({
+      color: '#000',
+      duration: 0.2,
+      height: '5px'
+    })
+    loadingBarInterval = setInterval(() => {
+      loadingBar.increase(1)
+    }, 100)
+  }
+
+  yield
+
+  // end loading in bottom-most router afterRender
+  if (!ctx.$child) {
+    loadingBar.finish()
+    clearInterval(loadingBarInterval)
+    loading(false)
+    // reset for next navigation
+    loadingBar = null
+    loadingBarInterval = null
+  }
 }
