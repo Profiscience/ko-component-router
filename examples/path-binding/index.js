@@ -1,6 +1,5 @@
-
 import ko from 'knockout'
-import Router from '../../src/index'
+import Router from '../../dist/modules'
 
 function createOuterTemplate(foo) {
   return `

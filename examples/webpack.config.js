@@ -23,14 +23,8 @@ module.exports = {
         exclude: [
           path.resolve('node_modules')
         ],
-        query: {
-          cacheDirectory: true,
-          plugins: [
-            'transform-es2015-modules-commonjs'
-          ],
-          presets: [
-            'es2017'
-          ]
+        options: {
+          cacheDirectory: true
         }
       }
     ]
