@@ -6,6 +6,7 @@ module.exports = {
   entry: {
     'hashbang': path.resolve(__dirname, './hashbang/index.js'),
     'lazy-loading': path.resolve(__dirname, './lazy-loading/index.js'),
+    'loading-animation': path.resolve(__dirname, './loading-animation/index.js'),
     'mvc': path.resolve(__dirname, './mvc/index.js'),
     'path-binding': path.resolve(__dirname, './path-binding/index.js')
   },
