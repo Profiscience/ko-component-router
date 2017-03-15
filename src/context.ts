@@ -14,6 +14,8 @@ import {
 
 export default class Context {
   /* eslint-disable */
+  $child: Context
+  $parent: Context
   _redirect: string
   router: Router
   route: Route
@@ -22,10 +24,6 @@ export default class Context {
   path: string
   // path segment relevant to this context
   pathname: string
-  // full path w/ base
-  fullPath: string
-  // full path w/o base
-  canonicalPath: string
 
   private _queue:                      Array<Promise<any>>  = []
   private _beforeNavigateCallbacks:    Array<AsyncCallback> = []
@@ -33,11 +31,12 @@ export default class Context {
   private _routeMiddlewareDownstream:  Array<AsyncCallback> = []
   /* eslint-enable */
 
-  constructor(router: Router, path: string, _with: { [key: string]: any } = {}) {
+  constructor(router: Router, $parent: Context, path: string, _with: { [key: string]: any } = {}) {
     const route = router.resolveRoute(path)
     const [params, pathname, childPath] = route.parse(path)
 
     extend(this, {
+      $parent,
       router,
       route,
       params,
@@ -45,14 +44,8 @@ export default class Context {
       pathname
     }, _with)
 
-    this.router.ctx = this
-    this.fullPath = this.router.base + this.pathname
-    this.canonicalPath = this.fullPath.replace(new RegExp(Router.head.base, 'i'), '')
-
     if (childPath) {
-      this.router.$child = new Router(childPath, this.router, this)
-    } else {
-      Router.tail = router
+      this.$child = new Router(childPath, this).ctx
     }
   }
 
@@ -60,24 +53,51 @@ export default class Context {
     this._beforeNavigateCallbacks.unshift(cb)
   }
 
+  get base(): string {
+    return this.router.isRoot
+      ? Router.base
+      : this.$parent.base + this.$parent.pathname
+  }
+
+  // full path w/ base
+  get fullPath() {
+    return this.base + this.pathname
+  }
+
+  // full path w/ base
+  get canonicalPath() {
+    return this.fullPath.replace(new RegExp(this.$root.base, 'i'), '')
+  }
+
   get $root() {
-    return this.router.$root.ctx
-  }
-
-  get $parent() {
-    return isUndefined(this.router.$parent) ? undefined : this.router.$parent.ctx
-  }
-
-  get $child() {
-    return isUndefined(this.router.$child) ? undefined : this.router.$child.ctx
+    let ctx: Context = this
+    while (ctx) {
+      if (ctx.$parent) {
+        ctx = ctx.$parent
+      } else {
+        return ctx
+      }
+    }
   }
 
   get $parents(): Array<Context> {
-    return map(this.router.$parents, (r) => r.ctx)
+    const parents = []
+    let parent = this.$parent
+    while (parent) {
+      parents.push(parent)
+      parent = parent.$parent
+    }
+    return parents
   }
 
   get $children(): Array<Context> {
-    return map(this.router.$children, (r) => r.ctx)
+    const children = []
+    let child = this.$child
+    while (child) {
+      children.push(child)
+      child = child.$child
+    }
+    return children
   }
 
   queue(promise) {
@@ -110,6 +130,9 @@ export default class Context {
   render() {
     let ctx: Context = this                               // eslint-disable-line
 
+    // ctx.router.component(null)
+    // ko.tasks.runEarly()
+
     while (ctx) {
       if (isUndefined(ctx._redirect)) {
         ctx.router.component(ctx.route.component)
@@ -129,7 +152,7 @@ export default class Context {
     this._appMiddlewareDownstream = appMiddlewareDownstream.slice(0, numAppMiddlewareRanPreRedirect)
     this._routeMiddlewareDownstream = routeMiddlewareDownstream.slice(0, numRouteMiddlewareRanPreRedirect)
 
-    if (this.$child) {
+    if (this.$child && isUndefined(this._redirect)) {
       await this.$child.runBeforeRender(false)
     }
     if (flush) {
@@ -137,14 +160,9 @@ export default class Context {
     }
   }
 
-  async runAfterRender(flush = true) {
+  async runAfterRender() {
     await sequence(concat(this._appMiddlewareDownstream, this._routeMiddlewareDownstream))
-    if (this.$child) {
-      await this.$child.runAfterRender(false)
-    }
-    if (flush) {
-      await this.flushQueue()
-    }
+    await this.flushQueue()
     if (this._redirect) {
       const { router, path } = traversePath(this.router, this._redirect)
       router.update(path)
@@ -152,7 +170,7 @@ export default class Context {
   }
 
   async runBeforeDispose(flush = true) {
-    if (this.$child) {
+    if (this.$child && isUndefined(this._redirect)) {
       await this.$child.runBeforeDispose(false)
     }
     await sequence(concat(this._routeMiddlewareDownstream, this._appMiddlewareDownstream))
@@ -162,7 +180,7 @@ export default class Context {
   }
 
   async runAfterDispose(flush = true) {
-    if (this.$child) {
+    if (this.$child && isUndefined(this._redirect)) {
       await this.$child.runAfterDispose(false)
     }
     await sequence(concat(this._routeMiddlewareDownstream, this._appMiddlewareDownstream))

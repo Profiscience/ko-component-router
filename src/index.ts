@@ -1,3 +1,4 @@
+import { map } from 'lodash-es'
 import ko from 'knockout'
 import Router from './router'
 import './binding'
@@ -28,20 +29,32 @@ ko.bindingHandlers.__ko_component_router__ = {
       }
     }, bindingCtx.extend({ $router }))
 
+    $router.init()
+
     return { controlsDescendantBindings: true }
   }
 }
 
 function createViewModel(params) {
   let router
-  if (!Router.get(0)) {
-    router = new Router(Router.getPathFromLocation(), undefined, undefined, params)
+  if (!Router.head) {
+    router = new Router(Router.getPathFromLocation(), undefined, params)
   } else {
     router = Router.head
     while (router.bound) {
-      router = router.$child
+      router = router.ctx.$child.router
     }
   }
   router.bound = true
+
+  if (router.isRoot) {
+    router.ctx.runBeforeRender()
+      .then(() => {
+        router.ctx.render()
+        map(Router.onInit, (resolve) => resolve(this))
+        return
+      })
+  }
+
   return router
 }

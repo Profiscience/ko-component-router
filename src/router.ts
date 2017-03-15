@@ -31,7 +31,6 @@ export interface RouteMap {
 
 export default class Router {
   /* eslint-disable */
-  private static onInit: Array<Function> = []
   private static routes: RouteMap = {}
   private static events: {
     click: string,
@@ -43,6 +42,7 @@ export default class Router {
 
   static head:        Router
   static tail:        Router
+  static onInit:      Array<Function>     = []
   static middleware:  Array<Middleware>   = []
   static plugins:     Array<Plugin>       = []
   static config: {
@@ -55,10 +55,7 @@ export default class Router {
     activePathCSSClass: 'active-path'
   }
 
-  private onInit: Array<Function> = []
-
-  $parent?:       Router
-  $child?:        Router
+  onInit:         Array<Function> = []
   component:      KnockoutObservable<string>
   isNavigating:   KnockoutObservable<boolean>
   routes:         Array<Route>
@@ -69,13 +66,12 @@ export default class Router {
 
   constructor(
     url: string,
-    $parentRouter?: Router,
     $parentCtx?: Context,
     _with: { [k: string]: any } = {}
   ) {
     this.component = ko.observable(null)
     this.isNavigating = ko.observable(true)
-    this.isRoot = isUndefined($parentRouter)
+    this.isRoot = isUndefined($parentCtx)
     this.routes = this.isRoot
       ? Router.createRoutes(Router.routes)
       : $parentCtx.route.children
@@ -84,34 +80,9 @@ export default class Router {
       Router.head = this
       document.addEventListener(Router.events.click, Router.onclick)
       window.addEventListener(Router.events.popstate, Router.onpopstate)
-    } else {
-      this.$parent = $parentRouter
-      this.routes = $parentCtx.route.children
     }
 
-    const path = Router.getPath(url)
-
-    this.ctx = new Context(this, path, _with)
-
-    if (this.isRoot) {
-      this.ctx.runBeforeRender()
-        .then(() => {
-          this.ctx.render()
-          return this.ctx.runAfterRender()
-        })
-        .then(() => {
-          this.isNavigating(false)
-          const resolveRouter = (router) => (resolve) => resolve(router)
-          let router = this as Router
-          // static
-          map(Router.onInit, resolveRouter(router))
-          while (router) {
-            // instance
-            map(router.onInit, resolveRouter(router))
-            router = router.$child
-          }
-        })
-    }
+    this.ctx = new Context(this, $parentCtx, Router.getPath(url), _with)
   }
 
   get initialized(): Promise<Router> {
@@ -122,39 +93,21 @@ export default class Router {
     }
   }
 
-  get base(): string {
-    return this.isRoot
-      ? Router.config.base + (Router.config.hashbang ? '/#!' : '')
-      : this.$parent.base + this.$parent.ctx.pathname
-  }
-
-  get $root(): Router {
-    return Router.head
-  }
-
-  get $parents(): Array<Router> {
-    const parents = []
-    let r = this.$parent
-    while (r) {
-      parents.push(r)
-      r = r.$parent
-    }
-    return parents
-  }
-
-  get $children(): Array<Router> {
-    const children = []
-    let r = this.$child
-    while (r) {
-      children.push(r)
-      r = r.$child
-    }
-    return children
+  init() {
+    this.isNavigating(false)
+    this.ctx.runAfterRender().then(() => {
+      const resolveRouter = (router) => (resolve) => resolve(router)
+      let ctx = this.ctx
+      while (ctx) {
+        map(ctx.router.onInit, resolveRouter(ctx.router))
+        ctx = ctx.$child
+      }
+    })
   }
 
   async update(
     url: string,
-    _args: boolean | {
+    _args?: boolean | {
       push?: boolean
       force?: boolean
       with?: { [prop: string]: any }
@@ -179,13 +132,13 @@ export default class Router {
     const path = Router.getPath(url)
     const route = this.resolveRoute(path)
     const [, pathname, childPath] = route.parse(path)
-    const samePage = this.ctx.pathname === pathname
+    const samePage = fromCtx.pathname === pathname
 
-    if (this.$child && samePage && !args.force) {
-      return await this.$child.update(childPath + search + hash, args)
+    if (fromCtx.$child && samePage && !args.force) {
+      return await fromCtx.$child.router.update(childPath + search + hash, args)
     }
 
-    const toCtx = new Context(this, path, args.with)
+    const toCtx = new Context(this, this.ctx.$parent, path, args.with)
 
     if (!toCtx.route) {
       return false
@@ -203,7 +156,7 @@ export default class Router {
     history[args.push ? 'pushState' : 'replaceState'](
       history.state,
       document.title,
-      this.base + path + search + hash
+      toCtx.base + toCtx.path + search + hash
     )
 
     await toCtx.runBeforeRender()
@@ -263,6 +216,10 @@ export default class Router {
     }
   }
 
+  static get base(): string {
+    return Router.config.base + (Router.config.hashbang ? '/#!' : '')
+  }
+
   static setConfig({ base, hashbang, activePathCSSClass }: {
     base?: string
     hashbang?: boolean
@@ -290,7 +247,7 @@ export default class Router {
   static get(i: number): Router {
     let router = Router.head
     while (i-- > 0) {
-      router = router.$child
+      router = router.ctx.$child.router
     }
     return router
   }
@@ -325,7 +282,7 @@ export default class Router {
     }
 
     const { pathname, search, hash = '' } = el
-    const path = (pathname + search + hash).replace(new RegExp(Router.head.base, 'i'), '')
+    const path = (pathname + search + hash).replace(new RegExp(Router.base, 'i'), '')
 
     const isValidRoute = Router.hasRoute(path)
     const isCrossOrigin = !Router.sameOrigin(el.href)
@@ -364,7 +321,7 @@ export default class Router {
 
   private static parseUrl(url: string) {
     const parser = document.createElement('a')
-    const b = Router.head.base.toLowerCase()
+    const b = Router.base.toLowerCase()
     if (b && url.toLowerCase().indexOf(b) === 0) {
       url = url.replace(new RegExp(b, 'i'), '') || '/'
     }

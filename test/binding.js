@@ -28,7 +28,7 @@ ko.components.register('binding', {
         synchronous: true,
         viewModel: class {
           constructor(ctx) {
-            ctx.router.$child.initialized.then(() => {
+            ctx.$child.router.initialized.then(() => {
               t.equals('/a', $('#outer-relative').attr('href'))
               t.equals('/a', $('#outer-absolute').attr('href'))
 

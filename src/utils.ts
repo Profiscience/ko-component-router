@@ -1,6 +1,7 @@
 import isFunction from 'lodash-es/isFunction'
 import isUndefined from 'lodash-es/isUndefined'
 import noop from 'lodash-es/noop'
+import Router from './router'
 
 export { default as isArray } from 'lodash-es/isArray'
 export { default as isBoolean } from 'lodash-es/isBoolean'
@@ -39,21 +40,21 @@ export async function sequence(callbacks: AsyncCallback[], ...args): Promise<{
   return { count, success }
 }
 
-export function traversePath(router, path) {
+export function traversePath(router: Router, path) {
   if (path.indexOf('//') === 0) {
     path = path.replace('//', '/')
 
     while (!router.isRoot) {
-      router = router.$parent
+      router = router.ctx.$parent.router
     }
   } else {
     if (path.indexOf('./') === 0) {
       path = path.replace('./', '/')
-      router = router.$child
+      router = router.ctx.$child.router
     }
 
     while (path && path.match(/\/?\.\./i) && !router.isRoot) {
-      router = router.$parent
+      router = router.ctx.$parent.router
       path = path.replace(/\/?\.\./i, '')
     }
   }
