@@ -25,6 +25,7 @@ export function resolveHref({ router, path }) {
 }
 
 export function isActivePath({ router, path }) {
+  router.isNavigating()
   return (router.ctx.pathname || '/') === ('/' + path.split('/')[1])
 }
 
