@@ -27,7 +27,17 @@ Router.useRoutes({
           '/': [
             randomTimeout,
             {
-              '/': 'foo'
+              '/': [
+                randomTimeout,
+                {
+                  '/': [
+                    randomTimeout,
+                    {
+                      '/': 'foo'
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
