@@ -11,7 +11,7 @@
 
 Super duper flexible component based router for developing wicked awesome single page apps with KnockoutJS.
 
-[Migrating from 3.x to 4.x](https://github.com/Profiscience/ko-component-router/wiki/Migrating-from-3.x-to-4.x).
+**[oh hai, a blog post on changes in ko-component-router@next, fancy that.](https://medium.com/@notCaseyWebb/building-a-better-router-ef42896e2e5a)**
 
 ### Installation
 ```bash
