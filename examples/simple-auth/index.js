@@ -35,10 +35,6 @@ ko.components.register('home', {
 
 ko.components.register('login', {
   viewModel: class {
-    constructor() {
-      this.password = ko.observable()
-    }
-
     login() {
       sessionStorage.setItem('authenticated', true)
       Router.update('/')
