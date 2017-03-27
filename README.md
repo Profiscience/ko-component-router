@@ -9,7 +9,7 @@
 [![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
 [![Gitter](https://img.shields.io/gitter/room/profiscience/ko-component-router.svg)](https://gitter.im/Profiscience/ko-component-router)
 
-Super duper flexible component based router for developing wicked awesome single page apps with KnockoutJS.
+Super-duper flexible component based router for developing wicked awesome single page apps with KnockoutJS.
 
 **YOU ARE ON THE `next` BRANCH**
 
@@ -83,6 +83,13 @@ function loadingMiddleware(ctx) {
     }
   }
 }
+
+// generators are also supported if you're a pioneer of sorts
+// function * loadingMiddleware(ctx) {
+//   loading(true)
+//   yield
+//   loading(false)
+// }
 
 function loadUsers(ctx) {
   // return promise for async middleware
