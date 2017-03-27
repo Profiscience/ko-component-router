@@ -11,51 +11,96 @@
 
 Super duper flexible component based router for developing wicked awesome single page apps with KnockoutJS.
 
+**YOU ARE ON THE `next` BRANCH**
+
 **[oh hai, a blog post on changes in ko-component-router@next, fancy that.](https://medium.com/@notCaseyWebb/building-a-better-router-ef42896e2e5a)**
 
 ### Installation
 ```bash
-$ yarn add ko-component-router
+$ yarn add ko-component-router@next
 ```
 ...or...
 ```bash
-$ npm install -S ko-component-router
+$ npm install -S ko-component-router@next
 ```
 
-### Basic Usage
+### Usage
+_app.js_
 ```javascript
+import $ from 'jquery'
 import ko from 'knockout'
-import 'ko-component-router'
+import Router from 'ko-component-router'
 
-ko.components.register('app', {
-  viewModel: class App {
-    constructor() {
-      this.routes = {
-        '/': 'home',
-        '/user/:id': 'user'
-      }
-    }
-  },
-  template: `
-    <ko-component-router></ko-component-router>
-  `
-})
+const loading = ko.observable(true)
 
-ko.component.register('home', {
-  template: `<a href="/users/1234">Show user</a>`
-})
+Router.use(loadingMiddleware)
 
-ko.components.register('user', {
-  viewModel: class User {
-    constructor(ctx) {
-      // ctx.params
-      //
-      // ...and more!
-    }
+Router.useRoutes({
+  '/': 'home',
+  '/users': {
+    '/': [loadUsers, 'users'],
+    '/:id': [loadUser, 'user']
   }
 })
 
-ko.applyBindings()
+ko.component.register('home', {
+  template: `<a data-bind="path: '/users'">Show users</a>`
+})
+
+ko.components.register('users', {
+  viewModel: class UsersViewModel {
+    constructor(ctx) {
+      this.users = ctx.users
+    }
+    
+    navigateToUser(user) {
+      Router.update('/users/' + user.id, { with: { user } })
+    }
+  },
+  template: `
+    <ul data-bind="foreach: users">
+      <span data-bind="text: name, click: navigateToUser"></span>
+    </ul>
+  `
+})
+
+ko.components.register('user', {
+  viewModel: class UserViewModel {
+    constructor(ctx) {
+      this.user = ctx.user
+    }
+  },
+  template: `...`
+})
+
+function loadingMiddleware(ctx) {
+  return {
+    beforeRender() {
+      loading(true)
+    },
+    afterRender() {
+      loading(false)
+    }
+  }
+}
+
+function loadUsers(ctx) {
+  // return promise for async middleware
+  return $.get('/api/users/').then((us) => ctx.users = us)
+}
+
+function loadUser(ctx) {
+  // if not passed in via `with` from Users.navigateToUser
+  if (!ctx.user) {
+    return $.get('/api/users/' + ctx.params.id).then((u) => ctx.user = u)
+  }
+}
+
+ko.applyBindings({ loading })
+```
+_index.html_
+```html
+<ko-component-router data-bind="css: { opacity: loading() ? .5 : 1 }"></ko-component-router>
 ```
 
 [More](./docs)
