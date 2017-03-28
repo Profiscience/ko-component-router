@@ -18,6 +18,7 @@
   "main": "dist/ko-component-router.js",
   "jsnext:main": "dist/modules/index.js",
   "module": "dist/modules/index.js",
+  "types": "ko-component-router.d.ts",
   "files": [
     "dist"
   ],
