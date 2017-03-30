@@ -32,7 +32,7 @@ ko.components.register('binding', {
         viewModel: class {
           constructor(ctx) {
             ctx.$child.router.initialized.then(() => {
-              ko.tasks.schedule(() => {
+              setTimeout(() => {
                 t.equals('/a', $('#outer-relative-a').attr('href'))
                 t.equals('/a', $('#outer-absolute-a').attr('href'))
 
@@ -50,7 +50,7 @@ ko.components.register('binding', {
                 t.ok($('#outer-deep').hasClass('active-path'))
 
                 Router.update('/b')
-              })
+              }, 200)
             })
           }
         },
