@@ -32,10 +32,10 @@ ko.components.register('hashbang', {
             t.pass('initializes with hashbang')
             t.true(location.href.indexOf('/base/#!/foo/foo') > -1, 'uses hash in url on init')
 
-            ctx.router.initialized.then(() => setTimeout(() => {
+            ctx.router.initialized.then(() => setTimeout(() => { // dirty hack for FF/TravisCI
               t.equals($('#foo-link').attr('href'), '/base/#!/foo/foo', 'sets href correctly in path binding')
               Router.update('/bar/bar')
-            }, 200))
+            }))
           }
         }
       })
