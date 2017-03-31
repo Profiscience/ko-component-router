@@ -125,9 +125,6 @@ export default class Context {
   render() {
     let ctx: Context = this                               // eslint-disable-line
 
-    // ctx.router.component(null)
-    // ko.tasks.runEarly()
-
     while (ctx) {
       if (isUndefined(ctx._redirect)) {
         ctx.router.component(ctx.route.component)

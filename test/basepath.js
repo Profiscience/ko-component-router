@@ -31,7 +31,6 @@ ko.components.register('basepath', {
             t.pass('initializes with basepath')
             t.equals(location.pathname, '/base/foo/foo', 'uses basepath in url on init')
             t.equals(ctx.canonicalPath, '/foo/foo', 'ctx.canonicalPath is correct')
-            t.equals(ctx.fullPath, '/base/foo/foo', 'ctx.fullPath is correct')
 
             ctx.router.initialized.then(() => setTimeout(() => { // Dirty hack for FF/TravisCI
               t.equals($('#foo-link').attr('href'), '/base/foo/foo', 'sets href correctly in path binding')
