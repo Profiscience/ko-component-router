@@ -2,18 +2,16 @@
 
 The real power and extensibility of the router comes in the form of middleware.
 In this case, middleware is a series of functions, sync or async, that compose a
-route. In fact, the actual component setting is merely a middleware function that
-sets the router component.
+route.
 
 If used correctly, you can have complete control over the lifecycle of each view
-and keep your viewmodel as slim as possible (think skinny controllers, fat models).
+and keep your viewModel as slim as possible (think skinny controllers, fat models).
 
 ## Registering Middleware
 
 ### App
 
-App middleware is ran for every route and is registered using `Router.use`,
-or if you use a module system you may prefer something to the effect of...
+App middleware is ran for every route and is registered using `Router.use`
 
 ```javascript
 import Router from 'ko-component-router'
@@ -45,7 +43,7 @@ This...
 
 ```javascript
 {
-  '/user/:id': [(ctx) => ctx.router.component('user')]
+  '/user/:id': [(ctx) => ctx.router.component = 'user']
 }
 ```
 
@@ -64,8 +62,8 @@ To add middleware to a route, simply add it to the array...
 }
 ```
 
-__NOTE:__ I'm not going to stop you from putting functions *after* the component,
-but I __highly__ discourage it. There is a better way... keep reading...
+__NOTE:__ Putting functions after the component will *not* cause the functions
+to run after the component is rendered. For how to accomplish that, keep reading.
 
 ## Middleware Functions
 
@@ -73,8 +71,7 @@ Middleware functions are passed 2 arguments:
 - `ctx`: the ctx object passed into the viewmodel
 - `done`: an optional callback for async functions\*; promises are also supported, and encouraged
 
-\*that should wait for completion before continuing middleware, otherwise use
-`ctx.queue()`
+\*that should wait for completion before continuing middleware, otherwise use `ctx.queue()`
 
 Let's look at some example logging middleware...
 
@@ -113,7 +110,7 @@ at different points in the page lifecycle.
 ```javascript
 import Query from 'ko-query'
 
-function(ctx) {
+export default function(ctx) {
   return {
     beforeRender(/* done */) {
       console.log('[router] navigating to', ctx.pathname)
@@ -128,15 +125,12 @@ function(ctx) {
     },
     afterRender() {
       console.log('[router] navigated to', ctx.pathname)
-      $(ctx.element).fadeIn()
     },
     beforeDispose() {
       console.log('[router] navigating away from', ctx.pathname)
-      $(ctx.element).fadeOut()
     },
     afterDispose() {
       console.log('[router] navigated away from', ctx.pathname)
-      ctx.query.dispose()
     }
   }
 }
@@ -168,11 +162,9 @@ function * monolithicMiddleware(ctx) {
   yield loadSomeAsyncData().then((data) => ctx.data = data)
 
   console.log('[router] navigated to', ctx.pathname)
-  $(ctx.element).fadeIn()
   yield
 
   console.log('[router] navigating away from', ctx.pathname)
-  $(ctx.element).fadeOut()
   yield
 
   console.log('[router] navigated away from', ctx.pathname)
@@ -197,26 +189,34 @@ I :heart: future JS.
 
 ## Execution Order
 
-Assuming navigation from a => b, where "X/app" indicates app middleware for route X,
+Assuming navigation from from => to, where "X/app" indicates app middleware for route X,
 middleware is executed in the following order...
 
-- a: before dispose
-- a/app: before dispose
+- from: before dispose
+- from/app: before dispose
 
-- b/app: before render
-- b: before render
+- to/app: before render
+- to: before render
 
-- a: after dispose
-- a/app: after dispose
+- to: render
 
-- b/app: after render
-- b: after render
+- from: after dispose
+- from/app: after dispose
+
+- to/app: after render
+- to: after render
 
 *Why is the next page's before render middleware called before this one is disposed
 entirely!?*
 
-Because doing so prevents intermediate whitespace while asynchronous before render
-middleware is executing.
+Good question. This gives the best possible UX by preventing intermediate whitespace
+while asynchronous beforeRender middleware is executing. See the [loading-animation](../examples/loading-animation) example for more.
+
+## Using with Nested Routing
+
+When used with nested routing, child middleware will also be executed as part of the
+execution chain, meaning as long as data is gathered in middleware, it will all be
+available down the chain for a deep synchronous render.
 
 ---
 

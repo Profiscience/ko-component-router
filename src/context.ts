@@ -59,14 +59,9 @@ export default class Context {
       : this.$parent.base + this.$parent.pathname
   }
 
-  // full path w/ base
-  get fullPath() {
-    return this.base + this.pathname
-  }
-
-  // full path w/ base
+  // full path w/o base
   get canonicalPath() {
-    return this.fullPath.replace(new RegExp(this.$root.base, 'i'), '')
+    return this.base.replace(new RegExp(this.$root.base, 'i'), '') + this.pathname
   }
 
   get $root() {

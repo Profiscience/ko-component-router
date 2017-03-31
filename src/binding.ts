@@ -1,6 +1,6 @@
 import ko from 'knockout'
 import Router from './router'
-import { isUndefined, traversePath } from './utils'
+import { isUndefined, isActivePath, resolveHref, traversePath } from './utils'
 
 ko.bindingHandlers.path = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
@@ -18,15 +18,6 @@ ko.bindingHandlers.path = {
       })
     })
   }
-}
-
-export function resolveHref({ router, path }) {
-  return router.ctx.base + path
-}
-
-export function isActivePath({ router, path }) {
-  router.isNavigating()
-  return (router.ctx.pathname || '/') === ('/' + path.split('/')[1])
 }
 
 function getRouter(bindingCtx) {

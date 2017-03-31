@@ -1,5 +1,20 @@
 # Router
 
+*ES2015*
+```javascript
+import Router from 'ko-component-router'
+```
+
+*CommonJS*
+```javascript
+const { default: Router } = require('ko-component-router')
+```
+
+*Browser Globals*
+```javascript
+const Router = ko.router.default
+```
+
 ## API
 
 ### Instance
@@ -7,26 +22,31 @@
 #### router.ctx
 Current [router context](./context.md) object
 
+#### router.initialized
+Promise that returns after this router is initialized
+
 #### router.isNavigating()
 Observable value that is true if router is navigating
 
 #### router.isRoot
 Is the root router
 
-#### router.update(path, push = true)
+#### router.update(path, [push = true], [options = { push: true, force: false, with: {} }])
 Routes to `path`; adds history state entry if `push === true`
+
+Second argument can be a boolean `push`, or an options object:
+
+| Option | Description                    | Default |
+| ------ | ------------------------------ | ------- |
+| push   | push history state entry       | true    |
+| force  | force reload of same route     | false   |
+| with   | object to extend context with  | {}      |
 
 #### router.$parent
 Parent router accessor
 
 #### router.$parents
 Array of parent routers
-
-#### router.$child
-Child router accessor
-
-#### router.$children
-Array of child routers
 
 ### Static
 
@@ -36,53 +56,25 @@ Return router at the given depth, beginning at 0
 #### Router.head
 Top-most router
 
-#### Router.tail
-Deepest router
-
 #### Router.initialized
-Promise that resolves `Router.head` after initialization
+Alias for `Router.head.initialized`
 
 #### Router.setConfig({ base = '', hashbang = false, activePathCSSClass = 'active-path' })
 Sets router configuration
 
-#### Router.use(fn)
-Convenience function for `Router.middleware.push(fn)`
+#### Router.use(...fns)
+Registers app [middleware](./middleware.md)
 
-#### Router.usePlugin(fn)
-Convenience function for `Router.plugins.push(fn)`
+#### Router.usePlugin(...fns)
+Registers [plugin](./plugins.md)
+
+Plugins must be registered *before* routes
 
 #### Router.useRoutes(routes)
-Convenience function for `Object.assign(Router.routes, routes)`
+Registers routes
 
 #### Router.update(path, [push = true], [options = { push: true, force: false, with: {} }])
 Convenience function for `Router.get(0).update(...)`
-
-Second argument can be a boolean `push`, or an options object:
-
-option | description                    | default
------- | ------------------------------ | -------
-push   | push history state entry       | true
-force  | force reload of same route     | false
-with   | object to extend context with  | {}
-
-#### Router.config.base = ''
-Base path that the router is active under
-
-#### Router.config.hashbang = false
-Using hashbang routing
-
-#### Router.config.activePathCSSClass = 'active-path'
-CSS class to add to elements with a path binding that resolves to the current
-page — useful for styling navbars and tabs.
-
-#### Router.middleware = []
-Global middleware
-
-#### Router.plugins = []
-Router plugins
-
-#### Router.routes = {}
-Routes for top-level router
 
 ---
 

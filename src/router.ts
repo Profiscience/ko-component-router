@@ -168,9 +168,9 @@ export default class Router {
 
     this.ctx = toCtx
 
-    await fromCtx.runAfterDispose()
-
     toCtx.render()
+
+    await fromCtx.runAfterDispose()
 
     if (!isUndefined(toCtx._redirect)) {
       await toCtx.runAfterRender()

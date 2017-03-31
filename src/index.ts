@@ -6,6 +6,7 @@ import './binding'
 export default Router
 export { default as Context } from './context'
 export { default as Route } from './route'
+export { isActivePath, resolveHref } from './utils'
 
 ko.components.register('ko-component-router', {
   synchronous: true,

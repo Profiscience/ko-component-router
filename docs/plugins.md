@@ -1,10 +1,10 @@
 # Plugins
 
 A primary goal of this router is to be flexible enough to allow you to structure
-your app as you wish. One method it uses to ensure this is via plugins.
+your app as you wish. The primary method used to attain this is via plugins.
 
 Plugins are functions that take your route value and return middleware — if applicable —
-allowing you to format your routes in a way that you see fit.
+allowing you to format your routes in any way you see fit.
 
 For example say you wanted to refactor this...
 
@@ -112,8 +112,9 @@ Router.plugins = [
 ]
 ```
 
-As you've seen, plugins can be registered using `Routes.usePlugin(fn)` or by
-setting the static property `Router.plugins`.
+As you've seen, plugins are registered by using `Routes.usePlugin(fn)`.
+
+Plugins must be registered *before* routes.
 
 Plugins may return anything the router can make sense of, i.e. a middleware function,
 a component name, or a nested route object. They can also return an array of any combination
@@ -125,8 +126,7 @@ is assumed the route is in a format the router understands, and it will be parse
 Otherwise — so if a plugin was "successful" at interpreting the route and returned something —
 the route will not be passed along.
 
-One more thing to note, a route with an array value will have the plugins ran against each
-element in it, not the whole array.
+Routes with array configs will have the plugins ran against each config in that array, not the whole array.
 
 ---
 

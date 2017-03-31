@@ -62,6 +62,15 @@ export function traversePath(router: Router, path) {
   return { router, path }
 }
 
+export function resolveHref({ router, path }) {
+  return router.ctx.base + path
+}
+
+export function isActivePath({ router, path }) {
+  router.isNavigating()
+  return (router.ctx.pathname || '/') === ('/' + path.split('/')[1])
+}
+
 export function isGenerator(x) {
   return x.constructor.name === 'GeneratorFunction'
 }
