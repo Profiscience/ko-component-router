@@ -1,5 +1,5 @@
 import ko from 'knockout'
-import Route from './Route'                               // eslint-disable-line
+import Route from './route'                               // eslint-disable-line
 import Router, { Middleware } from './router'             // eslint-disable-line
 import {
   AsyncCallback,                                          // eslint-disable-line
