@@ -5,9 +5,8 @@ import Router from '../dist/test'
 
 ko.components.register('binding', {
   template: `
-    <a id="custom-class" data-bind="path: '/a', pathActiveClass: 'custom-active-class'"></a>
-    <a id="outer-relative-a" data-bind="path: '/a'"></a>
-    <a id="outer-absolute-a" data-bind="path: '//a'"></a>
+    <a id="custom-class" data-bind="path: '/a/a', pathActiveClass: 'custom-active-class'"></a>
+    <a id="outer-relative-a" data-bind="path: '/a/a'"></a>
     <a id="outer-deep" data-bind="path: '/a/a'"></a>
     <a id="outer-relative-b" data-bind="path: '/b'"></a>
     <a id="outer-absolute-b" data-bind="path: '//b'"></a>
@@ -32,8 +31,7 @@ ko.components.register('binding', {
         viewModel: class {
           constructor(ctx) {
             ctx.$child.router.initialized.then(() => {
-              t.equals('/a', $('#outer-relative-a').attr('href'))
-              t.equals('/a', $('#outer-absolute-a').attr('href'))
+              t.equals('/a/a', $('#outer-relative-a').attr('href'))
 
               t.equals('/a/a', $('#inner-relative').attr('href'))
               t.equals('/a', $('#inner-absolute').attr('href'))
@@ -42,11 +40,11 @@ ko.components.register('binding', {
               t.equals('/a', $('#nested-relative-up').attr('href'))
               t.equals('/a', $('#nested-absolute').attr('href'))
 
-              t.ok($('#custom-class').hasClass('custom-active-class'))
-              t.ok($('#outer-relative-a').hasClass('active-path'))
-              t.ok($('#inner-relative').hasClass('active-path'))
-              t.ok($('#nested-relative').hasClass('active-path'))
-              t.ok($('#outer-deep').hasClass('active-path'))
+              t.ok($('#custom-class').hasClass('custom-active-class'), 'should apply custom active class when used with pathActiveClass binding')
+              t.ok($('#outer-relative-a').hasClass('active-path'), 'should apply active class on elements outside routers')
+              t.ok($('#inner-relative').hasClass('active-path'), 'should apply active class on relative paths inside routers')
+              t.ok($('#nested-relative').hasClass('active-path'), 'should apply active class on nested relative paths')
+              t.ok($('#outer-deep').hasClass('active-path'), 'should apply active class on deep paths')
 
               Router.update('/b')
             })

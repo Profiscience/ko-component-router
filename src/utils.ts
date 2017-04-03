@@ -62,13 +62,24 @@ export function traversePath(router: Router, path) {
   return { router, path }
 }
 
-export function resolveHref({ router, path }) {
+export function resolveHref({ router, path }: { router: Router, path: string }) {
   return router.ctx.base + path
 }
 
-export function isActivePath({ router, path }) {
-  router.isNavigating()
-  return (router.ctx.pathname || '/') === ('/' + path.split('/')[1])
+export function isActivePath({ router, path }: { router: Router, path: string }): boolean {
+  let ctx = router.ctx
+  while (ctx) {
+    if (ctx.router.isNavigating()) {
+      return false
+    }
+    if (path.indexOf(ctx.pathname || '/') === 0) {
+      path = path.substr(ctx.pathname.length)
+      ctx = ctx.$child
+    } else {
+      return false
+    }
+  }
+  return true
 }
 
 export function isGenerator(x) {

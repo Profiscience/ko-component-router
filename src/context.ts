@@ -44,8 +44,11 @@ export default class Context {
       pathname
     }, _with)
 
+    if ($parent) {
+      $parent.$child = this
+    }
     if (childPath) {
-      this.$child = new Router(childPath, this).ctx
+      new Router(childPath, this).ctx
     }
   }
 
