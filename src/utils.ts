@@ -72,7 +72,7 @@ export function isActivePath({ router, path }: { router: Router, path: string })
     if (ctx.router.isNavigating()) {
       return false
     }
-    if (path.indexOf(ctx.pathname || '/') === 0) {
+    if (path === (ctx.pathname || '/')) {
       path = path.substr(ctx.pathname.length)
       ctx = ctx.$child
     } else {
