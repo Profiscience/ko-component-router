@@ -1,6 +1,7 @@
 import isFunction from 'lodash-es/isFunction'
 import isUndefined from 'lodash-es/isUndefined'
 import noop from 'lodash-es/noop'
+import startsWith from 'lodash-es/startsWith'
 import Router from './router'
 
 export { default as isArray } from 'lodash-es/isArray'
@@ -69,11 +70,12 @@ export function resolveHref({ router, path }: { router: Router, path: string }) 
 export function isActivePath({ router, path }: { router: Router, path: string }): boolean {
   let ctx = router.ctx
   while (ctx) {
-    if (ctx.router.isNavigating()) {
-      return false
-    }
-    if (path === (ctx.pathname || '/')) {
-      path = path.substr(ctx.pathname.length)
+    // create dependency on isNavigating so that this works with nested routes
+    // inside a computed
+    ctx.router.isNavigating()
+    
+    if (ctx.$child ? startsWith(path, ctx.pathname) : path === ctx.pathname) {
+      path = path.substr(ctx.pathname.length) || '/'
       ctx = ctx.$child
     } else {
       return false
