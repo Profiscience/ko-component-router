@@ -53,7 +53,7 @@ function createViewModel(params) {
         if (router.ctx._redirect) {
           router.ctx.runAfterRender().then(() => {
             const { router: r, path: p } = traversePath(router, router.ctx._redirect)
-            r.update(p)
+            r.update(p, router.ctx._redirectArgs)
           })
         } else {
           router.ctx.render()
@@ -62,7 +62,7 @@ function createViewModel(params) {
       })
   } else if (router.ctx._redirect) {
     const { router: r, path: p } = traversePath(router, router.ctx._redirect)
-    r.update(p)
+    r.update(p, router.ctx._redirectArgs)
   }
 
   return router

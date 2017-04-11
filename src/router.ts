@@ -175,7 +175,7 @@ export default class Router {
     if (!isUndefined(toCtx._redirect)) {
       await toCtx.runAfterRender()
       const { router: r, path: p } = traversePath(toCtx.router, toCtx._redirect)
-      r.update(p)
+      r.update(p, toCtx._redirectArgs)
     }
 
     return true
