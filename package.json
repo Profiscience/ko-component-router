@@ -1,6 +1,6 @@
 {
   "name": "ko-component-router",
-  "version": "5.0.0-rc.5",
+  "version": "5.0.0-rc.6",
   "publishConfig": {
     "tag": "next"
   },
