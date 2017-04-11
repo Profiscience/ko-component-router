@@ -17,7 +17,7 @@ export default class Context {
   $child: Context
   $parent: Context
   _redirect: string
-  _redirectArgs: boolean | {
+  _redirectArgs: {
     push?: boolean
     force?: boolean
     with?: { [prop: string]: any }
@@ -107,9 +107,9 @@ export default class Context {
     this._queue.push(promise)
   }
 
-  redirect(path, args) {
+  redirect(path, args = {}) {
     this._redirect = path
-    this._redirectArgs = args
+    this._redirectArgs = extend({}, args, { push: false })
   }
 
   async runBeforeNavigateCallbacks(): Promise<boolean> {
