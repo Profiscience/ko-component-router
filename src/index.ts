@@ -37,11 +37,10 @@ ko.bindingHandlers.__ko_component_router__ = {
 }
 
 function createViewModel(params) {
-  let router
-  if (!Router.head) {
+  let router = Router.head
+  if (!router) {
     router = new Router(Router.getPathFromLocation(), undefined, params)
   } else {
-    router = Router.head
     while (router.bound) {
       router = router.ctx.$child.router
     }
@@ -61,6 +60,9 @@ function createViewModel(params) {
           map(Router.onInit, (resolve) => resolve(this))
         }
       })
+  } else if (router.ctx._redirect) {
+    const { router: r, path: p } = traversePath(router, router.ctx._redirect)
+    r.update(p)
   }
 
   return router
