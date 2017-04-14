@@ -187,17 +187,17 @@ export default class Router {
 
     for (const rn in this.routes) {
 	  if (this.routes.hasOwnProperty(rn)) {
-		  const r = this.routes[rn]
-		  if (r.matches(path)) {
-			if (r.keys.length === 0) {
-			  return r
-			} else if (fewestMatchingSegments === Infinity ||
-			  (r.keys.length < fewestMatchingSegments && r.keys[0].pattern !== '.*')) {
-			  fewestMatchingSegments = r.keys.length
-			  matchingRouteWithFewestDynamicSegments = r
-			}
+	    const r = this.routes[rn]
+	    if (r.matches(path)) {
+		  if (r.keys.length === 0) {
+		    return r
+		  } else if (fewestMatchingSegments === Infinity ||
+		    (r.keys.length < fewestMatchingSegments && r.keys[0].pattern !== '.*')) {
+		    fewestMatchingSegments = r.keys.length
+		    matchingRouteWithFewestDynamicSegments = r
 		  }
-		}
+	    }
+	  }
 	}
     return matchingRouteWithFewestDynamicSegments
   }
