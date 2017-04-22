@@ -1,5 +1,7 @@
 # ko-component-router
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Profiscience/ko-component-router.svg)](https://greenkeeper.io/)
+
 [![NPM Version](https://img.shields.io/npm/v/ko-component-router.svg)](https://www.npmjs.com/package/ko-component-router)
 ![WTFPL](https://img.shields.io/npm/l/ko-component-router.svg)
 [![Travis](https://img.shields.io/travis/Profiscience/ko-component-router.svg)](https://travis-ci.org/Profiscience/ko-component-router)
