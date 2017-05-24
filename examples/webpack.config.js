@@ -35,10 +35,5 @@ module.exports = {
         loader: 'html-loader'
       }
     ]
-  },
-  resolve: {
-    alias: {
-      'ko-component-router': path.resolve(__dirname, '../dist/modules')
-    }
   }
 }
