@@ -29,8 +29,12 @@ ko.bindingHandlers.__ko_component_router__ = {
         params: $router.ctx
       }
     }, bindingCtx.extend({ $router }))
-
-    $router.init()
+    
+    if ($router.isRoot) {
+      $router.init()
+    } else {
+      $router.ctx.$parent.router.initialized.then(() => $router.init())
+    }
 
     return { controlsDescendantBindings: true }
   }
