@@ -18,8 +18,22 @@ module.exports = {
   devServer: {
     contentBase: __dirname
   },
+  devtool: 'inline-source-map',
   module: {
     rules: [
+      {
+        test: /\.ts$/,
+        loader: 'awesome-typescript-loader',
+        exclude: [
+          path.resolve('node_modules')
+        ],
+        options: {
+          useBabel: true,
+          useCache: true,
+          cacheDirectory: path.resolve(__dirname, '.cache'),
+          module: 'es2015'
+        }
+      },
       {
         test: /\.js$/,
         loader: 'babel-loader',
@@ -38,7 +52,11 @@ module.exports = {
   },
   resolve: {
     alias: {
-      'ko-component-router': path.resolve(__dirname, '../dist/modules')
-    }
+      'ko-component-router': path.resolve(__dirname, '../src')
+    },
+    extensions: [
+      '.js',
+      '.ts'
+    ]
   }
 }

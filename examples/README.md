@@ -3,7 +3,6 @@
 *In this directory*
 
 ```bash
-$ npm install
 $ npm start
 ```
 
