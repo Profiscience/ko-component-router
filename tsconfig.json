@@ -19,8 +19,7 @@
     ],
     "types": [
       "knockout",
-      "lodash-es",
-      "path-to-regexp"
+      "lodash-es"
     ],
     "typeRoots": [
       "node_modules/@types"
