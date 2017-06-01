@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "preinstall": "cd .. && (yarn install --ignore-scripts || npm install --ignore-scripts) && cd -",
+    "preinstall": "cd .. && (yarn install --ignore-scripts || npm install --ignore-scripts) && cd examples",
     "prestart": "yarn install || npm install",
     "start": "webpack-dev-server --hot"
   },
