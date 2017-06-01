@@ -28,6 +28,7 @@ module.exports = {
           path.resolve('node_modules')
         ],
         options: {
+          configFileName: path.resolve(__dirname, '../tsconfig.json'),
           useBabel: true,
           useCache: true,
           cacheDirectory: path.resolve(__dirname, '.cache'),
