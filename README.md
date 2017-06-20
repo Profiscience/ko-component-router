@@ -29,7 +29,7 @@ _app.js_
 ```javascript
 import $ from 'jquery'
 import ko from 'knockout'
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 const loading = ko.observable(true)
 

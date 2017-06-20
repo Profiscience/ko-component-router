@@ -5,7 +5,7 @@ object. Easy enough.
 
 ```javascript
 import ko from 'knockout'
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 Router.useRoutes({
   '/user': {
@@ -30,7 +30,7 @@ in that component.
 
 ```javascript
 import ko from 'knockout'
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 Router.useRoutes({
   '/user': [

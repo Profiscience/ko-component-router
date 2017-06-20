@@ -1,5 +1,5 @@
 import ko from 'knockout'
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 import lazyComponentLoaderPlugin from './plugins/lazy-component-loader'
 
 Router.setConfig({ base: '/lazy-loading', hashbang: true })

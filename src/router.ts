@@ -1,6 +1,6 @@
 import ko from 'knockout'
-import Context from './context'
-import Route, { RouteConfig } from './route'
+import { Context } from './context'
+import { Route, RouteConfig } from './route'
 import {
   AsyncCallback,
   isBoolean, isPlainObject, isUndefined,
@@ -30,7 +30,7 @@ export interface RouteMap {
 }
 /* eslint-enable */
 
-export default class Router {
+export class Router {
   /* eslint-disable */
   private static routes: RouteMap = {}
   private static events: {

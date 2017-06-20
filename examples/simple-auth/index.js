@@ -1,5 +1,5 @@
 import ko from 'knockout'
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 Router.setConfig({
   base: '/simple-auth',

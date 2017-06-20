@@ -2,7 +2,7 @@
 
 *ES2015*
 ```javascript
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 ```
 
 *CommonJS*

@@ -2,7 +2,7 @@ import isFunction from 'lodash-es/isFunction'
 import isUndefined from 'lodash-es/isUndefined'
 import noop from 'lodash-es/noop'
 import startsWith from 'lodash-es/startsWith'
-import Router from './router'
+import { Router } from './router'
 
 export { default as isArray } from 'lodash-es/isArray'
 export { default as isBoolean } from 'lodash-es/isBoolean'

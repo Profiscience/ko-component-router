@@ -1,5 +1,5 @@
 import ko from 'knockout'
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 import routes from './routes'
 import componentPlugin from './plugins/component'
 import middlewarePlugin from './plugins/middleware'

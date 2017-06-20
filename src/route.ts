@@ -1,10 +1,10 @@
-import pathtoRegexp from 'path-to-regexp'
+import * as pathtoRegexp from 'path-to-regexp'
 import { RouteMap, Middleware } from './router'
 import { isFunction, isPlainObject, isString, isUndefined, map, reduce } from './utils'
 
 export type RouteConfig = string | RouteMap | Middleware
 
-export default class Route {
+export class Route {
   /* eslint-disable */
   path:       string
   component:  string

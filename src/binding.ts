@@ -1,5 +1,5 @@
-import ko from 'knockout'
-import Router from './router'
+import * as ko from 'knockout'
+import { Router } from './router'
 import { isUndefined, isActivePath, resolveHref, traversePath } from './utils'
 
 ko.bindingHandlers.path = {

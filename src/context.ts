@@ -1,8 +1,8 @@
 import ko from 'knockout'
-import Route from './route'                               // eslint-disable-line
-import Router, { Middleware } from './router'             // eslint-disable-line
+import { Route } from './route'
+import { Router, Middleware } from './router'
 import {
-  AsyncCallback,                                          // eslint-disable-line
+  AsyncCallback,
   isGenerator, isThenable, isUndefined,
   concat,
   extend,
@@ -12,7 +12,7 @@ import {
   traversePath
 } from './utils'
 
-export default class Context {
+export class Context {
   /* eslint-disable */
   $child: Context
   $parent: Context

@@ -16,16 +16,9 @@
       "es2015.iterable",
       "es2015.promise",
       "es2017.object"
-    ],
-    "types": [
-      "knockout",
-      "lodash-es"
-    ],
-    "typeRoots": [
-      "node_modules/@types"
     ]
   },
-  "filesGlob": [
+  "include": [
     "src/**/*.ts"
   ],
   "exclude": [

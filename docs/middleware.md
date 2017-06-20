@@ -14,7 +14,7 @@ and keep your viewModel as slim as possible (think skinny controllers, fat model
 App middleware is ran for every route and is registered using `Router.use`
 
 ```javascript
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 Router.use(fn)
 ```
@@ -76,7 +76,7 @@ Middleware functions are passed 2 arguments:
 Let's look at some example logging middleware...
 
 ```javascript
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 Router.use((ctx) => console.log('[router] navigating to', ctx.pathname))
 ```
@@ -153,7 +153,7 @@ execution.
 Let's write the same `monolithicMiddleware` with a generator, then walk through what is going on...
 
 ```javascript
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 import Query from 'ko-query'
 
 function * monolithicMiddleware(ctx) {

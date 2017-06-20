@@ -22,7 +22,7 @@ window.history.setup('/', '!/', null)
 Configuration is set using the static `.setConfig` method on the Router
 
 ```javascript
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 Router.setConfig({
   // base path app runs under, i.e. '/app'
@@ -59,7 +59,7 @@ and any data attached via middleware as their first argument.
 If a picture is worth 1k words, code is worth 1M...
 
 ```javascript
-import Router from 'ko-component-router'
+import { Router } from 'ko-component-router'
 
 Router.useRoutes({
   routes: {
@@ -111,11 +111,6 @@ ko.applyBindings()
 <script src="/app.js"></script>
 <ko-component-router></ko-component-router>
 ```
-
-__NOTE:__
-When using without a module system, `const Router = ko.router.default`
-When using with commonjs, `const { default: Router } = require('ko-component-router')`
-
 ---
 
 [Back](./README.md)
