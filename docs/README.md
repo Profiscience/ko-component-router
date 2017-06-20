@@ -11,4 +11,4 @@
 
 #### Further Reading
 - [Ali (KnockoutJS SPA Boilerplate)](https://github.com/caseyWebb/ali)
-- [Building a Better Router](https://medium.com/@notCaseyWebb/building-a-better-router-ef42896e2e5a)**
+- [Building a Better Router](https://medium.com/@notCaseyWebb/building-a-better-router-ef42896e2e5a)

@@ -1,8 +1,18 @@
 # Changelog
 
-## [Unreleased]
+## 5.0.1
 
-:tada:
+### Fixed
+ - Incorrect tslib dependency
+
+
+## 5.0.0
+
+### Changed
+ - Improved nested routing UX ([Building a Better Router](https://medium.com/@notCaseyWebb/building-a-better-router-ef42896e2e5a))
+
+### Removed
+ - Ability to pass routes as component parameters to nested routers
 
 
 ## 4.4.4
