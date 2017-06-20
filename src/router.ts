@@ -1,4 +1,4 @@
-import ko from 'knockout'
+import * as ko from 'knockout'
 import { Context } from './context'
 import { Route, RouteConfig } from './route'
 import {

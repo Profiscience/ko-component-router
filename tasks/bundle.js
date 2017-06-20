@@ -34,7 +34,7 @@ module.exports = function * (fly) {
           knockout: 'ko'
         },
 
-        // ko.router.default === Router
+        // ko.router.Router === Router
         // ko.router.Context === Context
         // ko.router.Route === Route
         exports: 'named'

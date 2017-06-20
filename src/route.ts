@@ -1,4 +1,4 @@
-import * as pathtoRegexp from 'path-to-regexp'
+import pathtoRegexp from 'path-to-regexp'
 import { RouteMap, Middleware } from './router'
 import { isFunction, isPlainObject, isString, isUndefined, map, reduce } from './utils'
 
@@ -63,7 +63,7 @@ export class Route {
     return [params, path, childPath]
   }
 
-  static parseConfig(config): [string, Array<Middleware>, Array<Route>] {
+  private static parseConfig(config): [string, Array<Middleware>, Array<Route>] {
     let component: string
     let children: Array<Route>
 
@@ -92,7 +92,7 @@ export class Route {
     return [component, middleware, children]
   }
 
-  static parsePath(path, hasChildren) {
+  private static parsePath(path, hasChildren) {
     if (hasChildren) {
       path = path.replace(/\/?!?$/, '/!')
     }

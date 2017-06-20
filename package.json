@@ -35,7 +35,6 @@
   ],
   "dependencies": {
     "@types/knockout": "^3.4.0",
-    "@types/path-to-regexp": "^1.0.29",
     "lodash-es": "^4.17.4",
     "path-to-regexp": "^1.2.1",
     "tslib": "^1.6.0",
