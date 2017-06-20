@@ -1,43 +1,45 @@
 import ko from 'knockout'
 
 ko.components.register('ambiguous', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: class AmbiguousRoutingTest {
-    constructor({ t, next }) {
-
-      this.routes = {
-        '/': {
-          '/a': {
-            '/b': 'wrong'
-          }
-        },
-        '/a': {
-          '/b': {
-            '/c': 'right'
-          }
-        }
-      }
-
+    constructor({ t, done }) {
       ko.components.register('wrong', {
-        viewModel() {
-          t.fail('fails on ambiguous routes w/ nested shorthand')
-          next()
+        viewModel: class {
+          constructor() {
+            t.fail('fails on ambiguous routes w/ nested shorthand')
+            done()
+          }
         }
       })
 
       ko.components.register('right', {
-        viewModel() {
-          t.pass('figures out ambiguous routes w/ nested shorthand')
-          next()
+        viewModel: class {
+          constructor() {
+            t.pass('figures out ambiguous routes w/ nested shorthand')
+            done()
+          }
         }
       })
-    }
-
-    dispose() {
-      ko.components.unregister('wrong')
-      ko.components.unregister('right')
     }
   }
 })
 
-export default { '/ambiguous/!': 'ambiguous' }
+export const path = '/ambiguous/a/b/c'
+
+export const routes = {
+  '/ambiguous': ['ambiguous',
+    {
+      '/': {
+        '/a': {
+          '/b': 'wrong'
+        }
+      },
+      '/a': {
+        '/b': {
+          '/c': 'right'
+        }
+      }
+    }
+  ]
+}

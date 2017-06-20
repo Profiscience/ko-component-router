@@ -3,19 +3,19 @@
  * attached to context and the route is working
  **/
 
- import ko from 'knockout'
+import ko from 'knockout'
 
- ko.components.register('params', {
-   viewModel: class ParamsTest {
-     constructor({ t, next, params }) {
-       t.equal('foo', params.foo, 'parses param to ctx.params')
-       t.equal('baz', params.baz, 'parses param to ctx.params')
-       next()
-     }
-     dispose() {
-       ko.components.unregister('params')
-     }
+ko.components.register('params', {
+  viewModel: class ParamsTest {
+    constructor({ t, done, params }) {
+      t.equal('foo', params.foo, 'parses param to ctx.params')
+      done()
+    }
   }
- })
+})
 
- export default { '/params/:foo/bar/:baz': 'params' }
+export const path = '/params/foo'
+
+export const routes = {
+  '/params/:foo': 'params'
+}

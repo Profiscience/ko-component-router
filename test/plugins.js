@@ -1,16 +1,31 @@
-import { merge } from 'lodash'
+import { isPlainObject, merge } from 'lodash-es'
 import ko from 'knockout'
-import isPlainObject from 'is-plain-object'
-import Router from '../dist/modules'
+
+import { Router } from '../dist/test'
 
 ko.components.register('plugins', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: class PluginTest {
-    constructor({ t, next: _next }) {
-      const runner = this.runTests(_next)
-      const next = runner.next.bind(runner)
+    constructor({ t, done }) {
+      history.replaceState(null, null, '/component')
 
-      this.routes = {
+      Router.usePlugin(
+        (route) => {
+          if (route.component) {
+            return route.component
+          }
+        },
+        (route) => {
+          if (route.data) {
+            return isPlainObject(route.data)
+              ? Object.entries(route.data).map(([k, v]) =>
+                (ctx) => v.then((_v) => merge(ctx, { data: { [k]: _v } })))
+              : (ctx) => route.data.then((v) => (ctx.data = v))
+          }
+        }
+      )
+
+      Router.useRoutes({
         '/component': {
           component: 'component'
         },
@@ -27,79 +42,46 @@ ko.components.register('plugins', {
           component: 'composed',
           data: Promise.resolve(true)
         },
-      }
-
-      const componentPlugin = function(route) {
-        if (route.component) {
-          return route.component
-        }
-      }
-
-      const dataPlugin = function(route) {
-        if (route.data) {
-          return isPlainObject(route.data)
-            ? Object.entries(route.data).map(([k, v]) =>
-              (ctx) => v.then((_v) => merge(ctx, { data: { [k]: _v } })))
-            : (ctx) => route.data.then((v) => ctx.data = v)
-        }
-      }
-
-      Router.plugins = [componentPlugin]
-      Router.usePlugin(dataPlugin)
+      })
 
       ko.components.register('component', {
-        viewModel() {
-          t.pass('plugin works with returned string')
-          next()
+        viewModel: class {
+          constructor() {
+            t.pass('plugin works with returned string')
+            Router.update('/data')
+          }
         }
       })
 
       ko.components.register('data', {
-        viewModel(ctx) {
-          t.equals(true, ctx.data, 'plugin works with returned middleware func')
-          next()
+        viewModel: class {
+          constructor(ctx) {
+            t.equals(true, ctx.data, 'plugin works with returned middleware func')
+            Router.update('/data-multi')
+          }
         }
       })
 
       ko.components.register('data-multi', {
-        viewModel(ctx) {
-          t.deepEquals({ true: true, false: false }, ctx.data, 'plugin works with returned array of middleware funcs')
-          next()
+        viewModel: class {
+          constructor(ctx) {
+            t.deepEquals({ true: true, false: false }, ctx.data, 'plugin works with returned array of middleware funcs')
+            Router.update('/composed')
+          }
         }
       })
 
       ko.components.register('composed', {
-        viewModel(ctx) {
-          t.equals(true, ctx.data, 'plugins can be composed')
-          next()
+        viewModel: class {
+          constructor(ctx) {
+            t.equals(true, ctx.data, 'plugins can be composed')
+            done()
+          }
         }
-      })
-
-      next()
-    }
-
-    * async runTests(next) {
-      const begin = location.href
-
-      yield history.replaceState(null, null, '/component')
-
-      yield Router.update('/data')
-      yield Router.update('/data-multi')
-      yield Router.update('/composed')
-
-      Router.update('/').then(() => {
-        history.pushState(null, null, begin)
-        next()
       })
     }
 
     dispose() {
-      ko.components.unregister('plugins')
-      ko.components.unregister('component')
-      ko.components.unregister('data')
-      ko.components.unregister('data-multi')
-      ko.components.unregister('composed')
-
       Router.plugins = []
     }
   }

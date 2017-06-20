@@ -1,64 +1,74 @@
 import ko from 'knockout'
 
+import { Router } from '../dist/test'
+
 ko.components.register('history', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: class History {
-    constructor({ t, next }) {
-      this.routes = {
+    constructor({ t, done }) {
+      Router.useRoutes({
         '/a': 'a', // init
         '/b': 'b', // update(path)
         '/c': 'c', // update(path, {})
         '/d': 'd', // update(path, false)
         '/e': 'e'  // update(path, { push: false })
-      }
+      })
 
       history.pushState(null, null, '/a')
 
       const begin = history.length
 
+      if (begin > 48) {
+        ko.components.register('a', {})
+        t.skip('Unable to test history.length b/c history.length is too long')
+        done()
+        return
+      }
+
       ko.components.register('a', {
-        viewModel(ctx) {
-          t.equals(history.length, begin, 'does not add history entry on initialization')
-          ctx.router.update('/b')
+        viewModel: class {
+          constructor(ctx) {
+            t.equals(history.length, begin, 'does not add history entry on initialization')
+            ctx.router.update('/b')
+          }
         }
       })
 
       ko.components.register('b', {
-        viewModel(ctx) {
-          t.equals(history.length, begin + 1, 'adds history entry when no second argument')
-          ctx.router.update('/c', { })
+        viewModel: class {
+          constructor(ctx) {
+            t.equals(history.length, begin + 1, 'adds history entry when no second argument')
+            ctx.router.update('/c', {})
+          }
         }
       })
 
       ko.components.register('c', {
-        viewModel(ctx) {
-          t.equals(history.length, begin + 2, 'adds history entry when second argument is object and has undefined push property')
-          ctx.router.update('/d', false)
+        viewModel: class {
+          constructor(ctx) {
+            t.equals(history.length, begin + 2, 'adds history entry when second argument is object and has undefined push property')
+            ctx.router.update('/d', false)
+          }
         }
       })
 
       ko.components.register('d', {
-        viewModel(ctx) {
-          t.equals(history.length, begin + 2, 'does not add history entry with false second argument')
-          ctx.router.update('/e', { push: false })
+        viewModel: class {
+          constructor(ctx) {
+            t.equals(history.length, begin + 2, 'does not add history entry with false second argument')
+            ctx.router.update('/e', { push: false })
+          }
         }
       })
 
       ko.components.register('e', {
-        viewModel() {
-          t.equals(history.length, begin + 2, 'does not add history entry when second argument is objcet and push property is false')
-          next()
+        viewModel: class {
+          constructor() {
+            t.equals(history.length, begin + 2, 'does not add history entry when second argument is objcet and push property is false')
+            done()
+          }
         }
       })
-    }
-
-    dispose() {
-      ko.components.unregister('history')
-      ko.components.unregister('a')
-      ko.components.unregister('b')
-      ko.components.unregister('c')
-      ko.components.unregister('d')
-      ko.components.unregister('e')
     }
   }
 })

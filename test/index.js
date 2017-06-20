@@ -1,25 +1,27 @@
-import $ from 'jquery'
 import ko from 'knockout'
+import $ from 'jquery'
 import tape from 'tape'
 
-import Router from '../dist/modules'
+import './helpers/ko-overwrite-component-registration'
 
 import './anchor'
+import './basepath'
 import './binding'
 import './routing'
+import './hashbang'
 import './history'
 import './force-update'
 import './with'
 import './middleware'
 import './queue'
+import './redirect'
 import './before-navigate-callbacks'
-import './element'
-import './passthrough'
 import './plugins'
-import './issues'
 
 const tests = [
   'routing',
+  'basepath',
+  'hashbang',
   'history',
   'force-update',
   'with',
@@ -27,61 +29,45 @@ const tests = [
   'binding',
   'middleware',
   'queue',
+  'redirect',
   'before-navigate-callbacks',
-  'element',
-  'passthrough',
-  'plugins',
-  'issues'
+  'plugins'
 ]
 
-ko.components.loaders.unshift({
-  loadComponent(name, config, done) {
-    if (!config.template) {
-      config.template = '<a></a>'
-    }
-    done(null)
-  }
-})
-
-class Test {
+class TestRunner {
   constructor() {
-    this.test = ko.observable()
-
     $('body').append(`
+      <pre><code id="output"></code></pre>
       <div data-bind="if: test">
         <div id="test-container" data-bind="component: {
             name: test,
-            params: { t: t, next: next }
+            params: { t: t, done: done }
         }"></div>
       </div>
     `)
-
-    const runner = this.runTests()
-    this.next = runner.next.bind(runner)
-    this.next()
+    this.test = ko.observable(null)
+    this.runTests()
   }
 
-  * async runTests() {
+  async runTests() {
     for (const test of tests) {
-      const t = await this.runTest(test)
-      yield t
-      t.end()
+      await this.runTest(test)
     }
   }
 
-  runTest(test) {
-    Router.config = { base: '', hashbang: false, activePathCSSClass: 'active-path' }
-    Router.middleware = []
-    Router.plugins = []
-    Router.routes = {}
+  async runTest(test) {
+    history.pushState(null, null, '/')
 
-    return new Promise((resolve) =>
+    return await new Promise((resolve) =>
       tape(test, (t) => {
         this.t = t
+        this.done = () => {
+          t.end()
+          resolve()
+        }
         this.test(test)
-        resolve(t)
       }))
   }
 }
 
-$(() => ko.applyBindings(new Test()))
+ko.applyBindings(new TestRunner())

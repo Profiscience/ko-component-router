@@ -2,8 +2,10 @@
 npm-debug.log
 npm-debug.log.*
 
+.cache/
 .chrome/
 .vscode/
 coverage/
-dist/
 node_modules/
+
+dist/

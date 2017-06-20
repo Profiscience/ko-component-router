@@ -1,65 +1,49 @@
 import ko from 'knockout'
-import { extend, mapValues } from 'lodash'
+import { extend, map } from 'lodash-es'
 
-import Router from '../../dist/modules'
+import { Router } from '../../dist/test'
 
-import init from './init'
-import basic from './basic'
-import params from './params'
-import nested from './nested'
-import similar from './similar'
-import ambiguous from './ambiguous'
-import _static from './static'
+import * as init from './init'
+import * as basic from './basic'
+import * as params from './params'
+import * as nested from './nested'
+import * as similar from './similar'
+import * as ambiguous from './ambiguous'
 
-const paths = [
-  '/basic',
-  '/params/foo/bar/baz',
-  '/nested/a',
-  '/similar/foo/bar',
-  '/ambiguous/a/b/c',
-  '/static'
+const tests = [
+  basic,
+  params,
+  nested,
+  similar,
+  ambiguous
 ]
 
+const paths = map(tests, 'path')
+
 ko.components.register('routing', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router params="t: t, done: done"></ko-component-router>',
   viewModel: class RoutingTestSuite {
-    constructor({ t, next: _next }) {
-      const runner = this.runTests(_next)
-      const next = runner.next.bind(runner)
+    constructor({ t, done }) {
+      Router.useRoutes(init.routes)
+      history.pushState(null, null, init.path)
+      Router.useRoutes(extend({}, ...map(tests, 'routes')))
 
-      this.routes = mapValues({
-        ...init,
-        ...basic,
-        ...params,
-        ...nested,
-        ...similar,
-        ...ambiguous
-      }, (r) => [
-        (ctx) => extend(ctx, { t, next }),
-        r
-      ])
+      let resolve
+      new Promise((_resolve) => (resolve = _resolve))
+        .then(() => {
+          this.runTests(t).then(done)
+        })
 
-      Router.useRoutes(mapValues({
-        ..._static
-      }, (r) => [
-        (ctx) => extend(ctx, { t, next }),
-        r
-      ]))
-
-      next()
+      this.t = t
+      this.done = () => resolve()
     }
 
-    * async runTests(next) {
-      const begin = location.href
-
-      yield history.pushState(null, null, '/init')
-
+    async runTests(t) {
       for (const path of paths) {
-        yield Router.update(path)
+        await new Promise((resolve) => {
+          Router.update(path, { with: { t, done: resolve } })
+        })
       }
-
-      history.pushState(null, null, begin)
-      next()
     }
   }
 })

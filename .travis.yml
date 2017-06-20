@@ -3,6 +3,8 @@ node_js:
   - stable
 addons:
   firefox: latest
+env:
+  - TRAVIS=true
 cache:
   yarn: true
   directories:
@@ -10,11 +12,8 @@ cache:
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
-script:
-  - npm run lint
-  - npm test -- --firefox --coverage
 after_script:
-  - ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.txt
+  - ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info
 notifications:
   email: false
   webhooks:

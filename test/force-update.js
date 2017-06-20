@@ -1,32 +1,31 @@
 import ko from 'knockout'
 
+import { Router } from '../dist/test'
+
 ko.components.register('force-update', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: class ForceUpdate {
-    constructor({ t, next }) {
+    constructor({ t, done }) {
       let count = 0
 
-      this.routes = {
+      Router.useRoutes({
         '/': 'foo'
-      }
+      })
 
       history.pushState(null, null, '/')
 
       ko.components.register('foo', {
-        viewModel(ctx) {
-          if (++count === 1) {
-            ctx.router.update('/', { force: true })
-          } else {
-            t.pass('can force same-route update')
-            next()
+        viewModel: class {
+          constructor(ctx) {
+            if (++count === 1) {
+              ctx.router.update('/', { force: true })
+            } else {
+              t.pass('can force same-route update')
+              done()
+            }
           }
         }
       })
-    }
-
-    dispose() {
-      ko.components.unregister('force-update')
-      ko.components.unregister('foo')
     }
   }
 })

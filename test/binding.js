@@ -1,47 +1,54 @@
 import ko from 'knockout'
 import $ from 'jquery'
 
+import { Router } from '../dist/test'
+
 ko.components.register('binding', {
   template: `
-    <a id="custom-class" data-bind="path: '/a', pathActiveClass: 'custom-active-class'"></a>
-    <a id="outer-relative" data-bind="path: '/a'"></a>
-    <a id="outer-absolute" data-bind="path: '//a'"></a>
+    <a id="custom-class" data-bind="path: '/a/a', pathActiveClass: 'custom-active-class'"></a>
+    <a id="outer-relative-a" data-bind="path: '/a/a'"></a>
     <a id="outer-deep" data-bind="path: '/a/a'"></a>
-    <ko-component-router params="routes: routes"></ko-component-router>
+    <a id="outer-relative-b" data-bind="path: '/b'"></a>
+    <a id="outer-absolute-b" data-bind="path: '//b'"></a>
+    <ko-component-router></ko-component-router>
   `,
   viewModel: class BindingTest {
-    constructor({ t, next }) {
-      const begin = location.href
+    constructor({ t, done }) {
       history.replaceState(null, null, '/a/a')
 
-      this.routes = {
-        '/a/!': ['a', { // eslint-disable-line
-          '/a': 'a-inner'
-        }]
-      }
+      Router.useRoutes({
+        '/a': [
+          'a',
+          {
+            '/a': 'a-inner'
+          }
+        ],
+        '/b': 'b'
+      })
 
       ko.components.register('a', {
-        viewModel() {
-          setTimeout(() => {
-            t.equals('/a', $('#outer-relative').attr('href'))
-            t.equals('/a', $('#outer-absolute').attr('href'))
+        synchronous: true,
+        viewModel: class {
+          constructor(ctx) {
+            ctx.$child.router.initialized.then(() => {
+              t.equals('/a/a', $('#outer-relative-a').attr('href'))
 
-            t.equals('/a/a', $('#inner-relative').attr('href'))
-            t.equals('/a', $('#inner-absolute').attr('href'))
+              t.equals('/a/a', $('#inner-relative').attr('href'))
+              t.equals('/a', $('#inner-absolute').attr('href'))
 
-            t.equals('/a/a', $('#nested-relative').attr('href'))
-            t.equals('/a', $('#nested-relative-up').attr('href'))
-            t.equals('/a', $('#nested-absolute').attr('href'))
+              t.equals('/a/a', $('#nested-relative').attr('href'))
+              t.equals('/a', $('#nested-relative-up').attr('href'))
+              t.equals('/a', $('#nested-absolute').attr('href'))
 
-            t.ok($('#custom-class').hasClass('custom-active-class'))
-            t.ok($('#outer-relative').hasClass('active-path'))
-            t.ok($('#inner-relative').hasClass('active-path'))
-            t.ok($('#nested-relative').hasClass('active-path'))
-            t.ok($('#outer-deep').hasClass('active-path'))
+              t.ok($('#custom-class').hasClass('custom-active-class'), 'should apply custom active class when used with pathActiveClass binding')
+              t.ok($('#outer-relative-a').hasClass('active-path'), 'should apply active class on elements outside routers')
+              t.ok($('#inner-relative').hasClass('active-path'), 'should apply active class on relative paths inside routers')
+              t.ok($('#nested-relative').hasClass('active-path'), 'should apply active class on nested relative paths')
+              t.ok($('#outer-deep').hasClass('active-path'), 'should apply active class on deep paths')
 
-            history.pushState(null, null, begin)
-            next()
-          })
+              Router.update('/b')
+            })
+          }
         },
         template: `
           <a id="inner-relative" data-bind="path: './a'"></a>
@@ -51,18 +58,21 @@ ko.components.register('binding', {
       })
 
       ko.components.register('a-inner', {
+        synchronous: true,
         template: `
           <a id="nested-relative" data-bind="path: '/a'"></a>
           <a id="nested-relative-up" data-bind="path: '../a'"></a>
           <a id="nested-absolute" data-bind="path: '//a'"></a>
         `
       })
-    }
 
-    dispose() {
-      ko.components.unregister('a')
-      ko.components.unregister('a-inner')
-      ko.components.unregister('binding')
+      ko.components.register('b', {
+        viewModel: class {
+          constructor() {
+            done()
+          }
+        }
+      })
     }
   }
 })

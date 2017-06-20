@@ -1,6 +1,5 @@
-
 import ko from 'knockout'
-import Router from '../../src/index'
+import { Router } from 'ko-component-router'
 
 function createTemplate(foo) {
   return `

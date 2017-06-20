@@ -1,9 +1,7 @@
+import { map } from 'lodash-es'
 import ko from 'knockout'
 
-const anchors = [
-  'absolute-a',
-  'relative-b'
-]
+import { Router } from '../dist/test'
 
 const ignoredAnchors = [
   'x-origin',
@@ -16,8 +14,7 @@ const ignoredAnchors = [
 
 ko.components.register('anchor', {
   template: `
-    <a id="absolute-a" href="/a"></a>
-    <ko-component-router params="routes: routes"></ko-component-router>
+    <ko-component-router></ko-component-router>
 
     <a id="x-origin" href="http://example.com:8080"></a>
     <a id="download" download></a>
@@ -27,65 +24,54 @@ ko.components.register('anchor', {
     <a id="target" target="_blank"></a>
   `,
   viewModel: class AnchorTest {
-    constructor({ t, next: _next }) {
-      const runner = this.runTests(_next)
-      const next = runner.next.bind(runner)
-
-      this.routes = {
-        '/': 'empty',
+    constructor({ t, done }) {
+      Router.useRoutes({
+        '/': 'root',
         '/a': 'a',
         '/b': 'b'
-      }
+      })
 
-      ko.components.register('empty', {})
+      ko.components.register('root', {
+        template: '<a id="absolute-a" href="/a"></a>',
+        viewModel: class {
+          constructor() {
+            ko.tasks.schedule(() => document.getElementById('absolute-a').click())
+          }
+        }
+      })
 
       ko.components.register('a', {
         template: '<a id="relative-b" href="b"></a>',
-        viewModel() {
-          t.pass('can handle anchors with absolute paths')
-          next()
+        viewModel: class {
+          constructor() {
+            t.pass('can handle anchors with absolute paths')
+            ko.tasks.schedule(() => document.getElementById('relative-b').click())
+          }
         }
       })
 
       ko.components.register('b', {
-        viewModel() {
-          t.pass('can handle anchors with relative paths')
-          next()
+        viewModel: class {
+          constructor() {
+            t.pass('can handle anchors with relative paths')
+            ko.tasks.schedule(() => map(ignoredAnchors, (id) => document.getElementById(id).click()))
+          }
         }
       })
 
+      let count = 0
       this.clickHandler = (e) => {
         if (!e.defaultPrevented) {
           t.ok(ignoredAnchors.indexOf(e.target.id) > -1, `ignores ${e.target.id} anchors`)
           e.preventDefault()
-          next()
+
+          if (++count === ignoredAnchors.length) {
+            document.removeEventListener('click', this.clickHandler)
+            done()
+          }
         }
       }
-
       window.addEventListener('click', this.clickHandler)
-
-      setTimeout(() => next())
-    }
-
-    * async runTests(next) {
-      const begin = location.href
-
-      history.replaceState(null, null, '/')
-
-      for (const anchor of [...anchors, ...ignoredAnchors]) {
-        yield document.getElementById(anchor).click()
-      }
-
-      history.pushState(null, null, begin)
-
-      next()
-    }
-
-    dispose() {
-      ko.components.unregister('empty')
-      ko.components.unregister('a')
-      ko.components.unregister('b')
-      document.removeEventListener('click', this.clickHandler)
     }
   }
 })

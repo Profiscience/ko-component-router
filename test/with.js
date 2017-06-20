@@ -1,34 +1,34 @@
 import ko from 'knockout'
 
+import { Router } from '../dist/test'
+
 ko.components.register('with', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: class With {
-    constructor({ t, next }) {
-      this.routes = {
+    constructor({ t, done }) {
+      Router.useRoutes({
         '/a': 'a',
         '/b': 'b'
-      }
+      })
 
       history.pushState(null, null, '/a')
 
       ko.components.register('a', {
-        viewModel(ctx) {
-          ctx.router.update('/b', { with: { foo: 'foo' } })
+        viewModel: class {
+          constructor(ctx) {
+            ctx.router.update('/b', { with: { foo: 'foo' } })
+          }
         }
       })
 
       ko.components.register('b', {
-        viewModel(ctx) {
-          t.equals(ctx.foo, 'foo', 'can pass data using with')
-          next()
+        viewModel: class {
+          constructor(ctx) {
+            t.equals(ctx.foo, 'foo', 'can pass data using with')
+            done()
+          }
         }
       })
-    }
-
-    dispose() {
-      ko.components.unregister('with')
-      ko.components.unregister('a')
-      ko.components.unregister('b')
     }
   }
 })

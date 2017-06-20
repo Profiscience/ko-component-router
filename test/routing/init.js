@@ -2,14 +2,15 @@ import ko from 'knockout'
 
 ko.components.register('init', {
   viewModel: class RoutingInitializationTest {
-    constructor({ t, next }) {
+    constructor({ t, done }) {
       t.pass('initializes')
-      next()
-    }
-    dispose() {
-      ko.components.unregister('init')
+      done()
     }
   }
 })
 
-export default { '/init': 'init' }
+export const path = '/init'
+
+export const routes = {
+  '/init': 'init'
+}

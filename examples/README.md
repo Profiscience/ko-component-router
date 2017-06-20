@@ -1,7 +1,8 @@
 # ko-component-router examples
 
+*In this directory*
+
 ```bash
-$ npm install
 $ npm start
 ```
 

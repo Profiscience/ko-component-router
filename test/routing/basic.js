@@ -2,14 +2,15 @@ import ko from 'knockout'
 
 ko.components.register('basic', {
   viewModel: class BasicRoutingTest {
-    constructor({ t, next }) {
+    constructor({ t, done }) {
       t.pass('navigates to basic route')
-      next()
-    }
-    dispose() {
-      ko.components.unregister('basic')
+      done()
     }
   }
 })
 
-export default { '/basic': 'basic' }
+export const path = '/basic'
+
+export const routes = {
+  '/basic': 'basic'
+}

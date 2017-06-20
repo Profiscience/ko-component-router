@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "target": "es5",
+    "module": "umd",
+    "sourceMap": true,
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "outDir": "./dist/umd",
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.core",
+      "es2015.iterable",
+      "es2015.promise",
+      "es2017.object",
+      "esnext.asynciterable"
+    ],
+    "downlevelIteration": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "test",
+    "examples",
+    "node_modules"
+  ]
+}

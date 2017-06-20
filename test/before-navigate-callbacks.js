@@ -1,21 +1,27 @@
 import ko from 'knockout'
-import Router from '../dist/modules'
+
+import { Router } from '../dist/test'
 
 ko.components.register('before-navigate-callbacks', {
-  template: '<ko-component-router params="routes: routes"></ko-component-router>',
+  template: '<ko-component-router></ko-component-router>',
   viewModel: class BeforeNavigateCallbackTest {
-    constructor({ t, next }) {
-      this.routes = {
+    constructor({ t, done }) {
+      Router.useRoutes({
         '/': 'empty',
         '/sync': 'sync',
         '/async-callback': 'async-callback',
         '/async-promise': 'async-promise',
-        '/nested/!': 'nested'
-      }
+        '/nested': [
+          'nested',
+          {
+            '/': 'nested-child'
+          }
+        ]
+      })
 
       ko.components.register('empty', {})
 
-      setTimeout(() => this.runTests(t).then(next))
+      setTimeout(() => this.runTests(t).then(done))
     }
 
     async runTests(t) {
@@ -24,45 +30,52 @@ ko.components.register('before-navigate-callbacks', {
       history.replaceState(null, null, '/sync')
 
       ko.components.register('sync', {
-        viewModel(ctx) {
-          ctx.addBeforeNavigateCallback(() => !block)
+        viewModel: class {
+          constructor(ctx) {
+            ctx.addBeforeNavigateCallback(() => !block)
+          }
         }
       })
 
       ko.components.register('async-callback', {
-        viewModel(ctx) {
-          ctx.addBeforeNavigateCallback((done) => done(!block))
+        viewModel: class {
+          constructor(ctx) {
+            ctx.addBeforeNavigateCallback((done) => done(!block))
+          }
         }
       })
 
       ko.components.register('async-promise', {
-        viewModel(ctx) {
-          ctx.addBeforeNavigateCallback(() => Promise.resolve(!block))
+        viewModel: class {
+          constructor(ctx) {
+            ctx.addBeforeNavigateCallback(() => Promise.resolve(!block))
+          }
         }
       })
 
       let hit = false
 
       ko.components.register('nested', {
-        template: '<ko-component-router params="routes: routes"></ko-component-router>',
-        viewModel(ctx) {
-          this.routes = {
-            '/': 'nested-child'
+        template: '<ko-component-router></ko-component-router>',
+        viewModel: class {
+          constructor(ctx) {
+            ctx.addBeforeNavigateCallback(() => {
+              t.ok(hit, 'callbacks are called sequentially from bottom => top')
+            })
           }
-          ctx.addBeforeNavigateCallback(() => {
-            t.ok(hit, 'callbacks are called sequentially from bottom => top')
-          })
         }
       })
 
       ko.components.register('nested-child', {
-        viewModel(ctx) {
-          ctx.addBeforeNavigateCallback((done) => {
-            setTimeout(() => {
-              hit = true
-              done()
-            }, 200)
-          })
+        viewModel: class {
+          constructor(ctx) {
+            ctx.addBeforeNavigateCallback((done) => {
+              setTimeout(() => {
+                hit = true
+                done()
+              }, 200)
+            })
+          }
         }
       })
 
@@ -86,16 +99,6 @@ ko.components.register('before-navigate-callbacks', {
 
       await Router.update('/nested')
       await Router.update('/')
-    }
-
-    dispose() {
-      ko.components.unregister('empty')
-      ko.components.unregister('sync')
-      ko.components.unregister('async-callback')
-      ko.components.unregister('async-promise')
-      ko.components.unregister('nested')
-      ko.components.unregister('nested-child')
-      ko.components.unregister('before-navigate-callbacks')
     }
   }
 })
