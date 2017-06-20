@@ -2,8 +2,8 @@
 
 [![NPM Version](https://img.shields.io/npm/v/ko-component-router.svg)](https://www.npmjs.com/package/ko-component-router)
 ![WTFPL](https://img.shields.io/npm/l/ko-component-router.svg)
-[![Travis](https://img.shields.io/travis/Profiscience/ko-component-router/next.svg)](https://travis-ci.org/Profiscience/ko-component-router/)
-[![Coverage Status](https://coveralls.io/repos/github/Profiscience/ko-component-router/badge.svg?branch=next)](https://coveralls.io/github/Profiscience/ko-component-router?branch=next)
+[![Travis](https://img.shields.io/travis/Profiscience/ko-component-router/master.svg)](https://travis-ci.org/Profiscience/ko-component-router/)
+[![Coverage Status](https://coveralls.io/repos/github/Profiscience/ko-component-router/badge.svg)](https://coveralls.io/github/Profiscience/ko-component-router)
 [![Dependency Status](https://img.shields.io/david/Profiscience/ko-component-router.svg)](https://david-dm.org/Profiscience/ko-component-router)
 [![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)](https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table)
 [![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
