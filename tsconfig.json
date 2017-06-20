@@ -15,8 +15,10 @@
       "es2015.core",
       "es2015.iterable",
       "es2015.promise",
-      "es2017.object"
-    ]
+      "es2017.object",
+      "esnext.asynciterable"
+    ],
+    "downlevelIteration": true
   },
   "include": [
     "src/**/*.ts"

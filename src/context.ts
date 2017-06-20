@@ -1,9 +1,10 @@
+import 'core-js/es7/symbol'
 import * as ko from 'knockout'
 import { Route } from './route'
 import { Router, Middleware } from './router'
 import {
   AsyncCallback,
-  isGenerator, isThenable, isUndefined,
+  isGenerator, isPlainObject, isThenable, isUndefined,
   concat,
   extend,
   map,
@@ -209,43 +210,20 @@ export class Context {
     })
   }
 
-  // ts why u no haz async generators?? babel why ur generators so $$$?????
   private static generatorify(fn) {
     return isGenerator(fn)
       ? fn
-      : function(ctx) {
-        let count = 1, ret
-        return {
-          async next() {
-            switch (count++) {
-            case 1:
-              ret = await promisify(fn)(ctx) || false
-              return ret && ret.beforeRender
-                    ? await promisify(ret.beforeRender)()
-                    : ret
-            case 2: return ret && await promisify(ret.afterRender)()
-            case 3: return ret && await promisify(ret.beforeDispose)()
-            case 4: return ret && await promisify(ret.afterDispose)()
-            }
-          },
+      : async function * (ctx) {
+          const ret = await promisify(fn)(ctx)
+  
+          if (isPlainObject(ret)) {
+            yield await promisify(ret.beforeRender)()
+            yield await promisify(ret.afterRender)()
+            yield await promisify(ret.beforeDispose)()
+            yield await promisify(ret.afterDispose)()
+          } else {
+            yield ret
+          }
         }
-      }
   }
-
-  // function generatorify(fn) {
-  //   return isGenerator(fn)
-  //     ? fn
-  //     : async function * (...args) {
-  //         const ret = await promisify(fn)(...args)
-  //
-  //         if (isPlainObject(ret)) {
-  //           yield await promisify(ret.beforeRender)()
-  //           yield await promisify(ret.afterRender)()
-  //           yield await promisify(ret.beforeDispose)()
-  //           yield await promisify(ret.afterDispose)()
-  //         } else {
-  //           yield ret
-  //         }
-  //       }
-  // }
-  }
+}
