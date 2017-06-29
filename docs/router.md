@@ -7,12 +7,12 @@ import { Router } from 'ko-component-router'
 
 *CommonJS*
 ```javascript
-const { default: Router } = require('ko-component-router')
+const { Router } = require('ko-component-router')
 ```
 
 *Browser Globals*
 ```javascript
-const Router = ko.router.default
+const { Router } = ko.router
 ```
 
 ## API
