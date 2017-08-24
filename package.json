@@ -57,7 +57,7 @@
     "karma-firefox-launcher": "^1.0.1",
     "karma-mocha-reporter": "^2.2.2",
     "karma-remap-istanbul": "^0.6.0",
-    "karma-rollup-preprocessor": "^4.0.0",
+    "karma-rollup-preprocessor": "^5.0.1",
     "karma-tap": "^3.1.1",
     "knockout": "^3.3.0",
     "lodash": "^4.17.4",
