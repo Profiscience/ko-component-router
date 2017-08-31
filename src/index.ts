@@ -66,7 +66,7 @@ function createViewModel(params) {
       })
   } else if (router.ctx._redirect) {
     const { router: r, path: p } = traversePath(router, router.ctx._redirect)
-    r.update(p, router.ctx._redirectArgs)
+    setTimeout(() => r.update(p, router.ctx._redirectArgs))
   }
 
   return router
