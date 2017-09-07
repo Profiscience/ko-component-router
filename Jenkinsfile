@@ -3,12 +3,12 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        powershell 'npm run build'
+        powershell 'yarn build'
       }
     }
     stage('Test') {
       steps {
-        sh 'npm test'
+        powershell 'yarn test'
       }
     }
   }
