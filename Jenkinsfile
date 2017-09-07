@@ -1,14 +1,23 @@
 pipeline {
   agent any
   stages {
-    stage('Build') {
+    stage('Dependencies') {
       steps {
-        powershell 'yarn build'
+        powershell 'yarn install'
       }
     }
     stage('Test') {
       steps {
-        powershell 'yarn test'
+        parallel(
+          "Test": {
+            powershell 'yarn test'
+            
+          },
+          "Build": {
+            powershell 'yarn build'
+            
+          }
+        )
       }
     }
   }
