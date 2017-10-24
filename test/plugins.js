@@ -29,10 +29,10 @@ ko.components.register('plugins', {
         '/component': {
           component: 'component'
         },
-        '/data': ['data', { // eslint-disable-line
+        '/data': ['data', {
           data: Promise.resolve(true)
         }],
-        '/data-multi': ['data-multi', { // eslint-disable-line
+        '/data-multi': ['data-multi', {
           data: {
             true: Promise.resolve(true),
             false: Promise.resolve(false)

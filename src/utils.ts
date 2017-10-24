@@ -1,5 +1,6 @@
 import isFunction from 'lodash-es/isFunction'
 import isUndefined from 'lodash-es/isUndefined'
+import isPlainObject from 'lodash-es/isPlainObject'
 import noop from 'lodash-es/noop'
 import startsWith from 'lodash-es/startsWith'
 import { Router } from './router'
@@ -20,9 +21,7 @@ export { default as map } from 'lodash-es/map'
 export { default as mapValues } from 'lodash-es/mapValues'
 export { default as reduce } from 'lodash-es/reduce'
 
-/* eslint-disable */
 export type AsyncCallback = (done?: () => void) => Promise<any> | void
-/* eslint-enable */
 
 export async function sequence(callbacks: AsyncCallback[], ...args): Promise<{
   count: number,
@@ -73,7 +72,7 @@ export function isActivePath({ router, path }: { router: Router, path: string })
     // create dependency on isNavigating so that this works with nested routes
     // inside a computed
     ctx.router.isNavigating()
-    
+
     if (ctx.$child ? startsWith(path, ctx.pathname) : path === ctx.pathname) {
       path = path.substr(ctx.pathname.length) || '/'
       ctx = ctx.$child
@@ -92,8 +91,8 @@ export function isThenable(x) {
   return !isUndefined(x) && isFunction(x.then)
 }
 
-export function promisify(_fn: Function = noop) {
-  return async(...args) => {
+export function promisify(_fn: (...args: any[]) => void = noop): (...args: any[]) => Promise<any> {
+  return async (...args) => {
     const fn = () =>
       _fn.length === args.length + 1
         ? new Promise((r) => {
@@ -107,4 +106,21 @@ export function promisify(_fn: Function = noop) {
       ? await ret
       : ret
   }
+}
+
+export function generatorify(fn) {
+  return isGenerator(fn)
+    ? fn
+    : async function *(ctx) {
+      const ret = await promisify(fn)(ctx)
+
+      if (isPlainObject(ret)) {
+        yield await promisify(ret.beforeRender)()
+        yield await promisify(ret.afterRender)()
+        yield await promisify(ret.beforeDispose)()
+        yield await promisify(ret.afterDispose)()
+      } else {
+        yield ret
+      }
+    }
 }

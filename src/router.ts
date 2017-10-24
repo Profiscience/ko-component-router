@@ -11,27 +11,35 @@ import {
   traversePath
 } from './utils'
 
-/* eslint-disable */
-export interface Middleware {
-  (ctx: Context, done?: () => any): {
-    beforeRender?:  AsyncCallback
-    afterRender?:   AsyncCallback
-    beforeDispose?: AsyncCallback
-    afterDispose?:  AsyncCallback
-  }
+export type Middleware = (ctx: Context, done?: () => any) => {
+  beforeRender?: AsyncCallback
+  afterRender?: AsyncCallback
+  beforeDispose?: AsyncCallback
+  afterDispose?: AsyncCallback
 }
 
-export interface Plugin {
-  (routeConfig: any): RouteConfig
-}
+export type Plugin = (routeConfig: any) => RouteConfig
 
+// tslint:disable-next-line interface-name
 export interface RouteMap {
-  [name: string]: Array<RouteConfig>
+  [name: string]: RouteConfig[]
 }
-/* eslint-enable */
 
 export class Router {
-  /* eslint-disable */
+  public static head: Router
+  public static onInit: Array<(router: Router) => void> = []
+  public static middleware: Middleware[] = []
+  public static plugins: Plugin[] = []
+  public static config: {
+    base?: string
+    hashbang?: boolean
+    activePathCSSClass?: string
+  } = {
+    base: '',
+    hashbang: false,
+    activePathCSSClass: 'active-path'
+  }
+
   private static routes: RouteMap = {}
   private static events: {
     click: string,
@@ -41,28 +49,13 @@ export class Router {
     popstate: 'popstate'
   }
 
-  static head:        Router
-  static onInit:      Array<Function>     = []
-  static middleware:  Array<Middleware>   = []
-  static plugins:     Array<Plugin>       = []
-  static config: {
-    base?:                string
-    hashbang?:            boolean
-    activePathCSSClass?:  string
-  } = {
-    base:               '',
-    hashbang:           false,
-    activePathCSSClass: 'active-path'
-  }
-
-  onInit:         Array<Function> = []
-  component:      KnockoutObservable<string>
-  isNavigating:   KnockoutObservable<boolean>
-  routes:         Array<Route>
-  isRoot:         boolean
-  ctx:            Context
-  bound:          boolean
-  /* eslint-enable */
+  public onInit: Array<() => void> = []
+  public component: KnockoutObservable<string>
+  public isNavigating: KnockoutObservable<boolean>
+  public routes: Route[]
+  public isRoot: boolean
+  public ctx: Context
+  public bound: boolean
 
   constructor(
     url: string,
@@ -93,7 +86,7 @@ export class Router {
     }
   }
 
-  init() {
+  public init() {
     this.isNavigating(false)
     this.ctx.runAfterRender().then(() => {
       const resolveRouter = (router) => (resolve) => resolve(router)
@@ -105,7 +98,7 @@ export class Router {
     })
   }
 
-  async update(
+  public async update(
     url: string,
     _args?: boolean | {
       push?: boolean
@@ -181,7 +174,7 @@ export class Router {
     return true
   }
 
-  resolveRoute(path: string): Route {
+  public resolveRoute(path: string): Route {
     let matchingRouteWithFewestDynamicSegments
     let fewestMatchingSegments = Infinity
 
@@ -202,12 +195,11 @@ export class Router {
     return matchingRouteWithFewestDynamicSegments
   }
 
-  dispose() {
+  public dispose() {
     if (this.isRoot) {
       document.removeEventListener(Router.events.click, Router.onclick, false)
       window.removeEventListener(Router.events.popstate, Router.onpopstate, false)
-      delete Router.head // eslint-disable-line
-      // this.ctx.runBeforeDispose().then(() => this.ctx.runAfterDispose())
+      delete Router.head
     }
   }
 
@@ -223,7 +215,7 @@ export class Router {
     return Router.config.base + (Router.config.hashbang ? '/#!' : '')
   }
 
-  static setConfig({ base, hashbang, activePathCSSClass }: {
+  public static setConfig({ base, hashbang, activePathCSSClass }: {
     base?: string
     hashbang?: boolean
     activePathCSSClass?: string
@@ -235,19 +227,19 @@ export class Router {
     }, (_default, v) => isUndefined(v) ? _default : v)
   }
 
-  static use(...fns: Array<Middleware>) {
+  public static use(...fns: Middleware[]) {
     Router.middleware.push(...fns)
   }
 
-  static usePlugin(...fns: Array<Plugin>) {
+  public static usePlugin(...fns: Plugin[]) {
     Router.plugins.push(...fns)
   }
 
-  static useRoutes(routes: { [route: string]: any }) {
+  public static useRoutes(routes: { [route: string]: any }) {
     extend(Router.routes, Router.normalizeRoutes(routes))
   }
 
-  static get(i: number): Router {
+  public static get(i: number): Router {
     let router = Router.head
     while (i-- > 0) {
       router = router.ctx.$child.router
@@ -255,7 +247,7 @@ export class Router {
     return router
   }
 
-  static async update(
+  public static async update(
     url: string,
     _args?: boolean | {
       push?: boolean
@@ -265,7 +257,7 @@ export class Router {
     return await Router.head.update(url, _args)
   }
 
-  static getPathFromLocation(): string {
+  public static getPathFromLocation(): string {
     const path = location.pathname + location.search + location.hash
     const baseWithOrWithoutHashbangRegexp = Router.config.base.replace('#!', '#?!?')
     return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
@@ -346,7 +338,7 @@ export class Router {
     return !isUndefined(Router.head.resolveRoute(Router.getPath(path)))
   }
 
-  private static createRoutes(routes: RouteMap): Array<Route> {
+  private static createRoutes(routes: RouteMap): Route[] {
     return map(routes, (config, path) => new Route(path, config))
   }
 
@@ -354,11 +346,11 @@ export class Router {
     return mapValues(routes, (c) =>
       map(Router.runPlugins(c), (routeConfig) =>
         isPlainObject(routeConfig)
-          ? Router.normalizeRoutes(routeConfig as RouteMap) // eslint-disable-line
+          ? Router.normalizeRoutes(routeConfig as RouteMap)
           : routeConfig))
   }
 
-  private static runPlugins(config): Array<RouteConfig> {
+  private static runPlugins(config): RouteConfig[] {
     return flatMap(castArray(config), (rc) => {
       const routeConfig = reduce(
         Router.plugins,

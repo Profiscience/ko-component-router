@@ -36,7 +36,7 @@ module.exports = {
       tsc.on('close', resolve)
     })
   },
-  * karma() { // eslint-disable-line require-yield
+  * karma() {
     const config = {
       basePath: path.resolve(__dirname, '..'),
 

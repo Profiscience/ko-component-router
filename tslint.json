@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "tslint:recommended"
+  ],
+  "rules": {
+    "curly": true,
+    "quotemark": [true, "single"],
+    "member-ordering": [true, { "order": "instance-sandwich" }],    
+    "object-literal-sort-keys": false,
+    "ordered-imports": [false],
+    "semicolon": [true, "never"],
+    "trailing-comma": [true, "never"],
+    "variable-name": [true, "allow-leading-underscore"]
+  }
+}

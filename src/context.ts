@@ -4,38 +4,33 @@ import { Route } from './route'
 import { Router, Middleware } from './router'
 import {
   AsyncCallback,
-  isGenerator, isPlainObject, isThenable, isUndefined,
+  isThenable, isUndefined,
   concat,
   extend,
   map,
-  promisify,
-  sequence,
-  traversePath
+  generatorify,
+  sequence
 } from './utils'
 
 export class Context {
-  /* eslint-disable */
-  $child: Context
-  $parent: Context
-  _redirect: string
-  _redirectArgs: {
+  public $child: Context
+  public $parent: Context
+  public router: Router
+  public route: Route
+  public params: { [k: string]: any }
+  public path: string
+  public pathname: string
+  public _redirect: string
+  public _redirectArgs: {
     push?: boolean
     force?: boolean
     with?: { [prop: string]: any }
   }
-  router: Router
-  route: Route
-  params: { [k: string]: any }
-  // path including childPath
-  path: string
-  // path segment relevant to this context
-  pathname: string
 
-  private _queue:                      Array<Promise<any>>  = []
-  private _beforeNavigateCallbacks:    Array<AsyncCallback> = []
-  private _appMiddlewareDownstream:    Array<AsyncCallback> = []
-  private _routeMiddlewareDownstream:  Array<AsyncCallback> = []
-  /* eslint-enable */
+  private _queue: Array<Promise<any>>  = []
+  private _beforeNavigateCallbacks: AsyncCallback[] = []
+  private _appMiddlewareDownstream: AsyncCallback[] = []
+  private _routeMiddlewareDownstream: AsyncCallback[] = []
 
   constructor(router: Router, $parent: Context, path: string, _with: { [key: string]: any } = {}) {
     const route = router.resolveRoute(path)
@@ -43,22 +38,23 @@ export class Context {
 
     extend(this, {
       $parent,
-      router,
-      route,
       params,
       path,
-      pathname
+      pathname,
+      route,
+      router
     }, _with)
 
     if ($parent) {
       $parent.$child = this
     }
     if (childPath) {
+      // tslint:disable-next-line no-unused-expression
       new Router(childPath, this).ctx
     }
   }
 
-  addBeforeNavigateCallback(cb) {
+  public addBeforeNavigateCallback(cb) {
     this._beforeNavigateCallbacks.unshift(cb)
   }
 
@@ -84,7 +80,7 @@ export class Context {
     }
   }
 
-  get $parents(): Array<Context> {
+  get $parents(): Context[] {
     const parents = []
     let parent = this.$parent
     while (parent) {
@@ -94,7 +90,7 @@ export class Context {
     return parents
   }
 
-  get $children(): Array<Context> {
+  get $children(): Context[] {
     const children = []
     let child = this.$child
     while (child) {
@@ -104,17 +100,17 @@ export class Context {
     return children
   }
 
-  queue(promise) {
+  public queue(promise) {
     this._queue.push(promise)
   }
 
-  redirect(path, args = {}) {
+  public redirect(path, args = {}) {
     this._redirect = path
     this._redirectArgs = extend({}, args, { push: false })
   }
 
-  async runBeforeNavigateCallbacks(): Promise<boolean> {
-    let ctx: Context = this                               // eslint-disable-line
+  public async runBeforeNavigateCallbacks(): Promise<boolean> {
+    let ctx: Context = this
     let callbacks = []
     while (ctx) {
       callbacks = [...ctx._beforeNavigateCallbacks, ...callbacks]
@@ -124,17 +120,8 @@ export class Context {
     return success
   }
 
-  private async flushQueue() {
-    const thisQueue = Promise.all(this._queue).then(() => {
-      this._queue = []
-    })
-    const childQueues = map(this.$children, (c) => c.flushQueue())
-    await Promise.all<Promise<void>>([thisQueue, ...childQueues])
-  }
-
-  render() {
-    let ctx: Context = this                               // eslint-disable-line
-
+  public render() {
+    let ctx: Context = this
     while (ctx) {
       if (isUndefined(ctx._redirect)) {
         ctx.router.component(ctx.route.component)
@@ -144,7 +131,7 @@ export class Context {
     ko.tasks.runEarly()
   }
 
-  async runBeforeRender(flush = true) {
+  public async runBeforeRender(flush = true) {
     const appMiddlewareDownstream = Context.runMiddleware(Router.middleware, this)
     const routeMiddlewareDownstream = Context.runMiddleware(this.route.middleware, this)
 
@@ -162,12 +149,12 @@ export class Context {
     }
   }
 
-  async runAfterRender() {
+  public async runAfterRender() {
     await sequence(concat(this._appMiddlewareDownstream, this._routeMiddlewareDownstream))
     await this.flushQueue()
   }
 
-  async runBeforeDispose(flush = true) {
+  public async runBeforeDispose(flush = true) {
     if (this.$child && isUndefined(this._redirect)) {
       await this.$child.runBeforeDispose(false)
     }
@@ -177,7 +164,7 @@ export class Context {
     }
   }
 
-  async runAfterDispose(flush = true) {
+  public async runAfterDispose(flush = true) {
     if (this.$child && isUndefined(this._redirect)) {
       await this.$child.runAfterDispose(false)
     }
@@ -187,9 +174,17 @@ export class Context {
     }
   }
 
-  private static runMiddleware(middleware: Middleware[], ctx: Context): Array<AsyncCallback> {
+  private async flushQueue() {
+    const thisQueue = Promise.all(this._queue).then(() => {
+      this._queue = []
+    })
+    const childQueues = map(this.$children, (c) => c.flushQueue())
+    await Promise.all<Promise<void>>([thisQueue, ...childQueues])
+  }
+
+  private static runMiddleware(middleware: Middleware[], ctx: Context): AsyncCallback[] {
     return map(middleware, (fn) => {
-      const runner = Context.generatorify(fn)(ctx)
+      const runner = generatorify(fn)(ctx)
       let beforeRender = true
       return async () => {
         const ret = runner.next() || {}
@@ -208,22 +203,5 @@ export class Context {
         }
       }
     })
-  }
-
-  private static generatorify(fn) {
-    return isGenerator(fn)
-      ? fn
-      : async function * (ctx) {
-          const ret = await promisify(fn)(ctx)
-  
-          if (isPlainObject(ret)) {
-            yield await promisify(ret.beforeRender)()
-            yield await promisify(ret.afterRender)()
-            yield await promisify(ret.beforeDispose)()
-            yield await promisify(ret.afterDispose)()
-          } else {
-            yield ret
-          }
-        }
   }
 }

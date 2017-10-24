@@ -18,10 +18,11 @@
       "es2017.object",
       "esnext.asynciterable"
     ],
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "noUnusedLocals": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*"
   ],
   "exclude": [
     "dist",

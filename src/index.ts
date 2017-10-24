@@ -29,7 +29,7 @@ ko.bindingHandlers.__ko_component_router__ = {
         params: $router.ctx
       }
     }, bindingCtx.extend({ $router }))
-    
+
     if ($router.isRoot) {
       $router.init()
     } else {
@@ -61,7 +61,7 @@ function createViewModel(params) {
           })
         } else {
           router.ctx.render()
-          map(Router.onInit, (resolve) => resolve(this))
+          map(Router.onInit, (resolve) => resolve(router))
         }
       })
   } else if (router.ctx._redirect) {
