@@ -2,8 +2,8 @@ import './binding'
 import './component'
 
 export { Context } from './context'
-export { Route } from './route'
-export { Router, Middleware, Plugin } from './router'
+export { Route, RouteConfig } from './route'
+export { Router, RouteMap, Middleware, Plugin } from './router'
 export { isActivePath, resolveHref } from './utils'
 
 /**
