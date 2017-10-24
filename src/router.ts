@@ -12,12 +12,15 @@ import {
   traversePath
 } from './utils'
 
-export type Middleware = (ctx: Context & IContext, done?: () => any) => {
-  beforeRender?: AsyncCallback
-  afterRender?: AsyncCallback
-  beforeDispose?: AsyncCallback
-  afterDispose?: AsyncCallback
-}
+export type Middleware = (ctx: Context & IContext, done?: () => any) =>
+  {
+    beforeRender?: AsyncCallback
+    afterRender ?: AsyncCallback
+    beforeDispose?: AsyncCallback
+    afterDispose?: AsyncCallback
+  }
+  | IterableIterator<void | Promise<void>>
+  | AsyncIterableIterator<void | Promise<void>>
 
 export type Plugin = (routeConfig: any) => RouteConfig
 
