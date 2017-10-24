@@ -97,7 +97,7 @@ module.exports = {
           })
         ],
         format: 'iife',
-        sourceMap: 'inline'
+        sourcemap: 'inline'
       },
     }
 
