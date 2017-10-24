@@ -1,4 +1,5 @@
 import * as ko from 'knockout'
+import { IContext } from './'
 import { Context } from './context'
 import { Route, RouteConfig } from './route'
 import {
@@ -11,7 +12,7 @@ import {
   traversePath
 } from './utils'
 
-export type Middleware = (ctx: Context, done?: () => any) => {
+export type Middleware = (ctx: Context & IContext, done?: () => any) => {
   beforeRender?: AsyncCallback
   afterRender?: AsyncCallback
   beforeDispose?: AsyncCallback
@@ -54,7 +55,7 @@ export class Router {
   public isNavigating: KnockoutObservable<boolean>
   public routes: Route[]
   public isRoot: boolean
-  public ctx: Context
+  public ctx: Context & IContext
   public bound: boolean
 
   constructor(
