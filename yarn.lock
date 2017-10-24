@@ -458,7 +458,7 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
-chokidar@^1.4.1, chokidar@^1.6.1:
+chokidar@^1.4.1, chokidar@^1.6.1, chokidar@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-1.7.0.tgz#798e689778151c8076b4b360e5edd28cda2bb468"
   dependencies:
@@ -1704,12 +1704,12 @@ karma-remap-istanbul@^0.6.0:
     istanbul "^0.4.3"
     remap-istanbul "^0.9.0"
 
-karma-rollup-preprocessor@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/karma-rollup-preprocessor/-/karma-rollup-preprocessor-4.0.0.tgz#236c08108d3b0258d8e177667b0f4c50e6401ab2"
+karma-rollup-preprocessor@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/karma-rollup-preprocessor/-/karma-rollup-preprocessor-5.0.1.tgz#f070cde798a31e6577cf115d868f6e80fb7c13ad"
   dependencies:
-    lodash "^4.17.4"
-    rollup "^0.x"
+    chokidar "^1.7.0"
+    object-assign "^4.1.1"
 
 karma-tap@^3.1.1:
   version "3.1.1"
@@ -2206,7 +2206,7 @@ object-assign@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-3.0.0.tgz#9bedd5ca0897949bca47e7ff408062d549f587f2"
 
-object-assign@^4.1.0:
+object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
@@ -2772,11 +2772,15 @@ rollup-pluginutils@^2.0.1:
     estree-walker "^0.3.0"
     micromatch "^2.3.11"
 
-rollup@^0.41.4, rollup@^0.x:
+rollup@^0.41.4:
   version "0.41.6"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.41.6.tgz#e0d05497877a398c104d816d2733a718a7a94e2a"
   dependencies:
     source-map-support "^0.4.0"
+
+rollup@^0.50.0:
+  version "0.50.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.50.0.tgz#4c158f4e780e6cb33ff0dbfc184a52cc58cd5f3b"
 
 safe-buffer@^5.0.1, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
