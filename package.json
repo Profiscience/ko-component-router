@@ -46,8 +46,6 @@
     "chalk": "^2.0.0",
     "coveralls": "^3.0.0",
     "cross-spawn": "^5.1.0",
-    "eslint": "^4.0.0",
-    "eslint-config-profiscience": "^2.0.0",
     "fly": "^2.0.5",
     "fly-rename": "^0.1.1",
     "fly-rollup": "^2.0.0",
@@ -70,6 +68,7 @@
     "rollup-plugin-node-globals": "^1.1.0",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-ts": "^0.1.0",
-    "tape": "caseyWebb/tape"
+    "tape": "caseyWebb/tape",
+    "tslint": "^5.8.0"
   }
 }

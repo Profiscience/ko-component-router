@@ -6,7 +6,7 @@ export default function * idGenerator() {
 
   let i = users[users.length - 1] + 1 || 0
 
-  while (true) { // eslint-disable-line no-constant-condition
+  while (true) {
     yield i++
   }
 }

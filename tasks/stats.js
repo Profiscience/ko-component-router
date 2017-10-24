@@ -16,9 +16,7 @@ module.exports = function * (fly) {
 
       stats.push([name, kilobytes, compressedKilobytes])
     })
-    // eslint-disable-next-line require-yield
     .run({ every: false }, function * () {
-      /* eslint-disable no-console */
       const border = '-------------------------------------------------------------'
       console.log(green(border))
       each(stats, ([name, raw, gzipped]) =>
@@ -30,6 +28,5 @@ module.exports = function * (fly) {
           ),
           '|')))
       console.log(green(border))
-      /* eslint-enable no-console */
     })
 }

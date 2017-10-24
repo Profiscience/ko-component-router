@@ -5,17 +5,15 @@ import { isFunction, isPlainObject, isString, isUndefined, map, reduce } from '.
 export type RouteConfig = string | RouteMap | Middleware
 
 export class Route {
-  /* eslint-disable */
-  path:       string
-  component:  string
-  middleware: Array<Middleware>
-  children:   Array<Route>
-  keys
+  public path: string
+  public component: string
+  public middleware: Middleware[]
+  public children: Route[]
+  public keys
 
   private regexp: RegExp
-  /* eslint-enable */
 
-  constructor(path: string, config: Array<RouteConfig>) {
+  constructor(path: string, config: RouteConfig[]) {
     const [component, middleware, children] = Route.parseConfig(config)
     this.path = path
     this.component = component
@@ -27,7 +25,7 @@ export class Route {
     this.regexp = regexp as RegExp
   }
 
-  matches(path) {
+  public matches(path) {
     const matches = this.regexp.exec(path)
     if (matches === null) {
       return false
@@ -44,7 +42,7 @@ export class Route {
     return true
   }
 
-  parse(path): [Object, string, string] {
+  public parse(path): [{ [k: string]: any }, string, string] {
     let childPath
     const params = {}
     const matches = this.regexp.exec(path)
@@ -63,14 +61,14 @@ export class Route {
     return [params, path, childPath]
   }
 
-  private static parseConfig(config): [string, Array<Middleware>, Array<Route>] {
+  private static parseConfig(config): [string, Middleware[], Route[]] {
     let component: string
-    let children: Array<Route>
+    let children: Route[]
 
     const middleware = reduce(
       config,
       (
-        accum: Array<Middleware>,
+        accum: Middleware[],
         m: string | RouteMap | Middleware
       ) => {
         if (isString(m)) {
