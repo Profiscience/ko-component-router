@@ -43,7 +43,7 @@ This...
 
 ```javascript
 {
-  '/user/:id': [(ctx) => ctx.router.component = 'user']
+  '/user/:id': [(ctx) => ctx.route.component = 'user']
 }
 ```
 
