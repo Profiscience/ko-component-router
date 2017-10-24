@@ -1,24 +1,31 @@
 language: node_js
 node_js:
-  - stable
+- stable
 addons:
   firefox: latest
 env:
+  matrix:
   - TRAVIS=true
+  global:
+    secure: LHF20/U42BskU7ov0yH0PaOjOmVVP8kNwJTCVshOhEcJNJwTt1LvBSX7DxiIfxOntgLu0kZLIHjyPuESjeJYLP+1BlfACuXfg/CC2X9C1cbsoxbkF7vhpqIq7scEUW0h6d0OpxVzBzyjjYyxE14ct1KGVrylqnwrbAD5EsRPM3Byf5WFq1iMd2VWxvwn1KnluKm+7EklbsPC6X93ui7o8gDllwl55vZjw2a+JnymAoORbk5k07Vo4/5hRI4wLNEZ2hPD2FnWc30Tir/WrDU9/b/by+JLr8J+vTuAH13WdNRJ7oe1bggIahObEIj6D9RyjizO9EeUVNF7g64VbOK1aGWPYzGKCMojPadhs6rzkFoKCC6xWBMidfqKms3dkF0JE4GJVcKd0XO6AbGfdomK7TrQNh54jN4cpUhmEhGMAUS05qG9+hrCqiqVULm1A0TqFnZPzrm+jA7XLgxUk0CAYHfv17XgAdi9aeubmAD4vXAquSvPnbAiDQbH3B73k6Vk1V9fxiqu5NU83OPt8D0X+TiAhhEOIgMlCHpQr71NT3c0C1DbTFZvQmZ6LFdIz0hJwNVF+MJwnE4YUHGY0hjXbZndWfhksEtZuNlGmeEVlNrF9d6qEEfOpoeMxDDRuKO9GPk/A/lQSJXqommbhpMNBWGxlG2e5dK9liYt95UyOBI=
 cache:
   yarn: true
   directories:
-    - node_modules
+  - node_modules
+before_install:
+- yarn global add greenkeeper-lockfile@1
 before_script:
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- greenkeeper-lockfile-update
 after_script:
-  - ./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info
+- "./node_modules/coveralls/bin/coveralls.js < coverage/lcov.info"
+- greenkeeper-lockfile-upload
 notifications:
   email: false
   webhooks:
     urls:
-      - https://webhooks.gitter.im/e/76b4266a7bbf95521f37
+    - https://webhooks.gitter.im/e/76b4266a7bbf95521f37
     on_success: change
     on_failure: always
     on_start: never
