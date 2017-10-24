@@ -21,6 +21,8 @@ export type Middleware = (ctx: Context & IContext, done?: () => any) =>
   }
   | IterableIterator<void | Promise<void>>
   | AsyncIterableIterator<void | Promise<void>>
+  | Promise<void>
+  | void
 
 export type Plugin = (routeConfig: any) => RouteConfig
 
