@@ -1,5 +1,6 @@
 import 'core-js/es7/symbol'
 import * as ko from 'knockout'
+import { IContext } from './'
 import { Route } from './route'
 import { Router, Middleware } from './router'
 import {
@@ -12,9 +13,9 @@ import {
   sequence
 } from './utils'
 
-export class Context {
-  public $child: Context
-  public $parent: Context
+export class Context implements IContext {
+  public $child: Context & IContext
+  public $parent: Context & IContext
   public router: Router
   public route: Route
   public params: { [k: string]: any }
@@ -58,19 +59,19 @@ export class Context {
     this._beforeNavigateCallbacks.unshift(cb)
   }
 
-  get base(): string {
+  public get base(): string {
     return this.router.isRoot
       ? Router.base
       : this.$parent.base + this.$parent.pathname
   }
 
   // full path w/o base
-  get canonicalPath() {
+  public get canonicalPath() {
     return this.base.replace(new RegExp(this.$root.base, 'i'), '') + this.pathname
   }
 
-  get $root() {
-    let ctx: Context = this
+  public get $root(): Context & IContext {
+    let ctx: Context & IContext = this
     while (ctx) {
       if (ctx.$parent) {
         ctx = ctx.$parent
@@ -80,7 +81,7 @@ export class Context {
     }
   }
 
-  get $parents(): Context[] {
+  public get $parents(): Array<Context & IContext> {
     const parents = []
     let parent = this.$parent
     while (parent) {
@@ -90,7 +91,7 @@ export class Context {
     return parents
   }
 
-  get $children(): Context[] {
+  public get $children(): Array<Context & IContext> {
     const children = []
     let child = this.$child
     while (child) {

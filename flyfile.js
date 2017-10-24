@@ -10,7 +10,8 @@ exports.typings = require('./tasks/typings')
 exports.umd = require('./tasks/umd')
 
 exports.build = function * (fly) {
-  yield fly.parallel(['modules', 'umd', 'typings', 'bundle'])
+  yield fly.parallel(['modules', 'umd', 'typings'])
+  yield fly.start('bundle')
   yield fly.start('stats')
 }
 
