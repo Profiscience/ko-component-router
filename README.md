@@ -23,9 +23,9 @@ $ yarn add ko-component-router
 
 ### Usage
 _app.js_
-```javascript
-import $ from 'jquery'
-import ko from 'knockout'
+```typescript
+import * as $ from 'jquery'
+import * as ko from 'knockout'
 import { Router } from 'ko-component-router'
 
 const loading = ko.observable(true)
@@ -86,6 +86,13 @@ function loadingMiddleware(ctx) {
 //   loading(true)
 //   yield
 //   loading(false)
+// }
+
+// TypeScript? Good for you! Just add ~water~ these lines
+// declare module 'ko-component-router' {
+//   interface IContext {
+//     users: MyUserTypeDef[]
+//   }
 // }
 
 function loadUsers(ctx) {
