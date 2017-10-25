@@ -1,0 +1,6 @@
+{
+  "extends": "profiscience",
+  "parserOptions": {
+    "sourceType": "module"
+  }
+}

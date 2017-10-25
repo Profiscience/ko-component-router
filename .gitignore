@@ -1,11 +1,10 @@
 .DS_Store
-npm-debug.log
-npm-debug.log.*
+
+*.log
 
 .cache/
 .chrome/
 .vscode/
 coverage/
-node_modules/
-
 dist/
+node_modules/

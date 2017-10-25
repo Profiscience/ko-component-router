@@ -7,19 +7,20 @@
   "homepage": "https://github.com/Profiscience/ko-component-router",
   "bugs": "https://github.com/Profiscience/ko-component-router/issues",
   "repository": "Profiscience/ko-component-router",
-  "main": "dist/umd/index.js",
-  "jsnext:main": "dist/modules/index.js",
-  "module": "dist/modules/index.js",
-  "typings": "dist/typings/index.d.ts",
+  "main": "ko-component-router.js",
+  "jsnext:main": "dist/index.js",
+  "module": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist/",
+    "ko-component-router.js"
   ],
   "scripts": {
-    "build": "fly build",
-    "watch": "fly watch",
-    "test": "fly test",
-    "test:watch": "fly test:watch",
-    "prepublish": "npm run build"
+    "build": "taskr build",
+    "watch": "taskr watch",
+    "test": "taskr test",
+    "test:watch": "taskr test:watch",
+    "prepublish": "yarn build"
   },
   "keywords": [
     "knockoutjs",
@@ -28,29 +29,28 @@
     "component",
     "router",
     "routing",
-    "spa"
+    "spa",
+    "framework"
   ],
   "dependencies": {
-    "core-js": "^2.4.1",
-    "lodash-es": "^4.17.4",
+    "core-js": "^2.3.0",
+    "lodash-es": "^4.14.0",
     "path-to-regexp": "^2.0.0",
-    "tslib": "^1.7.0",
-    "typescript": "^2.4.0"
+    "tslib": "^1.7.0"
   },
   "peerDependencies": {
     "knockout": "^3.4.0"
   },
   "devDependencies": {
+    "@taskr/clear": "^1.1.0",
+    "@taskr/uglify": "^1.1.0",
+    "@taskr/watch": "^1.1.0",
     "@types/knockout": "^3.4.0",
     "@types/lodash-es": "^4.14.4",
     "chalk": "^2.0.0",
-    "coveralls": "^3.0.0",
-    "cross-spawn": "^5.1.0",
-    "fly": "^2.0.5",
-    "fly-rename": "^0.1.1",
-    "fly-rollup": "^2.0.0",
-    "fly-uglify": "^2.1.1",
-    "fly-watch": "^1.1.1",
+    "eslint": "^4.9.0",
+    "eslint-config-profiscience": "^2.0.4",
+    "execa": "^0.8.0",
     "jquery": "^3.1.1",
     "karma": "^1.6.0",
     "karma-chrome-launcher": "^2.0.0",
@@ -69,6 +69,11 @@
     "rollup-plugin-node-globals": "^1.1.0",
     "rollup-plugin-node-resolve": "^3.0.0",
     "tape": "^4.8.0",
-    "tslint": "^5.8.0"
+    "taskr": "^1.1.0",
+    "taskr-rename": "^0.0.1",
+    "taskr-rollup": "^0.0.2",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.5.3"
   }
 }

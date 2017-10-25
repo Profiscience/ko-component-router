@@ -6,35 +6,33 @@ const commonjs = require('rollup-plugin-commonjs')
 
 let cache
 
-module.exports = function * (fly) {
-  yield fly.source(path.resolve(__dirname, '../dist/modules/index.js'))
-    .rollup({
-      rollup: {
+module.exports = {
+  * 'bundle'(task) {
+    yield task
+      .source(path.resolve(__dirname, '../dist/index.js'))
+      .rollup({
         cache,
+        external: ['knockout'],
         plugins: [
           nodeResolve({
             preferBuiltins: false
           }),
           commonjs()
         ],
-        external: ['knockout']
-      },
-      bundle: {
-        format: 'umd',
-        moduleName: 'ko.router',
-        globals: {
-          knockout: 'ko'
-        },
+        output: {
+          file: `ko-component-router.js`,
+          format: 'umd',
+          exports: 'named', // const { Router, Route, Context, ... } = ko.router
+          globals: {
+            knockout: 'ko'
+          },
+          name: 'ko.router'
+        }
+      })
+      .target(path.resolve(__dirname, '../'))
 
-        // const { Router, Route, Context } = ko.router
-        exports: 'named'
-      }
-    })
-
-    .rename({ basename: 'ko-component-router', extname: '.js' })
-    .target(path.resolve(__dirname, '../dist'))
-
-    .uglify()
-    .rename({ suffix: '.min' })
-    .target(path.resolve(__dirname, '../dist'))
+      .uglify()
+      .rename({ suffix: '.min' })
+      .target(path.resolve(__dirname, '../'))
+  }
 }

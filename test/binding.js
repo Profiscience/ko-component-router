@@ -1,7 +1,7 @@
 import ko from 'knockout'
 import $ from 'jquery'
 
-import { Router } from '../dist/test'
+import { Router } from '../'
 
 ko.components.register('binding', {
   template: `
