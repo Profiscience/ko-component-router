@@ -1,7 +1,6 @@
 'use strict'
 
 const path = require('path')
-const spawn = require('cross-spawn')
 const { Server } = require('karma')
 const nodeResolve = require('rollup-plugin-node-resolve')
 const nodeBuiltins = require('rollup-plugin-node-builtins')
@@ -13,37 +12,27 @@ const rollupIstanbul = require('rollup-plugin-istanbul')
 let cache, watch, coverage
 
 module.exports = {
-  * test(fly) {
-    watch = false
+  * test(task) {
     coverage = true
+    watch = false
 
-    yield fly.serial(['test:build', 'karma'])
+    yield task.serial(['compile', 'karma'])
   },
-  * 'test:watch'(fly) {
+  * 'test:watch'(task) {
     coverage = false
     watch = true
 
-    yield fly.watch(path.resolve(__dirname, '../src/**/*.ts'), 'test:build')
-    yield fly.serial(['test:build', 'karma'])
+    yield task.watch(path.resolve(__dirname, '../src/**/*.ts'), 'compile')
+    yield task.serial(['compile', 'karma'])
   },
-  * 'test:build'() {
-    yield new Promise((resolve) => {
-      const tsc = spawn('tsc', [
-        '--target', coverage ? 'es5' : 'es2017',
-        '--module', 'es2015',
-        '--outDir', path.resolve(__dirname, '../dist/test')
-      ], { stdio: 'inherit' })
-      tsc.on('close', resolve)
-    })
-  },
-  * karma() {
+  * karma() { // eslint-disable-line require-yield
     const config = {
       basePath: path.resolve(__dirname, '..'),
 
       frameworks: ['tap'],
 
       files: [
-        { pattern: 'dist/test/**/*.js', included: false },
+        // { pattern: 'dist/es/*.js', included: false },
         'test/index.js'
       ],
 
@@ -117,7 +106,6 @@ module.exports = {
       }
     }
 
-    const server = new Server(config, (code) => process.exit(code))
-    server.start()
+    new Server(config, (code) => process.exit(code)).start()
   }
 }

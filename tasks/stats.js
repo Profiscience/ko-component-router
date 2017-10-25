@@ -2,13 +2,15 @@
 
 const path = require('path')
 const { gzip } = require('zlib')
-const { each, padEnd, round } = require('lodash')
+const _ = require('lodash')
 const { green } = require('chalk')
+const { padEnd, padStart, round } = _
 
-module.exports = function * (fly) {
+module.exports = function * (task) {
   const stats = []
 
-  yield fly.source(path.resolve(__dirname, '../dist/ko-component-router.*'))
+  yield task
+    .source(path.resolve(__dirname, '../ko-component-router.*'))
     .run({ every: true }, function * ({ base: name, data }) {
       const gzipped = yield new Promise((resolve) => gzip(data, (_, result) => resolve(result)))
       const kilobytes = round(Buffer.byteLength(data, 'utf8') / 1000)
@@ -16,17 +18,18 @@ module.exports = function * (fly) {
 
       stats.push([name, kilobytes, compressedKilobytes])
     })
-    .run({ every: false }, function * () {
+    .run({ every: false }, function * () { // eslint-disable-line require-yield
       const border = '-------------------------------------------------------------'
-      console.log(green(border))
-      each(stats, ([name, raw, gzipped]) =>
-        console.log(green(
-          '|',
-          padEnd(
-            (padEnd(name, 'dist/ko-component-router.min.js'.length) + `\t~${raw}kb\t~${gzipped}kb gzipped`),
-            border.length - 5
-          ),
-          '|')))
-      console.log(green(border))
+      const padLeftWidth = 'ko-component-router.min.js'.length + 3
+      const padRightWidth = border.length - 4 - padLeftWidth
+      console.log(green(border)) // eslint-disable-line no-console
+      _(stats)
+        .sortBy(([name]) => name)
+        .each(([name, raw, gzipped]) =>
+          console.log(green(  // eslint-disable-line no-console
+            '|',
+            (padEnd(name, padLeftWidth) + padStart(`~${raw}kb   ~${gzipped}kb gzipped`, padRightWidth)),
+            '|')))
+      console.log(green(border))  // eslint-disable-line no-console
     })
 }
