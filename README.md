@@ -91,7 +91,8 @@ function loadingMiddleware(ctx) {
 // TypeScript? Good for you! Just add ~water~ these lines
 // declare module 'ko-component-router' {
 //   interface IContext {
-//     users: MyUserTypeDef[]
+//     user?: MyUserTypeDef
+//     users?: MyUserTypeDef[]
 //   }
 // }
 
