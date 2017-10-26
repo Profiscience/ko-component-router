@@ -120,28 +120,28 @@ _index.html_
 [KnockoutJS]: https://knockoutjs.com
 
 [npm]: https://www.npmjs.com/package/ko-component-router
-[npm-version-shield]: https://img.shields.io/npm/v/ko-component-router.svg?style=for-the-badge
+[npm-version-shield]: https://img.shields.io/npm/v/ko-component-router.svg
 
 [wtfpl]: ./LICENSE.md
-[wtfpl-shield]: https://img.shields.io/npm/l/ko-component-router.svg?style=for-the-badge
+[wtfpl-shield]: https://img.shields.io/npm/l/ko-component-router.svg
 
 [travis-ci]: https://travis-ci.org/Profiscience/ko-component-router/
-[travis-ci-shield]: https://img.shields.io/travis/Profiscience/ko-component-router/master.svg?style=for-the-badge
+[travis-ci-shield]: https://img.shields.io/travis/Profiscience/ko-component-router/master.svg
 
 [codecov]: https://codecov.io/gh/Profiscience/ko-component-router
-[codecov-shield]: https://img.shields.io/codecov/c/github/Profiscience/ko-component-router.svg?style=for-the-badge
+[codecov-shield]: https://img.shields.io/codecov/c/github/Profiscience/ko-component-router.svg
 
 [david-dm]: https://david-dm.org/Profiscience/ko-component-router
-[david-dm-shield]: https://img.shields.io/david/Profiscience/ko-component-router.svg?style=for-the-badge
+[david-dm-shield]: https://img.shields.io/david/Profiscience/ko-component-router.svg
 
 [david-dm-peer]: https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table
-[david-dm-peer-shield]: https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?style=for-the-badge&maxAge=2592000
+[david-dm-peer-shield]: https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000
 
 [greenkeeper]: https://greenkeeper.io/
-[greenkeeper-shield]: https://badges.greenkeeper.io/Profiscience/ko-component-router.svg?style=for-the-badge
+[greenkeeper-shield]: https://badges.greenkeeper.io/Profiscience/ko-component-router.svg
 
 [npm-stats]: http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=
-[npm-stats-shield]: https://img.shields.io/npm/dt/ko-component-router.svg?style=for-the-badge&maxAge=2592000
+[npm-stats-shield]: https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000
 
 [gitter]: https://gitter.im/Profiscience/ko-component-router
-[gitter-shield]: https://img.shields.io/gitter/room/profiscience/ko-component-router.svg?style=for-the-badge
+[gitter-shield]: https://img.shields.io/gitter/room/profiscience/ko-component-router.svg
