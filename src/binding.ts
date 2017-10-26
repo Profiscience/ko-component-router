@@ -20,7 +20,7 @@ ko.bindingHandlers.path = {
   }
 }
 
-function getRouter(bindingCtx) {
+function getRouter(bindingCtx: KnockoutBindingContext) {
   while (!isUndefined(bindingCtx)) {
     if (!isUndefined(bindingCtx.$router)) {
       return bindingCtx.$router

@@ -2,6 +2,13 @@ import * as ko from 'knockout'
 import { Router } from './router'
 import { map, traversePath } from './utils'
 
+declare global {
+  // tslint:disable-next-line interface-name
+  interface KnockoutBindingContext {
+    $router: Router
+  }
+}
+
 ko.components.register('ko-component-router', {
   synchronous: true,
   viewModel: { createViewModel },
@@ -14,7 +21,7 @@ ko.components.register('ko-component-router', {
 ko.bindingHandlers.__ko_component_router__ = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
 
-    const $router = bindingCtx.$rawData
+    const $router: Router = bindingCtx.$rawData
 
     ko.applyBindingsToNode(el, {
       css: $router.component,
@@ -34,7 +41,7 @@ ko.bindingHandlers.__ko_component_router__ = {
   }
 }
 
-function createViewModel(params) {
+function createViewModel(params: { [k: string]: any }) {
   let router = Router.head
   if (!router) {
     router = new Router(Router.getPathFromLocation(), undefined, params)
