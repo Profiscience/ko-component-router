@@ -135,7 +135,7 @@ _index.html_
 [david-dm-shield]: https://img.shields.io/david/Profiscience/ko-component-router.svg?style=for-the-badge
 
 [david-dm-peer]: https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table
-[david-dm-peer-shield]: https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?style=for-the-badge?maxAge=2592000
+[david-dm-peer-shield]: https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?style=for-the-badge&maxAge=2592000
 
 [greenkeeper]: https://greenkeeper.io/
 [greenkeeper-shield]: https://badges.greenkeeper.io/Profiscience/ko-component-router.svg?style=for-the-badge
