@@ -4,12 +4,12 @@ import { IContext } from './'
 import { Route } from './route'
 import { Router, Middleware } from './router'
 import {
-  AsyncCallback,
+  Callback,
   isThenable, isUndefined,
   concat,
   extend,
   map,
-  generatorify,
+  castLifecycleObjectMiddlewareToGenerator,
   sequence
 } from './utils'
 
@@ -23,19 +23,19 @@ export class Context implements IContext {
   public pathname: string
   public _redirect: string
   public _redirectArgs: {
-    push?: boolean
+    push: false
     force?: boolean
     with?: { [prop: string]: any }
   }
 
-  private _queue: Array<Promise<any>>  = []
-  private _beforeNavigateCallbacks: AsyncCallback[] = []
-  private _appMiddlewareDownstream: AsyncCallback[] = []
-  private _routeMiddlewareDownstream: AsyncCallback[] = []
+  private _queue: Promise<void>[]  = []
+  private _beforeNavigateCallbacks: Callback<void>[] = []
+  private _appMiddlewareDownstream: Callback<void>[] = []
+  private _routeMiddlewareDownstream: Callback<void>[] = []
 
   constructor(router: Router, $parent: Context, path: string, _with: { [key: string]: any } = {}) {
     const route = router.resolveRoute(path)
-    const [params, pathname, childPath] = route.parse(path)
+    const { params, pathname, childPath } = route.parse(path)
 
     extend(this, {
       $parent,
@@ -55,7 +55,7 @@ export class Context implements IContext {
     }
   }
 
-  public addBeforeNavigateCallback(cb) {
+  public addBeforeNavigateCallback(cb: Callback<void>) {
     this._beforeNavigateCallbacks.unshift(cb)
   }
 
@@ -81,7 +81,7 @@ export class Context implements IContext {
     }
   }
 
-  public get $parents(): Array<Context & IContext> {
+  public get $parents(): (Context & IContext)[] {
     const parents = []
     let parent = this.$parent
     while (parent) {
@@ -91,7 +91,7 @@ export class Context implements IContext {
     return parents
   }
 
-  public get $children(): Array<Context & IContext> {
+  public get $children(): (Context & IContext)[] {
     const children = []
     let child = this.$child
     while (child) {
@@ -101,18 +101,18 @@ export class Context implements IContext {
     return children
   }
 
-  public queue(promise) {
+  public queue(promise: Promise<void>) {
     this._queue.push(promise)
   }
 
-  public redirect(path, args = {}) {
+  public redirect(path: string, args: { [k: string]: any } = {}) {
     this._redirect = path
-    this._redirectArgs = extend({}, args, { push: false })
+    this._redirectArgs = extend({}, args, { push: false as false })
   }
 
   public async runBeforeNavigateCallbacks(): Promise<boolean> {
     let ctx: Context = this
-    let callbacks = []
+    let callbacks: Callback<boolean | void>[] = []
     while (ctx) {
       callbacks = [...ctx._beforeNavigateCallbacks, ...callbacks]
       ctx = ctx.$child
@@ -183,16 +183,16 @@ export class Context implements IContext {
     await Promise.all<Promise<void>>([thisQueue, ...childQueues])
   }
 
-  private static runMiddleware(middleware: Middleware[], ctx: Context): AsyncCallback[] {
+  private static runMiddleware(middleware: Middleware[], ctx: Context): Callback<void>[] {
     return map(middleware, (fn) => {
-      const runner = generatorify(fn)(ctx)
+      const runner = castLifecycleObjectMiddlewareToGenerator(fn)(ctx)
       let beforeRender = true
       return async () => {
-        const ret = runner.next() || {}
+        const ret = runner.next()
         if (isThenable(ret)) {
           await ret
-        } else if (isThenable(ret.value)) {
-          await ret.value
+        } else if (isThenable((ret as IteratorResult<Promise<void> | void>).value)) {
+          await (ret as IteratorResult<Promise<void> | void>).value
         }
         if (beforeRender) {
           // this should only block the sequence for the first call,

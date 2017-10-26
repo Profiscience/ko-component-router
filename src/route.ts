@@ -9,7 +9,7 @@ export class Route {
   public component: string
   public middleware: Middleware[]
   public children: Route[]
-  public keys
+  public keys: pathtoRegexp.Key[]
 
   private regexp: RegExp
 
@@ -20,12 +20,12 @@ export class Route {
     this.middleware = middleware
     this.children = children
 
-    const [keys, regexp] = Route.parsePath(path, !isUndefined(children))
+    const { keys, regexp } = Route.parsePath(path, !isUndefined(children))
     this.keys = keys
-    this.regexp = regexp as RegExp
+    this.regexp = regexp
   }
 
-  public matches(path) {
+  public matches(path: string) {
     const matches = this.regexp.exec(path)
     if (matches === null) {
       return false
@@ -42,9 +42,10 @@ export class Route {
     return true
   }
 
-  public parse(path): [{ [k: string]: any }, string, string] {
+  public parse(path: string): { params: { [k: string]: any }, pathname: string, childPath: string } {
     let childPath
-    const params = {}
+    let pathname = path
+    const params: { [k: string]: any } = {}
     const matches = this.regexp.exec(path)
 
     for (let i = 1, len = matches.length; i < len; ++i) {
@@ -52,16 +53,16 @@ export class Route {
       const v = matches[i] || ''
       if (k.name === '__child_path__') {
         childPath = '/' + v
-        path = path.replace(new RegExp(childPath + '$'), '')
+        pathname = path.replace(new RegExp(childPath + '$'), '')
       } else {
         params[k.name] = v
       }
     }
 
-    return [params, path, childPath]
+    return { params, pathname, childPath }
   }
 
-  private static parseConfig(config): [string, Middleware[], Route[]] {
+  private static parseConfig(config: (string | RouteMap | Middleware)[]): [string, Middleware[], Route[]] {
     let component: string
     let children: Route[]
 
@@ -90,7 +91,7 @@ export class Route {
     return [component, middleware, children]
   }
 
-  private static parsePath(path, hasChildren) {
+  private static parsePath(path: string, hasChildren: boolean) {
     if (hasChildren) {
       path = path.replace(/\/?!?$/, '/!')
     }
@@ -101,9 +102,9 @@ export class Route {
       path = path.replace(/\(?\*\)?/, '(.*)')
     }
 
-    const keys = []
+    const keys: pathtoRegexp.Key[] = []
     const regexp = pathtoRegexp(path, keys)
 
-    return [keys, regexp]
+    return { keys, regexp }
   }
 }

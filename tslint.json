@@ -3,7 +3,9 @@
     "tslint:recommended"
   ],
   "rules": {
+    "array-type": [true, "array"],
     "curly": true,
+    "interface-over-type-literal": false,
     "quotemark": [true, "single"],
     "member-ordering": [true, { "order": "instance-sandwich" }],    
     "object-literal-sort-keys": false,

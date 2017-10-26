@@ -3,7 +3,7 @@ import { IContext } from './'
 import { Context } from './context'
 import { Route, RouteConfig } from './route'
 import {
-  AsyncCallback,
+  Callback,
   isBoolean, isPlainObject, isUndefined,
   castArray,
   extend, extendWith,
@@ -12,28 +12,32 @@ import {
   traversePath
 } from './utils'
 
-export type Middleware = (ctx: Context & IContext, done?: () => any) =>
-  {
-    beforeRender?: AsyncCallback
-    afterRender ?: AsyncCallback
-    beforeDispose?: AsyncCallback
-    afterDispose?: AsyncCallback
-  }
-  | IterableIterator<void | Promise<void>>
-  | AsyncIterableIterator<void | Promise<void>>
+export type SimpleMiddleware = (ctx: Context & IContext, done?: () => any) =>
   | Promise<void>
   | void
 
+export type LifecycleObjectMiddleware = (ctx: Context & IContext, done?: () => any) => {
+  beforeRender?: Callback<void>
+  afterRender ?: Callback<void>
+  beforeDispose?: Callback<void>
+  afterDispose?: Callback<void>
+}
+
+export type LifecycleGeneratorMiddleware = (ctx: Context & IContext, done?: () => any) =>
+  | IterableIterator<void | Promise<void>>
+  | AsyncIterableIterator<void | Promise<void>>
+
+export type Middleware = SimpleMiddleware | LifecycleObjectMiddleware | LifecycleGeneratorMiddleware
+
 export type Plugin = (routeConfig: any) => RouteConfig
 
-// tslint:disable-next-line interface-name
-export interface RouteMap {
+export type RouteMap = {
   [name: string]: RouteConfig[]
 }
 
 export class Router {
   public static head: Router
-  public static onInit: Array<(router: Router) => void> = []
+  public static onInit: ((router: Router) => void)[] = []
   public static middleware: Middleware[] = []
   public static plugins: Plugin[] = []
   public static config: {
@@ -55,7 +59,7 @@ export class Router {
     popstate: 'popstate'
   }
 
-  public onInit: Array<() => void> = []
+  public onInit: (() => void)[] = []
   public component: KnockoutObservable<string>
   public isNavigating: KnockoutObservable<boolean>
   public routes: Route[]
@@ -95,7 +99,7 @@ export class Router {
   public init() {
     this.isNavigating(false)
     this.ctx.runAfterRender().then(() => {
-      const resolveRouter = (router) => (resolve) => resolve(router)
+      const resolveRouter = (router: Router) => (resolve: typeof Promise.resolve) => resolve(router)
       let ctx = this.ctx
       while (ctx) {
         map(ctx.router.onInit, resolveRouter(ctx.router))
@@ -130,7 +134,7 @@ export class Router {
     const { search, hash } = Router.parseUrl(url)
     const path = Router.getPath(url)
     const route = this.resolveRoute(path)
-    const [, pathname, childPath] = route.parse(path)
+    const { pathname, childPath } = route.parse(path)
     const samePage = fromCtx.pathname === pathname
 
     if (fromCtx.$child && samePage && !args.force) {
@@ -269,14 +273,14 @@ export class Router {
     return path.replace(new RegExp(baseWithOrWithoutHashbangRegexp, 'i'), '')
   }
 
-  private static onclick(e) {
+  private static onclick(e: MouseEvent) {
     if (e.defaultPrevented) {
       return
     }
 
-    let el = e.target
+    let el: HTMLAnchorElement = e.target as HTMLAnchorElement
     while (el && el.nodeName !== 'A') {
-      el = el.parentNode
+      el = el.parentNode as HTMLAnchorElement
     }
     if (!el || el.nodeName !== 'A') {
       return
@@ -311,12 +315,12 @@ export class Router {
     e.preventDefault()
   }
 
-  private static onpopstate(e) {
+  private static onpopstate(e: PopStateEvent) {
     Router.update(Router.getPathFromLocation(), false)
     e.preventDefault()
   }
 
-  private static canonicalizePath(path) {
+  private static canonicalizePath(path: string) {
     return path.replace(new RegExp('/?#?!?/?'), '/')
   }
 
@@ -336,11 +340,11 @@ export class Router {
     }
   }
 
-  private static getPath(url) {
+  private static getPath(url: string) {
     return Router.parseUrl(url).pathname
   }
 
-  private static hasRoute(path) {
+  private static hasRoute(path: string) {
     return !isUndefined(Router.head.resolveRoute(Router.getPath(path)))
   }
 
@@ -356,7 +360,7 @@ export class Router {
           : routeConfig))
   }
 
-  private static runPlugins(config): RouteConfig[] {
+  private static runPlugins(config: any): RouteConfig[] {
     return flatMap(castArray(config), (rc) => {
       const routeConfig = reduce(
         Router.plugins,
@@ -372,7 +376,7 @@ export class Router {
     })
   }
 
-  private static sameOrigin(href) {
+  private static sameOrigin(href: string) {
     const { hostname, port, protocol } = location
     let origin = protocol + '//' + hostname
     if (port) {
@@ -381,8 +385,8 @@ export class Router {
     return href && href.indexOf(origin) === 0
   }
 
-  private static which(e): number {
-    e = e || window.event
+  private static which(e: MouseEvent): number {
+    e = e || window.event as MouseEvent
     return e.which === null ? e.button : e.which
   }
 }

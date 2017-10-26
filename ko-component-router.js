@@ -4224,7 +4224,7 @@ function promisify(_fn) {
         });
     };
 }
-function generatorify(fn) {
+function castLifecycleObjectMiddlewareToGenerator(fn) {
     return isGenerator(fn)
         ? fn
         : function (ctx) {
@@ -4272,7 +4272,7 @@ var Context = /** @class */ (function () {
         this._appMiddlewareDownstream = [];
         this._routeMiddlewareDownstream = [];
         var route = router.resolveRoute(path);
-        var _a = __read(route.parse(path), 3), params = _a[0], pathname = _a[1], childPath = _a[2];
+        var _a = route.parse(path), params = _a.params, pathname = _a.pathname, childPath = _a.childPath;
         assignIn(this, {
             $parent: $parent,
             params: params,
@@ -4506,14 +4506,14 @@ var Context = /** @class */ (function () {
     Context.runMiddleware = function (middleware, ctx) {
         var _this = this;
         return map(middleware, function (fn) {
-            var runner = generatorify(fn)(ctx);
+            var runner = castLifecycleObjectMiddlewareToGenerator(fn)(ctx);
             var beforeRender = true;
             return function () { return __awaiter(_this, void 0, void 0, function () {
                 var ret;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            ret = runner.next() || {};
+                            ret = runner.next();
                             if (!isThenable(ret)) return [3 /*break*/, 2];
                             return [4 /*yield*/, ret];
                         case 1:
@@ -4928,7 +4928,7 @@ var Route = /** @class */ (function () {
         this.component = component;
         this.middleware = middleware;
         this.children = children;
-        var _b = __read(Route.parsePath(path, !isUndefined(children)), 2), keys = _b[0], regexp = _b[1];
+        var _b = Route.parsePath(path, !isUndefined(children)), keys = _b.keys, regexp = _b.regexp;
         this.keys = keys;
         this.regexp = regexp;
     }
@@ -4961,6 +4961,7 @@ var Route = /** @class */ (function () {
     };
     Route.prototype.parse = function (path) {
         var childPath;
+        var pathname = path;
         var params = {};
         var matches = this.regexp.exec(path);
         for (var i = 1, len = matches.length; i < len; ++i) {
@@ -4968,13 +4969,13 @@ var Route = /** @class */ (function () {
             var v = matches[i] || '';
             if (k.name === '__child_path__') {
                 childPath = '/' + v;
-                path = path.replace(new RegExp(childPath + '$'), '');
+                pathname = path.replace(new RegExp(childPath + '$'), '');
             }
             else {
                 params[k.name] = v;
             }
         }
-        return [params, path, childPath];
+        return { params: params, pathname: pathname, childPath: childPath };
     };
     Route.parseConfig = function (config) {
         var component;
@@ -5011,7 +5012,7 @@ var Route = /** @class */ (function () {
         }
         var keys = [];
         var regexp = pathToRegexp_1(path, keys);
-        return [keys, regexp];
+        return { keys: keys, regexp: regexp };
     };
     return Route;
 }());
@@ -5083,7 +5084,7 @@ var Router = /** @class */ (function () {
                         _a = Router.parseUrl(url), search = _a.search, hash = _a.hash;
                         path = Router.getPath(url);
                         route = this.resolveRoute(path);
-                        _b = __read(route.parse(path), 3), pathname = _b[1], childPath = _b[2];
+                        _b = route.parse(path), pathname = _b.pathname, childPath = _b.childPath;
                         samePage = fromCtx.pathname === pathname;
                         if (!(fromCtx.$child && samePage && !args.force)) return [3 /*break*/, 2];
                         return [4 /*yield*/, fromCtx.$child.router.update(childPath + search + hash, args)];

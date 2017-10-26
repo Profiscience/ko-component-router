@@ -21,6 +21,7 @@
       "esnext.asynciterable"
     ],
     "downlevelIteration": true,
+    "noImplicitAny": true,
     "noUnusedLocals": true
   },
   "include": [

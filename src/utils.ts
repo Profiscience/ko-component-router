@@ -3,7 +3,8 @@ import isUndefined from 'lodash-es/isUndefined'
 import isPlainObject from 'lodash-es/isPlainObject'
 import noop from 'lodash-es/noop'
 import startsWith from 'lodash-es/startsWith'
-import { Router } from './router'
+import { Context } from './context'
+import { Router, Middleware, LifecycleGeneratorMiddleware } from './router'
 
 export { default as isArray } from 'lodash-es/isArray'
 export { default as isBoolean } from 'lodash-es/isBoolean'
@@ -21,9 +22,11 @@ export { default as map } from 'lodash-es/map'
 export { default as mapValues } from 'lodash-es/mapValues'
 export { default as reduce } from 'lodash-es/reduce'
 
-export type AsyncCallback = (done?: () => void) => Promise<any> | void
+export type AsyncCallback<T> = (done?: (t: T) => void) => Promise<T> | void
+export type SyncCallback<T> = () => T
+export type Callback<T> = AsyncCallback<T> | SyncCallback<T>
 
-export async function sequence(callbacks: AsyncCallback[], ...args): Promise<{
+export async function sequence(callbacks: Callback<boolean | void>[], ...args: any[]): Promise<{
   count: number,
   success: boolean
 }> {
@@ -40,7 +43,7 @@ export async function sequence(callbacks: AsyncCallback[], ...args): Promise<{
   return { count, success }
 }
 
-export function traversePath(router: Router, path) {
+export function traversePath(router: Router, path: string) {
   if (path.indexOf('//') === 0) {
     path = path.replace('//', '/')
 
@@ -83,11 +86,11 @@ export function isActivePath({ router, path }: { router: Router, path: string })
   return true
 }
 
-export function isGenerator(x) {
+export function isGenerator(x: any) {
   return x.constructor.name === 'GeneratorFunction'
 }
 
-export function isThenable(x) {
+export function isThenable(x: any) {
   return !isUndefined(x) && isFunction(x.then)
 }
 
@@ -108,10 +111,10 @@ export function promisify(_fn: (...args: any[]) => void = noop): (...args: any[]
   }
 }
 
-export function generatorify(fn) {
+export function castLifecycleObjectMiddlewareToGenerator(fn: Middleware): LifecycleGeneratorMiddleware {
   return isGenerator(fn)
-    ? fn
-    : async function *(ctx) {
+    ? fn as LifecycleGeneratorMiddleware
+    : async function *(ctx: Context) {
       const ret = await promisify(fn)(ctx)
 
       if (isPlainObject(ret)) {
