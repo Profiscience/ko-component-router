@@ -1,16 +1,16 @@
 # ko-component-router
 
-[![NPM Version](https://img.shields.io/npm/v/ko-component-router.svg)](https://www.npmjs.com/package/ko-component-router)
-![WTFPL](https://img.shields.io/npm/l/ko-component-router.svg)
-[![Travis](https://img.shields.io/travis/Profiscience/ko-component-router/master.svg)](https://travis-ci.org/Profiscience/ko-component-router/)
-[![Coverage Status](https://coveralls.io/repos/github/Profiscience/ko-component-router/badge.svg)](https://coveralls.io/github/Profiscience/ko-component-router)
-[![Dependency Status](https://img.shields.io/david/Profiscience/ko-component-router.svg)](https://david-dm.org/Profiscience/ko-component-router)
-[![Peer Dependency Status](https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?maxAge=2592000)](https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table)
-[![Greenkeeper badge](https://badges.greenkeeper.io/Profiscience/ko-component-router.svg)](https://greenkeeper.io/)
-[![NPM Downloads](https://img.shields.io/npm/dt/ko-component-router.svg?maxAge=2592000)](http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=)
-[![Gitter](https://img.shields.io/gitter/room/profiscience/ko-component-router.svg)](https://gitter.im/Profiscience/ko-component-router)
+[![Version][npm-version-shield]][npm]
+[![License][wtfpl-shield]][wtfpl]
+[![Build Status][travis-ci-shield]][travis-ci]
+[![Coverage States][codecov-shield]][codecov]
+[![Dependency Status][david-dm-shield]][david-dm]
+[![Peer Dependency Status][david-dm-peer-shield]][david-dm-peer]
+[![Greenkeeper Status][greenkeeper-shield]][greenkeeper]
+[![Downloads][npm-stats-shield]][npm-stats]
+[![Gitter][gitter-shield]][gitter]
 
-Super-duper flexible component based router + middleware framework for developing wicked awesome single page apps with [KnockoutJS](https://knockoutjs.com)
+Super-duper flexible component based router + middleware framework for developing wicked awesome single page apps with [KnockoutJS][]
 
 ### Installation
 ```bash
@@ -116,3 +116,32 @@ _index.html_
 ```
 
 [More](./docs)
+
+[KnockoutJS]: https://knockoutjs.com
+
+[npm]: https://www.npmjs.com/package/ko-component-router
+[npm-version-shield]: https://img.shields.io/npm/v/ko-component-router.svg?style=for-the-badge
+
+[wtfpl]: ./LICENSE.md
+[wtfpl-shield]: https://img.shields.io/npm/l/ko-component-router.svg?style=for-the-badge
+
+[travis-ci]: https://travis-ci.org/Profiscience/ko-component-router/
+[travis-ci-shield]: https://img.shields.io/travis/Profiscience/ko-component-router/master.svg?style=for-the-badge
+
+[codecov]: https://codecov.io/gh/Profiscience/ko-component-router
+[codecov-shield]: https://img.shields.io/codecov/c/github/Profiscience/ko-component-router.svg?style=for-the-badge
+
+[david-dm]: https://david-dm.org/Profiscience/ko-component-router
+[david-dm-shield]: https://img.shields.io/david/Profiscience/ko-component-router.svg?style=for-the-badge
+
+[david-dm-peer]: https://david-dm.org/Profiscience/ko-component-router#info=peerDependencies&view=table
+[david-dm-peer-shield]: https://img.shields.io/david/peer/Profiscience/ko-component-router.svg?style=for-the-badge?maxAge=2592000
+
+[greenkeeper]: https://greenkeeper.io/
+[greenkeeper-shield]: https://badges.greenkeeper.io/Profiscience/ko-component-router.svg?style=for-the-badge
+
+[npm-stats]: http://npm-stat.com/charts.html?package=ko-component-router&author=&from=&to=
+[npm-stats-shield]: https://img.shields.io/npm/dt/ko-component-router.svg?style=for-the-badge&maxAge=2592000
+
+[gitter]: https://gitter.im/Profiscience/ko-component-router
+[gitter-shield]: https://img.shields.io/gitter/room/profiscience/ko-component-router.svg?style=for-the-badge
