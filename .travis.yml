@@ -13,13 +13,13 @@ cache:
   directories:
   - node_modules
 before_install:
-- yarn global add coveralls greenkeeper-lockfile@1
+- yarn global add codecov greenkeeper-lockfile@1
 before_script:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
 - greenkeeper-lockfile-update
 after_script:
-- coveralls < coverage/lcov.info
+- codecov
 - greenkeeper-lockfile-upload
 notifications:
   email: false
