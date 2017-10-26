@@ -1,4 +1,4 @@
-'use strict'
+'use strict' // eslint-disable-line strict
 
 const path = require('path')
 

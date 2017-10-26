@@ -7,7 +7,7 @@ export default function plugin(componentName) {
     componentName,
 
     // then some middleware to load that component...
-    (ctx) => {
+    () => {
       // bail if already loaded
       if (ko.components.isRegistered(componentName)) {
         return
@@ -16,6 +16,7 @@ export default function plugin(componentName) {
       // https://webpack.js.org/guides/code-splitting-import/
       return import('../views/' + componentName + '/index.js')
         .then((exports) => ko.components.register(componentName, exports))
+        // eslint-disable-next-line no-console
         .catch((err) => console.error('Error fetching component', componentName, err))
     }
   ]

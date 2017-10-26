@@ -20,7 +20,7 @@ module.exports = {
           commonjs()
         ],
         output: {
-          file: `ko-component-router.js`,
+          file: 'ko-component-router.js',
           format: 'umd',
           exports: 'named', // const { Router, Route, Context, ... } = ko.router
           globals: {
