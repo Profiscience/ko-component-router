@@ -29,9 +29,11 @@ ko.components.register('plugins', {
         '/component': {
           component: 'component'
         },
+        // eslint-disable-next-line formatting/newline-object-in-array
         '/data': ['data', {
           data: Promise.resolve(true)
         }],
+        // eslint-disable-next-line formatting/newline-object-in-array
         '/data-multi': ['data-multi', {
           data: {
             true: Promise.resolve(true),
