@@ -127,3 +127,13 @@ export function castLifecycleObjectMiddlewareToGenerator(fn: Middleware): Lifecy
       }
     }
 }
+
+export function getRouterForBindingContext(bindingCtx: KnockoutBindingContext) {
+  while (!isUndefined(bindingCtx)) {
+    if (!isUndefined(bindingCtx.$router)) {
+      return bindingCtx.$router
+    }
+    bindingCtx = bindingCtx.$parentContext
+  }
+  return Router.head
+}

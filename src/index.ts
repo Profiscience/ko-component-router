@@ -1,4 +1,4 @@
-import './binding'
+import './bindings'
 import './component'
 
 export { Context } from './context'
