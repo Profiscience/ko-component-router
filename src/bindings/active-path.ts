@@ -1,18 +1,22 @@
 import * as ko from 'knockout'
 import { Router } from '../router'
-import { isActivePath, traversePath, getRouter } from '../utils'
+import { isActivePath, traversePath, getRouterForBindingContext } from '../utils'
 
-ko.bindingHandlers.activePath = {
+export const activePathBinding: KnockoutBindingHandler = {
   init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
-    const activePathCSSClass = allBindings.get("pathActiveClass") || Router.config.activePathCSSClass
-    
+    const activePathCSSClass = allBindings.get('pathActiveClass') || Router.config.activePathCSSClass
+    const path = ko.unwrap(valueAccessor())
+
     Router.initialized.then(() => {
-        const route = ko.pureComputed(() => traversePath(getRouter(bindingCtx), ko.unwrap(valueAccessor())))
-        ko.applyBindingsToNode(el, {
-            css: {
-              [activePathCSSClass]: ko.pureComputed(() => isActivePath(route()))
-            }
-        })
+      const router = getRouterForBindingContext(bindingCtx)
+      const route = ko.pureComputed(() => traversePath(router, path))
+      ko.applyBindingsToNode(el, {
+        css: {
+          [activePathCSSClass]: ko.pureComputed(() => isActivePath(route()))
+        }
+      })
     })
   }
 }
+
+ko.bindingHandlers.activePath = activePathBinding

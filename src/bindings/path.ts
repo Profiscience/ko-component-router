@@ -1,21 +1,24 @@
 import * as ko from 'knockout'
 import { Router } from '../router'
-import { isActivePath, resolveHref, traversePath, getRouter } from '../utils'
+import { resolveHref, traversePath, getRouterForBindingContext } from '../utils'
+import { activePathBinding } from './active-path'
 
-ko.bindingHandlers.path = {
-    init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
-      const activePathCSSClass = allBindings.get('pathActiveClass') || Router.config.activePathCSSClass
-  
-      Router.initialized.then(() => {
-        const route = ko.pureComputed(() => traversePath(getRouter(bindingCtx), ko.unwrap(valueAccessor())))
-        ko.applyBindingsToNode(el, {
-          attr: {
-            href: ko.pureComputed(() => resolveHref(route()))
-          },
-          css: {
-            [activePathCSSClass]: ko.pureComputed(() => isActivePath(route()))
-          }
-        })
+export const pathBinding: KnockoutBindingHandler = {
+  init(el, valueAccessor, allBindings, viewModel, bindingCtx) {
+    const path = ko.unwrap(valueAccessor())
+
+    activePathBinding.init.apply(this, arguments)
+
+    Router.initialized.then(() => {
+      const router = getRouterForBindingContext(bindingCtx)
+      const route = ko.pureComputed(() => traversePath(router, path))
+      ko.applyBindingsToNode(el, {
+        attr: {
+          href: ko.pureComputed(() => resolveHref(route()))
+        }
       })
-    }
+    })
   }
+}
+
+ko.bindingHandlers.path = pathBinding

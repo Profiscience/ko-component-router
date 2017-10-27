@@ -128,7 +128,7 @@ export function castLifecycleObjectMiddlewareToGenerator(fn: Middleware): Lifecy
     }
 }
 
-export function getRouter(bindingCtx: KnockoutBindingContext) {
+export function getRouterForBindingContext(bindingCtx: KnockoutBindingContext) {
   while (!isUndefined(bindingCtx)) {
     if (!isUndefined(bindingCtx.$router)) {
       return bindingCtx.$router
