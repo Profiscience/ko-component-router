@@ -4263,6 +4263,15 @@ function castLifecycleObjectMiddlewareToGenerator(fn) {
             });
         };
 }
+function getRouter(bindingCtx) {
+    while (!isUndefined(bindingCtx)) {
+        if (!isUndefined(bindingCtx.$router)) {
+            return bindingCtx.$router;
+        }
+        bindingCtx = bindingCtx.$parentContext;
+    }
+    return Router.head;
+}
 
 var Context = /** @class */ (function () {
     function Context(router, $parent, path, _with) {
@@ -5357,15 +5366,21 @@ ko.bindingHandlers.path = {
         });
     }
 };
-function getRouter(bindingCtx) {
-    while (!isUndefined(bindingCtx)) {
-        if (!isUndefined(bindingCtx.$router)) {
-            return bindingCtx.$router;
-        }
-        bindingCtx = bindingCtx.$parentContext;
+
+ko.bindingHandlers.activePath = {
+    init: function (el, valueAccessor, allBindings, viewModel, bindingCtx) {
+        var activePathCSSClass = allBindings.get("pathActiveClass") || Router.config.activePathCSSClass;
+        Router.initialized.then(function () {
+            var route = ko.pureComputed(function () { return traversePath(getRouter(bindingCtx), ko.unwrap(valueAccessor())); });
+            ko.applyBindingsToNode(el, {
+                css: (_a = {},
+                    _a[activePathCSSClass] = ko.pureComputed(function () { return isActivePath(route()); }),
+                    _a)
+            });
+            var _a;
+        });
     }
-    return Router.head;
-}
+};
 
 ko.components.register('ko-component-router', {
     synchronous: true,

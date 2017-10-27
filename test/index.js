@@ -6,7 +6,7 @@ import './helpers/ko-overwrite-component-registration'
 
 import './anchor'
 import './basepath'
-import './binding'
+import './bindings'
 import './routing'
 import './hashbang'
 import './history'
@@ -26,7 +26,8 @@ const tests = [
   'force-update',
   'with',
   'anchor',
-  'binding',
+  'bindings-path',
+  'bindings-active-path',
   'middleware',
   'queue',
   'redirect',
