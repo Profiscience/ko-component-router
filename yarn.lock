@@ -3450,9 +3450,9 @@ taskr-rename@^0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/taskr-rename/-/taskr-rename-0.0.1.tgz#6d332848aabf1e6378e2fa78abbabc9f7c411b6b"
 
-taskr-rollup@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/taskr-rollup/-/taskr-rollup-0.0.2.tgz#48a91f3d8e4e86020a3faa32a161b8013f740f70"
+taskr-rollup@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/taskr-rollup/-/taskr-rollup-0.0.3.tgz#c4f2a3d50fcb18304c492ea96b5f55001b7187e4"
 
 taskr@^1.1.0:
   version "1.1.0"

@@ -71,7 +71,7 @@
     "tape": "^4.8.0",
     "taskr": "^1.1.0",
     "taskr-rename": "^0.0.1",
-    "taskr-rollup": "^0.0.2",
+    "taskr-rollup": "^0.0.3",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"
