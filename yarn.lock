@@ -3105,9 +3105,9 @@ rollup-pluginutils@^2.0.1:
     estree-walker "^0.3.0"
     micromatch "^2.3.11"
 
-rollup@^0.50.0:
-  version "0.50.0"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.50.0.tgz#4c158f4e780e6cb33ff0dbfc184a52cc58cd5f3b"
+rollup@0.51.0:
+  version "0.51.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.51.0.tgz#bee110391dd42a48d61f31804807a80be4a085e5"
 
 run-async@^2.2.0:
   version "2.3.0"
@@ -3450,7 +3450,7 @@ taskr-rename@^0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/taskr-rename/-/taskr-rename-0.0.1.tgz#6d332848aabf1e6378e2fa78abbabc9f7c411b6b"
 
-taskr-rollup@0.0.3:
+taskr-rollup@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/taskr-rollup/-/taskr-rollup-0.0.3.tgz#c4f2a3d50fcb18304c492ea96b5f55001b7187e4"
 
